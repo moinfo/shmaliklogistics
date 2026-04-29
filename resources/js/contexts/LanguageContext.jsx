@@ -3,7 +3,8 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const en = {
     nav: {
         home: 'Home', services: 'Services', about: 'About', contact: 'Contact',
-        login: 'Login to System',
+        login: 'Login',
+        logout: 'Logout',
     },
     common: {
         getQuote: 'Get a Quote', freeQuote: 'Get a Free Quote', viewServices: 'View Services',
@@ -183,7 +184,8 @@ const en = {
 const sw = {
     nav: {
         home: 'Nyumbani', services: 'Huduma', about: 'Kuhusu', contact: 'Mawasiliano',
-        login: 'Ingia Mfumoni',
+        login: 'Ingia',
+        logout: 'Toka',
     },
     common: {
         getQuote: 'Pata Bei', freeQuote: 'Pata Bei ya Bure', viewServices: 'Angalia Huduma',

@@ -1,18 +1,29 @@
 import { Head, usePage } from '@inertiajs/react';
-import { Box, Title, Text, SimpleGrid, Group, Stack, Badge, Progress } from '@mantine/core';
+import { Box, Title, Text, SimpleGrid, Group, Stack, Badge, Progress, RingProgress } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../layouts/DashboardLayout';
 
+// Dark layer palette (must match DashboardLayout)
+const dk = {
+    card:    '#0F1E32',
+    cardHov: '#132436',
+    border:  'rgba(33,150,243,0.12)',
+    divider: 'rgba(255,255,255,0.06)',
+    textPri: '#E2E8F0',
+    textSec: '#94A3B8',
+    textMut: '#475569',
+};
+
 const stats = [
-    { icon: '🚛', label: 'Active Trips', value: '12', sub: '3 at border crossings', trend: '+2 today', trendUp: true, accent: '#1565C0' },
-    { icon: '🚗', label: 'Fleet on Road', value: '28', sub: 'of 50 vehicles', trend: '22 idle', trendUp: null, accent: '#0E4FA0' },
-    { icon: '💰', label: "Month's Revenue", value: 'TZS 48.2M', sub: 'vs TZS 41.1M last month', trend: '+17%', trendUp: true, accent: '#1565C0' },
-    { icon: '🛂', label: 'Pending Permits', value: '3', sub: '1 expiring in 7 days', trend: 'Action needed', trendUp: false, accent: '#0E4FA0' },
+    { icon: '🚛', label: 'Active Trips', value: '12', sub: '3 at border crossings', badge: '+2 today', badgeColor: 'teal', accent: ['#1565C0', '#2196F3'] },
+    { icon: '🚗', label: 'Fleet on Road', value: '28 / 50', sub: '22 vehicles idle', badge: '56%', badgeColor: 'blue', accent: ['#0E4FA0', '#1565C0'] },
+    { icon: '💰', label: "Month's Revenue", value: 'TZS 48.2M', sub: 'vs TZS 41.1M last month', badge: '+17%', badgeColor: 'green', accent: ['#065F46', '#059669'] },
+    { icon: '🛂', label: 'Pending Permits', value: '3', sub: '1 expiring in 7 days', badge: 'Act now', badgeColor: 'red', accent: ['#7F1D1D', '#DC2626'] },
 ];
 
 const recentTrips = [
-    { id: 'TRP-0241', route: 'Dar → Lubumbashi', driver: 'Juma Mwangi', status: 'In Transit', statusColor: '#2196F3', progress: 68, cargo: 'Industrial Equipment', vehicle: 'TZA-221-A' },
+    { id: 'TRP-0241', route: 'Dar → Lubumbashi', driver: 'Juma Mwangi', status: 'In Transit', statusColor: '#3B82F6', progress: 68, cargo: 'Industrial Equipment', vehicle: 'TZA-221-A' },
     { id: 'TRP-0240', route: 'Dar → Lusaka', driver: 'Peter Odhiambo', status: 'At Border', statusColor: '#F59E0B', progress: 52, cargo: 'General Goods', vehicle: 'TZA-185-B' },
     { id: 'TRP-0239', route: 'Dar → Lilongwe', driver: 'Hassan Ally', status: 'Delivered', statusColor: '#22C55E', progress: 100, cargo: 'FMCG', vehicle: 'TZA-309-C' },
     { id: 'TRP-0238', route: 'Dar → Maputo', driver: 'George Mwamba', status: 'Loading', statusColor: '#A78BFA', progress: 12, cargo: 'Construction Materials', vehicle: 'TZA-144-A' },
@@ -29,45 +40,13 @@ const fleetStatus = [
 ];
 
 const quickActions = [
-    { icon: '🚛', label: 'New Trip', desc: 'Create a trip booking' },
-    { icon: '🚗', label: 'Add Vehicle', desc: 'Register a new vehicle' },
-    { icon: '🛂', label: 'New Permit', desc: 'Apply for transit permit' },
-    { icon: '📦', label: 'Add Cargo', desc: 'Register cargo manifest' },
+    { icon: '🚛', label: 'New Trip', desc: 'Create a booking', accent: '#1565C0' },
+    { icon: '🚗', label: 'Add Vehicle', desc: 'Register vehicle', accent: '#0E4FA0' },
+    { icon: '🛂', label: 'New Permit', desc: 'Apply for permit', accent: '#065F46' },
+    { icon: '📦', label: 'Add Cargo', desc: 'Register manifest', accent: '#6D28D9' },
 ];
 
-function StatCard({ stat, isDark, delay }) {
-    return (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.5 }}>
-            <Box style={{
-                background: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
-                border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E8EDF2',
-                borderRadius: 16,
-                padding: '22px 24px',
-                position: 'relative',
-                overflow: 'hidden',
-                boxShadow: isDark ? 'none' : '0 2px 12px rgba(0,0,0,0.06)',
-            }}>
-                <Box style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${stat.accent}, #2196F3)` }} />
-                <Group justify="space-between" mb={12}>
-                    <Text style={{ fontSize: '1.8rem' }}>{stat.icon}</Text>
-                    {stat.trendUp !== null && (
-                        <Badge size="sm" variant="light" color={stat.trendUp ? 'green' : 'red'} radius="xl">
-                            {stat.trend}
-                        </Badge>
-                    )}
-                    {stat.trendUp === null && (
-                        <Text size="xs" c="dimmed">{stat.trend}</Text>
-                    )}
-                </Group>
-                <Text fw={900} style={{ fontSize: '2rem', lineHeight: 1, color: isDark ? 'white' : '#1a2a4a' }} mb={4}>
-                    {stat.value}
-                </Text>
-                <Text fw={600} size="sm" c={isDark ? 'gray.4' : 'brand.7'} mb={4}>{stat.label}</Text>
-                <Text size="xs" c="dimmed">{stat.sub}</Text>
-            </Box>
-        </motion.div>
-    );
-}
+const statusColors = { 'On Road': '#3B82F6', 'At Border': '#F59E0B', 'Idle': '#475569', 'Loading': '#A78BFA', 'Maintenance': '#EF4444' };
 
 export default function Dashboard() {
     const { props } = usePage();
@@ -75,42 +54,49 @@ export default function Dashboard() {
     const isDark = colorScheme === 'dark';
     const user = props.auth?.user;
 
-    const now = new Date();
-    const hour = now.getHours();
+    const hour = new Date().getHours();
     const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
-    const cardBg = isDark ? 'rgba(255,255,255,0.04)' : '#ffffff';
-    const cardBorder = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E8EDF2';
-    const cardShadow = isDark ? 'none' : '0 2px 12px rgba(0,0,0,0.06)';
-    const textPrimary = isDark ? 'white' : '#1a2a4a';
-    const textMuted = isDark ? 'gray.5' : 'dimmed';
+    // Semantic tokens
+    const cardBg     = isDark ? dk.card : '#ffffff';
+    const cardBorder = isDark ? `1px solid ${dk.border}` : '1px solid #E2E8F0';
+    const cardShadow = isDark ? '0 4px 24px rgba(0,0,0,0.4)' : '0 2px 16px rgba(0,0,0,0.06)';
+    const divider    = isDark ? `1px solid ${dk.divider}` : '1px solid #F1F5F9';
+    const textPri    = isDark ? dk.textPri : '#1E293B';
+    const textSec    = isDark ? dk.textSec : '#64748B';
+    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const rowHovBg   = isDark ? dk.cardHov : '#F8FAFC';
 
     return (
         <DashboardLayout title="Dashboard">
             <Head title="Dashboard — SH Malik Logistics" />
 
-            {/* ── Greeting ── */}
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-                <Group justify="space-between" align="flex-end" mb={32} wrap="wrap" gap="sm">
-                    <Stack gap={4}>
-                        <Text size="sm" c={textMuted}>{now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</Text>
-                        <Title order={2} style={{ color: textPrimary, fontWeight: 800 }}>
+            {/* ── Greeting header ── */}
+            <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <Group justify="space-between" align="flex-end" mb={28} wrap="wrap" gap="md">
+                    <Stack gap={3}>
+                        <Text size="xs" fw={500} style={{ color: textMut, letterSpacing: 0.3 }}>
+                            {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        </Text>
+                        <Title order={2} style={{ color: textPri, fontWeight: 800, lineHeight: 1.2 }}>
                             {greeting},{' '}
-                            <Text component="span" style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
+                            <Text component="span" style={{ background: 'linear-gradient(135deg, #1565C0, #60A5FA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
                                 {user?.name?.split(' ')[0] || 'Admin'}
                             </Text>
                         </Title>
-                        <Text size="sm" c={textMuted}>Here's what's happening with your fleet today.</Text>
+                        <Text size="sm" style={{ color: textSec }}>Here's what's happening with your fleet today.</Text>
                     </Stack>
-                    <Group gap="sm">
-                        {[
-                            { dot: '#22C55E', label: '28 On Road' },
-                            { dot: '#F59E0B', label: '2 At Border' },
-                            { dot: '#6B7280', label: '20 Idle' },
-                        ].map(b => (
-                            <Group key={b.label} gap={6} style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#fff', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E8EDF2', borderRadius: 20, padding: '6px 14px' }}>
-                                <Box style={{ width: 8, height: 8, borderRadius: '50%', background: b.dot }} />
-                                <Text size="xs" fw={500} c={textPrimary}>{b.label}</Text>
+
+                    {/* Fleet legend */}
+                    <Group gap="sm" wrap="wrap">
+                        {[['#22C55E', '28 On Road'], ['#F59E0B', '2 At Border'], ['#475569', '20 Idle']].map(([dot, label]) => (
+                            <Group key={label} gap={7} style={{
+                                background: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+                                border: isDark ? `1px solid ${dk.divider}` : '1px solid #E2E8F0',
+                                borderRadius: 20, padding: '6px 14px',
+                            }}>
+                                <Box style={{ width: 7, height: 7, borderRadius: '50%', background: dot }} />
+                                <Text size="xs" fw={500} style={{ color: textPri }}>{label}</Text>
                             </Group>
                         ))}
                     </Group>
@@ -118,59 +104,103 @@ export default function Dashboard() {
             </motion.div>
 
             {/* ── Stats ── */}
-            <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg" mb={28}>
-                {stats.map((s, i) => <StatCard key={s.label} stat={s} isDark={isDark} delay={i * 0.08} />)}
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg" mb={24}>
+                {stats.map((s, i) => (
+                    <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}>
+                        <Box style={{ background: cardBg, border: cardBorder, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow, position: 'relative' }}>
+                            {/* Gradient top stripe */}
+                            <Box style={{ height: 3, background: `linear-gradient(90deg, ${s.accent[0]}, ${s.accent[1]})` }} />
+                            {/* Soft glow blob */}
+                            {isDark && <Box style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: `radial-gradient(circle, ${s.accent[1]}22 0%, transparent 70%)`, pointerEvents: 'none' }} />}
+                            <Box style={{ padding: '20px 22px 22px' }}>
+                                <Group justify="space-between" mb={14} align="flex-start">
+                                    <Box style={{ width: 44, height: 44, borderRadius: 12, background: isDark ? `${s.accent[0]}30` : `${s.accent[1]}18`, border: isDark ? `1px solid ${s.accent[1]}30` : `1px solid ${s.accent[1]}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
+                                        {s.icon}
+                                    </Box>
+                                    <Badge size="sm" variant="light" color={s.badgeColor} radius="xl" style={{ fontWeight: 700 }}>
+                                        {s.badge}
+                                    </Badge>
+                                </Group>
+                                <Text fw={900} style={{ fontSize: '1.75rem', lineHeight: 1, color: textPri, marginBottom: 4 }}>
+                                    {s.value}
+                                </Text>
+                                <Text fw={600} size="sm" style={{ color: isDark ? '#60A5FA' : s.accent[1], marginBottom: 4 }}>{s.label}</Text>
+                                <Text size="xs" style={{ color: textMut }}>{s.sub}</Text>
+                            </Box>
+                        </Box>
+                    </motion.div>
+                ))}
             </SimpleGrid>
 
             {/* ── Quick Actions ── */}
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-                <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb={28}>
-                    {quickActions.map((a, i) => (
-                        <motion.div key={a.label} whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.98 }} transition={{ type: 'spring', stiffness: 300 }}>
-                            <Box style={{ background: 'linear-gradient(135deg, #0E4FA0, #1565C0)', borderRadius: 14, padding: '16px 20px', cursor: 'pointer', border: '1px solid rgba(33,150,243,0.3)', boxShadow: '0 4px 20px rgba(21,101,192,0.25)' }}>
-                                <Text style={{ fontSize: '1.6rem', marginBottom: 8 }}>{a.icon}</Text>
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb={24}>
+                    {quickActions.map((a) => (
+                        <motion.div key={a.label} whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.97 }} transition={{ type: 'spring', stiffness: 300 }}>
+                            <Box style={{
+                                background: isDark
+                                    ? `linear-gradient(135deg, ${a.accent}CC, ${a.accent}99)`
+                                    : `linear-gradient(135deg, ${a.accent}, ${a.accent}DD)`,
+                                borderRadius: 14, padding: '18px 20px', cursor: 'pointer',
+                                border: isDark ? `1px solid ${a.accent}55` : 'none',
+                                boxShadow: `0 4px 20px ${a.accent}33`,
+                                position: 'relative', overflow: 'hidden',
+                            }}>
+                                <Box style={{ position: 'absolute', bottom: -12, right: -12, width: 60, height: 60, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+                                <Text style={{ fontSize: '1.7rem', marginBottom: 10 }}>{a.icon}</Text>
                                 <Text fw={700} c="white" size="sm">{a.label}</Text>
-                                <Text size="xs" c="brand.3">{a.desc}</Text>
+                                <Text size="xs" style={{ color: 'rgba(255,255,255,0.65)' }}>{a.desc}</Text>
                             </Box>
                         </motion.div>
                     ))}
                 </SimpleGrid>
             </motion.div>
 
-            {/* ── Recent Trips + Fleet ── */}
+            {/* ── Recent Trips + Fleet Status ── */}
             <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
 
                 {/* Recent Trips */}
-                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.45 }}>
+                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
                     <Box style={{ background: cardBg, border: cardBorder, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow }}>
-                        <Box style={{ padding: '18px 24px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #F0F4F8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Text fw={700} c={textPrimary} size="md">Recent Trips</Text>
-                            <Badge color="brand" variant="light" size="sm">{recentTrips.length} trips</Badge>
-                        </Box>
+                        <Group style={{ padding: '16px 22px', borderBottom: divider }} justify="space-between">
+                            <Group gap="sm">
+                                <Text style={{ fontSize: '1.1rem' }}>🚛</Text>
+                                <Text fw={700} size="sm" style={{ color: textPri }}>Recent Trips</Text>
+                            </Group>
+                            <Badge color="blue" variant={isDark ? 'filled' : 'light'} size="sm" radius="xl"
+                                style={isDark ? { background: 'rgba(33,150,243,0.2)', color: '#60A5FA', border: '1px solid rgba(33,150,243,0.3)' } : {}}>
+                                {recentTrips.length} trips
+                            </Badge>
+                        </Group>
+
                         <Stack gap={0}>
                             {recentTrips.map((trip, i) => (
                                 <Box key={trip.id} style={{
-                                    padding: '14px 24px',
-                                    borderBottom: i < recentTrips.length - 1 ? (isDark ? '1px solid rgba(255,255,255,0.04)' : '1px solid #F5F7FA') : 'none',
+                                    padding: '13px 22px',
+                                    borderBottom: i < recentTrips.length - 1 ? divider : 'none',
                                     transition: 'background 0.15s',
                                 }}
-                                    onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC'}
+                                    onMouseEnter={e => e.currentTarget.style.background = rowHovBg}
                                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                 >
-                                    <Group justify="space-between" mb={6} wrap="nowrap">
-                                        <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
-                                            <Text size="xs" c="dimmed" fw={600} style={{ flexShrink: 0 }}>{trip.id}</Text>
-                                            <Text size="sm" fw={600} c={textPrimary} truncate>{trip.route}</Text>
+                                    <Group justify="space-between" mb={5} wrap="nowrap">
+                                        <Group gap={8} wrap="nowrap" style={{ minWidth: 0 }}>
+                                            <Text size="xs" fw={600} style={{ color: textMut, flexShrink: 0, fontFamily: 'monospace' }}>{trip.id}</Text>
+                                            <Text size="sm" fw={600} style={{ color: textPri }} truncate>{trip.route}</Text>
                                         </Group>
-                                        <Badge size="xs" radius="xl" style={{ background: trip.statusColor + '22', color: trip.statusColor, border: `1px solid ${trip.statusColor}44`, flexShrink: 0 }}>
-                                            {trip.status}
-                                        </Badge>
+                                        <Box style={{ background: trip.statusColor + '22', border: `1px solid ${trip.statusColor}44`, borderRadius: 20, padding: '2px 10px', flexShrink: 0 }}>
+                                            <Text size="10px" fw={700} style={{ color: trip.statusColor, letterSpacing: 0.5, textTransform: 'uppercase' }}>{trip.status}</Text>
+                                        </Box>
                                     </Group>
-                                    <Group justify="space-between" mb={6}>
-                                        <Text size="xs" c="dimmed">{trip.driver} · {trip.vehicle}</Text>
-                                        <Text size="xs" c="dimmed">{trip.cargo}</Text>
+                                    <Group justify="space-between" mb={7}>
+                                        <Text size="xs" style={{ color: textSec }}>{trip.driver} · {trip.vehicle}</Text>
+                                        <Text size="xs" style={{ color: textMut }}>{trip.cargo}</Text>
                                     </Group>
-                                    <Progress value={trip.progress} size={3} radius="xl" color={trip.status === 'Delivered' ? 'green' : trip.status === 'At Border' ? 'yellow' : 'blue'} />
+                                    <Progress
+                                        value={trip.progress} size={3} radius="xl"
+                                        color={trip.status === 'Delivered' ? 'teal' : trip.status === 'At Border' ? 'yellow' : trip.status === 'Loading' ? 'violet' : 'blue'}
+                                        style={{ opacity: isDark ? 0.85 : 1 }}
+                                    />
                                 </Box>
                             ))}
                         </Stack>
@@ -178,37 +208,55 @@ export default function Dashboard() {
                 </motion.div>
 
                 {/* Fleet Status */}
-                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.45 }}>
                     <Box style={{ background: cardBg, border: cardBorder, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow }}>
-                        <Box style={{ padding: '18px 24px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #F0F4F8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Text fw={700} c={textPrimary} size="md">Fleet Status</Text>
-                            <Badge color="brand" variant="light" size="sm">50 vehicles total</Badge>
-                        </Box>
+                        <Group style={{ padding: '16px 22px', borderBottom: divider }} justify="space-between">
+                            <Group gap="sm">
+                                <Text style={{ fontSize: '1.1rem' }}>🚗</Text>
+                                <Text fw={700} size="sm" style={{ color: textPri }}>Fleet Status</Text>
+                            </Group>
+                            <Badge color="blue" variant={isDark ? 'filled' : 'light'} size="sm" radius="xl"
+                                style={isDark ? { background: 'rgba(33,150,243,0.2)', color: '#60A5FA', border: '1px solid rgba(33,150,243,0.3)' } : {}}>
+                                50 vehicles total
+                            </Badge>
+                        </Group>
+
                         <Stack gap={0}>
                             {fleetStatus.map((v, i) => {
-                                const statusColor = { 'On Road': '#2196F3', 'At Border': '#F59E0B', 'Idle': '#6B7280', 'Loading': '#A78BFA', 'Maintenance': '#EF4444' }[v.status] || '#6B7280';
+                                const sc = statusColors[v.status] || '#475569';
+                                const fuelColor = v.fuel < 30 ? '#EF4444' : v.fuel < 55 ? '#F59E0B' : '#22C55E';
                                 return (
                                     <Box key={v.vehicle} style={{
-                                        padding: '12px 24px',
-                                        borderBottom: i < fleetStatus.length - 1 ? (isDark ? '1px solid rgba(255,255,255,0.04)' : '1px solid #F5F7FA') : 'none',
+                                        padding: '12px 22px',
+                                        borderBottom: i < fleetStatus.length - 1 ? divider : 'none',
+                                        transition: 'background 0.15s',
                                     }}
-                                        onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC'}
+                                        onMouseEnter={e => e.currentTarget.style.background = rowHovBg}
                                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                     >
                                         <Group justify="space-between" mb={4} wrap="nowrap">
-                                            <Group gap="sm" wrap="nowrap">
-                                                <Text fw={700} size="sm" c={textPrimary}>{v.vehicle}</Text>
-                                                <Text size="xs" c="dimmed">{v.type}</Text>
+                                            <Group gap={8} wrap="nowrap">
+                                                <Text fw={700} size="sm" style={{ color: textPri, fontFamily: 'monospace' }}>{v.vehicle}</Text>
+                                                <Box style={{ background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', borderRadius: 4, padding: '1px 7px' }}>
+                                                    <Text size="10px" fw={600} style={{ color: textSec }}>{v.type}</Text>
+                                                </Box>
                                             </Group>
-                                            <Badge size="xs" radius="xl" style={{ background: statusColor + '22', color: statusColor, border: `1px solid ${statusColor}44`, flexShrink: 0 }}>
-                                                {v.status}
-                                            </Badge>
+                                            <Box style={{ background: sc + '1A', border: `1px solid ${sc}44`, borderRadius: 20, padding: '2px 10px' }}>
+                                                <Text size="10px" fw={700} style={{ color: sc, letterSpacing: 0.5, textTransform: 'uppercase' }}>{v.status}</Text>
+                                            </Box>
                                         </Group>
                                         <Group justify="space-between">
-                                            <Text size="xs" c="dimmed">{v.driver}</Text>
-                                            <Group gap={6}>
-                                                <Text size="xs" c="dimmed">⛽ {v.fuel}%</Text>
-                                                <Progress value={v.fuel} w={48} size={3} radius="xl" color={v.fuel < 30 ? 'red' : v.fuel < 60 ? 'yellow' : 'green'} />
+                                            <Text size="xs" style={{ color: textSec }}>{v.driver}</Text>
+                                            <Group gap={8} align="center">
+                                                <Text size="xs" style={{ color: fuelColor, fontWeight: 600 }}>⛽ {v.fuel}%</Text>
+                                                <Box style={{ width: 52, height: 4, borderRadius: 4, background: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0', overflow: 'hidden' }}>
+                                                    <motion.div
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: `${v.fuel}%` }}
+                                                        transition={{ delay: 0.5 + i * 0.05, duration: 0.6, ease: 'easeOut' }}
+                                                        style={{ height: '100%', background: fuelColor, borderRadius: 4 }}
+                                                    />
+                                                </Box>
                                             </Group>
                                         </Group>
                                     </Box>

@@ -29,6 +29,15 @@ const dk = {
     textMut:  '#475569',
 };
 
+// Light sidebar tokens
+const lk = {
+    sidebar:  '#ffffff',
+    divider:  '#E8EDF4',
+    textPri:  '#1E293B',
+    textSec:  '#64748B',
+    textMut:  '#94A3B8',
+};
+
 export default function DashboardLayout({ title = 'Dashboard', children }) {
     const [opened, { toggle }] = useDisclosure();
     const { url, props } = usePage();
@@ -105,10 +114,14 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
             </AppShell.Header>
 
             {/* ── Sidebar ── */}
-            <AppShell.Navbar style={{ background: dk.sidebar, borderRight: `1px solid ${dk.divider}` }}>
+            <AppShell.Navbar style={{
+                background: isDark ? dk.sidebar : lk.sidebar,
+                borderRight: `1px solid ${isDark ? dk.divider : lk.divider}`,
+                boxShadow: isDark ? 'none' : '2px 0 12px rgba(0,0,0,0.06)',
+            }}>
                 <Stack gap={0} style={{ height: '100%' }}>
                     {/* Logo */}
-                    <Box style={{ padding: '18px 20px 16px', borderBottom: `1px solid ${dk.divider}` }}>
+                    <Box style={{ padding: '18px 20px 16px', borderBottom: `1px solid ${isDark ? dk.divider : lk.divider}` }}>
                         <Link href="/" style={{ textDecoration: 'none' }}>
                             <img src="/logo-full.png" alt="SH Malik" style={{ height: 42, objectFit: 'contain' }} />
                         </Link>
@@ -116,7 +129,7 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
 
                     {/* Section label */}
                     <Box style={{ padding: '16px 16px 6px' }}>
-                        <Text size="10px" fw={700} style={{ color: dk.textMut, letterSpacing: 1.2, textTransform: 'uppercase' }}>Main Menu</Text>
+                        <Text size="10px" fw={700} style={{ color: isDark ? dk.textMut : lk.textMut, letterSpacing: 1.2, textTransform: 'uppercase' }}>Main Menu</Text>
                     </Box>
 
                     {/* Nav items */}
@@ -124,6 +137,13 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
                         <Stack gap={2}>
                             {navItems.map((item) => {
                                 const active = url.startsWith(item.href);
+                                const hoverBg = isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9';
+                                const activeBg = isDark ? 'rgba(33,150,243,0.15)' : 'rgba(21,101,192,0.08)';
+                                const activeText = isDark ? '#60A5FA' : '#1565C0';
+                                const inactiveText = isDark ? dk.textSec : lk.textSec;
+                                const soonBg = isDark ? 'rgba(255,255,255,0.07)' : '#F1F5F9';
+                                const soonText = isDark ? dk.textMut : lk.textMut;
+
                                 return (
                                     <motion.div key={item.href} whileHover={!item.soon ? { x: 3 } : {}} transition={{ type: 'spring', stiffness: 400 }}>
                                         <Box
@@ -133,19 +153,19 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
                                                 display: 'flex', alignItems: 'center', gap: 10,
                                                 padding: '9px 12px', borderRadius: 8,
                                                 cursor: item.soon ? 'default' : 'pointer',
-                                                background: active ? 'rgba(33,150,243,0.15)' : 'transparent',
+                                                background: active ? activeBg : 'transparent',
                                                 borderLeft: active ? '3px solid #2196F3' : '3px solid transparent',
                                                 textDecoration: 'none', transition: 'all 0.15s',
-                                                opacity: item.soon ? 0.4 : 1,
+                                                opacity: item.soon ? 0.45 : 1,
                                             }}
-                                            onMouseEnter={e => { if (!active && !item.soon) e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                                            onMouseEnter={e => { if (!active && !item.soon) e.currentTarget.style.background = hoverBg; }}
                                             onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
                                         >
                                             <Text style={{ fontSize: '1rem', lineHeight: 1, width: 20, textAlign: 'center' }}>{item.icon}</Text>
-                                            <Text fw={active ? 700 : 500} size="sm" style={{ color: active ? '#60A5FA' : dk.textSec, flex: 1 }}>{item.label}</Text>
+                                            <Text fw={active ? 700 : 500} size="sm" style={{ color: active ? activeText : inactiveText, flex: 1 }}>{item.label}</Text>
                                             {item.soon && (
-                                                <Box style={{ background: 'rgba(255,255,255,0.07)', borderRadius: 4, padding: '1px 6px' }}>
-                                                    <Text style={{ fontSize: 9, color: dk.textMut, fontWeight: 700, letterSpacing: 0.5 }}>SOON</Text>
+                                                <Box style={{ background: soonBg, borderRadius: 4, padding: '1px 6px' }}>
+                                                    <Text style={{ fontSize: 9, color: soonText, fontWeight: 700, letterSpacing: 0.5 }}>SOON</Text>
                                                 </Box>
                                             )}
                                             {active && (
@@ -159,14 +179,19 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
                     </Box>
 
                     {/* Bottom */}
-                    <Box style={{ padding: '12px 16px 20px', borderTop: `1px solid ${dk.divider}` }}>
-                        <Box style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '10px 12px', border: `1px solid ${dk.divider}`, marginBottom: 10 }}>
-                            <Text size="xs" style={{ color: dk.textMut }} mb={2}>Logged in as</Text>
-                            <Text size="sm" fw={600} style={{ color: dk.textSec }}>{user?.name || 'Admin'}</Text>
+                    <Box style={{ padding: '12px 16px 20px', borderTop: `1px solid ${isDark ? dk.divider : lk.divider}` }}>
+                        <Box style={{
+                            background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC',
+                            borderRadius: 10, padding: '10px 12px',
+                            border: `1px solid ${isDark ? dk.divider : lk.divider}`,
+                            marginBottom: 10,
+                        }}>
+                            <Text size="xs" style={{ color: isDark ? dk.textMut : lk.textMut }} mb={2}>Logged in as</Text>
+                            <Text size="sm" fw={600} style={{ color: isDark ? dk.textSec : lk.textPri }}>{user?.name || 'Admin'}</Text>
                         </Box>
-                        <Anchor component={Link} href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, color: dk.textMut, fontSize: 12 }}>
+                        <Anchor component={Link} href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
                             <Text size="sm">🌐</Text>
-                            <Text size="xs" style={{ color: dk.textMut }}>Back to website</Text>
+                            <Text size="xs" style={{ color: isDark ? dk.textMut : lk.textSec }}>Back to website</Text>
                         </Anchor>
                     </Box>
                 </Stack>

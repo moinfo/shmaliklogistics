@@ -1,7 +1,8 @@
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
-import { MantineProvider, createTheme } from '@mantine/core';
+import { MantineProvider, createTheme, ColorSchemeScript } from '@mantine/core';
 import '@mantine/core/styles.css';
+import { LanguageProvider } from './contexts/LanguageContext';
 
 const theme = createTheme({
     primaryColor: 'brand',
@@ -31,7 +32,9 @@ createInertiaApp({
     setup({ el, App, props }) {
         createRoot(el).render(
             <MantineProvider theme={theme} defaultColorScheme="light">
-                <App {...props} />
+                <LanguageProvider>
+                    <App {...props} />
+                </LanguageProvider>
             </MantineProvider>
         );
     },

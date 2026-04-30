@@ -226,9 +226,9 @@ export default function WebsiteLayout({ children }) {
                             <img src="/logo-full.png" alt="SH Malik Logistics" style={{ height: 60, width: 'auto', objectFit: 'contain' }} />
                             <Text c="gray.6" size="sm" lh={1.8}>{T.footer.tagline}</Text>
                             <Stack gap={6}>
-                                <Text c="gray.5" size="sm">📍 Buza, Kwa Mama Kibonge, Dar es Salaam</Text>
-                                <Text c="gray.5" size="sm">📞 +255 789 511 234</Text>
-                                <Text c="gray.5" size="sm">📧 info@shmalik.co.tz</Text>
+                                <Text c="gray.5" size="sm">📍 Handeni, Tanzania</Text>
+                                <Text c="gray.5" size="sm">📞 +255 652 373 434</Text>
+                                <Text c="gray.5" size="sm">📧 shmaliklogisticscoltd@gmail.com</Text>
                             </Stack>
                         </Stack>
 
@@ -254,7 +254,7 @@ export default function WebsiteLayout({ children }) {
                         <Stack gap="sm">
                             <Text fw={700} c="white" size="sm" tt="uppercase" style={{ letterSpacing: 2 }}>{T.footer.activeRoutes}</Text>
                             {T.home.routes.items.map(r => (
-                                <Text key={r.to} c="gray.5" size="sm">{r.flag} Dar → {r.to}</Text>
+                                <Text key={r.to} c="gray.5" size="sm">{r.flag} Tanzania → {r.to}</Text>
                             ))}
                         </Stack>
                     </SimpleGrid>
@@ -264,7 +264,7 @@ export default function WebsiteLayout({ children }) {
                             <Text c="gray.6" size="xs">{T.footer.copyright}</Text>
                             <Group gap="xs">
                                 <Box style={{ width: 6, height: 6, borderRadius: '50%', background: '#1565C0' }} />
-                                <Text c="gray.6" size="xs">Dar es Salaam, Tanzania</Text>
+                                <Text c="gray.6" size="xs">Handeni, Tanzania</Text>
                             </Group>
                         </Group>
                     </Box>

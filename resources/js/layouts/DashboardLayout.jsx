@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const navItems = [
     { icon: '📊', label: 'Dashboard', href: '/system/dashboard' },
     { icon: '🚛', label: 'Trips', href: '/system/trips' },
-    { icon: '🚗', label: 'Fleet', href: '/system/fleet', soon: true },
+    { icon: '🚗', label: 'Fleet', href: '/system/fleet' },
     { icon: '🛂', label: 'Permits', href: '/system/permits', soon: true },
     { icon: '📦', label: 'Cargo', href: '/system/cargo', soon: true },
     { icon: '👥', label: 'Clients', href: '/system/clients', soon: true },

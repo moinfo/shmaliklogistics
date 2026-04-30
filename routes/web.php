@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\System\TripController;
+use App\Http\Controllers\System\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -27,6 +28,10 @@ Route::middleware('auth')->prefix('system')->name('system.')->group(function () 
     // Trips
     Route::resource('trips', TripController::class);
     Route::patch('trips/{trip}/status', [TripController::class, 'updateStatus'])->name('trips.update-status');
+
+    // Fleet
+    Route::resource('fleet', VehicleController::class);
+    Route::patch('fleet/{vehicle}/status', [VehicleController::class, 'updateStatus'])->name('fleet.update-status');
 });
 
 // Redirect /dashboard → /system/dashboard for convenience

@@ -45,7 +45,7 @@ const navItems = [
             { icon: '🚛', label: 'Fleet Utilization',   href: '/system/reports/fleet-utilization' },
         ],
     },
-    { icon: '📦', label: 'Cargo', href: '/system/cargo', soon: true },
+    { icon: '📦', label: 'Cargo', href: '/system/cargo' },
     {
         icon: '⚙️', label: 'Settings', href: '/system/settings',
         children: [

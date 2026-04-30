@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\System\CargoController;
 use App\Http\Controllers\System\DashboardController;
 use App\Http\Controllers\System\TripController;
 use App\Http\Controllers\System\VehicleController;
@@ -57,6 +58,10 @@ Route::middleware('auth')->prefix('system')->name('system.')->group(function () 
     // Trips
     Route::resource('trips', TripController::class);
     Route::patch('trips/{trip}/status', [TripController::class, 'updateStatus'])->name('trips.update-status');
+
+    // Cargo
+    Route::resource('cargo', CargoController::class);
+    Route::patch('cargo/{cargo}/status', [CargoController::class, 'updateStatus'])->name('cargo.update-status');
 
     // Fleet
     Route::resource('fleet', VehicleController::class);

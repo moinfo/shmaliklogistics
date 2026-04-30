@@ -4,7 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DatePicker from '../../../components/DatePicker';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
 
 function Section({ icon, title, children, isDark }) {
     const cardBg     = isDark ? dk.card : '#ffffff';
@@ -48,7 +48,7 @@ function LicenceClassToggle({ classes, selected, onToggle, isDark }) {
                                         cursor: 'pointer',
                                         userSelect: 'none',
                                         background: active
-                                            ? 'rgba(33,150,243,0.15)'
+                                            ? 'var(--c-border-strong)'
                                             : isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC',
                                         border: active
                                             ? '1.5px solid rgba(33,150,243,0.5)'
@@ -157,6 +157,26 @@ export default function DriverForm({ data, setData, errors, statuses, licenseCla
                 {errors.license_classes && (
                     <Text size="xs" style={{ color: '#EF4444', marginTop: 6 }}>{errors.license_classes}</Text>
                 )}
+            </Section>
+
+            <Section icon="🛂" title="Visa / Travel Documents" isDark={isDark}>
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap={2}>
+                        <DatePicker
+                            label="Visa Expiry"
+                            value={data.visa_expiry ?? ''}
+                            onChange={v => setData('visa_expiry', v)}
+                            error={errors.visa_expiry} styles={inputStyles}
+                        />
+                        {data.visa_expiry && (() => {
+                            const days = Math.floor((new Date(data.visa_expiry) - new Date()) / 86400000);
+                            if (days < 0) return <Text size="xs" style={{ color: '#EF4444', marginTop: 3 }}>⚠ Visa expired {Math.abs(days)} days ago</Text>;
+                            if (days <= 30) return <Text size="xs" style={{ color: '#F59E0B', marginTop: 3 }}>⚠ Visa expires in {days} days</Text>;
+                            return null;
+                        })()}
+                    </Stack>
+                </SimpleGrid>
+                <Text size="xs" style={{ color: textSec, marginTop: 8 }}>Upload the actual document files from the driver profile page.</Text>
             </Section>
 
             <Section icon="🚨" title="Emergency Contact" isDark={isDark}>

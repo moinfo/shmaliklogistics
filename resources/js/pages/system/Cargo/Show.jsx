@@ -4,13 +4,13 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', textPri: '#E2E8F0', textSec: '#94A3B8' };
 
 const STATUS_FLOW = ['registered', 'loaded', 'in_transit', 'at_border', 'cleared', 'delivered'];
 const fmtW = kg => kg >= 1000 ? `${(kg / 1000).toFixed(2)} t` : `${Number(kg).toFixed(0)} kg`;
 const fmt  = n  => n ? new Intl.NumberFormat('en-TZ').format(Number(n)) : '—';
 
-export default function ShowCargo({ cargo, statuses, types }) {
+export default function ShowCargo({ cargo, statusLogs = [], statuses, types }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const textPri    = isDark ? dk.textPri : '#1E293B';
@@ -18,9 +18,12 @@ export default function ShowCargo({ cargo, statuses, types }) {
     const cardBg     = isDark ? dk.card : '#ffffff';
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const divider    = isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9';
+    const inputBg    = isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC';
 
-    const [updating, setUpdating] = useState(false);
+    const [updating, setUpdating]         = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
+    const [logNotes, setLogNotes]          = useState('');
+    const [logLocation, setLogLocation]    = useState('');
 
     const st  = statuses[cargo.status] ?? { label: cargo.status, color: '#64748B' };
     const tp  = types[cargo.type]     ?? { label: cargo.type,   color: '#64748B' };
@@ -28,8 +31,8 @@ export default function ShowCargo({ cargo, statuses, types }) {
 
     const handleStatusChange = (newStatus) => {
         setUpdating(true);
-        router.patch(`/system/cargo/${cargo.id}/status`, { status: newStatus }, {
-            onFinish: () => setUpdating(false),
+        router.patch(`/system/cargo/${cargo.id}/status`, { status: newStatus, location: logLocation, notes: logNotes }, {
+            onFinish: () => { setUpdating(false); setLogNotes(''); setLogLocation(''); },
         });
     };
 
@@ -102,6 +105,18 @@ export default function ShowCargo({ cargo, statuses, types }) {
                 {cargo.status === 'cancelled' && (
                     <Text size="xs" style={{ color: '#EF4444', marginTop: 8 }}>This cargo has been cancelled.</Text>
                 )}
+                <Group gap="md" mt="md" wrap="wrap">
+                    <Box style={{ flex: 1, minWidth: 160 }}>
+                        <Text size="xs" style={{ color: textSec, marginBottom: 4 }}>Location (optional)</Text>
+                        <input value={logLocation} onChange={e => setLogLocation(e.target.value)} placeholder="e.g. Dar es Salaam Port"
+                            style={{ width: '100%', padding: '7px 10px', background: inputBg, border: `1px solid ${cardBorder}`, borderRadius: 7, color: textPri, fontSize: 12, outline: 'none', boxSizing: 'border-box' }} />
+                    </Box>
+                    <Box style={{ flex: 2, minWidth: 200 }}>
+                        <Text size="xs" style={{ color: textSec, marginBottom: 4 }}>Note (optional)</Text>
+                        <input value={logNotes} onChange={e => setLogNotes(e.target.value)} placeholder="Add a note for this update…"
+                            style={{ width: '100%', padding: '7px 10px', background: inputBg, border: `1px solid ${cardBorder}`, borderRadius: 7, color: textPri, fontSize: 12, outline: 'none', boxSizing: 'border-box' }} />
+                    </Box>
+                </Group>
             </Box>
 
             <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
@@ -143,7 +158,7 @@ export default function ShowCargo({ cargo, statuses, types }) {
                                 <Text size="sm" style={{ color: textSec }}>{cargo.trip.route_from} → {cargo.trip.route_to}</Text>
                                 <Text size="xs" style={{ color: textSec, marginTop: 4 }}>{cargo.trip.driver_name} · {cargo.trip.vehicle_plate}</Text>
                                 <Box component={Link} href={`/system/trips/${cargo.trip.id}`}
-                                    style={{ display: 'inline-block', marginTop: 10, padding: '6px 14px', borderRadius: 6, background: isDark ? 'rgba(33,150,243,0.15)' : '#EFF6FF', color: '#3B82F6', textDecoration: 'none', fontSize: 12, fontWeight: 600 }}>
+                                    style={{ display: 'inline-block', marginTop: 10, padding: '6px 14px', borderRadius: 6, background: isDark ? 'var(--c-border-strong)' : '#EFF6FF', color: '#3B82F6', textDecoration: 'none', fontSize: 12, fontWeight: 600 }}>
                                     View Trip →
                                 </Box>
                             </Box>
@@ -198,6 +213,50 @@ export default function ShowCargo({ cargo, statuses, types }) {
                     </Box>
                 </Stack>
             </SimpleGrid>
+
+            {/* Status Timeline */}
+            {statusLogs.length > 0 && (
+                <Box mt="xl" style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 12, overflow: 'hidden' }}>
+                    <Box style={{ padding: '14px 20px', borderBottom: `1px solid ${divider}` }}>
+                        <Text fw={700} size="sm" style={{ color: textPri }}>📍 Status Timeline</Text>
+                    </Box>
+                    <Box style={{ padding: '20px', position: 'relative' }}>
+                        {statusLogs.map((log, i) => {
+                            const s  = statuses[log.status] ?? { label: log.status, color: '#64748B' };
+                            const dt = new Date(log.created_at);
+                            return (
+                                <Box key={log.id} style={{ display: 'flex', gap: 14, marginBottom: i < statusLogs.length - 1 ? 20 : 0 }}>
+                                    <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 20, flexShrink: 0 }}>
+                                        <Box style={{ width: 12, height: 12, borderRadius: '50%', background: s.color, border: `2px solid ${s.color}66`, marginTop: 3, flexShrink: 0 }} />
+                                        {i < statusLogs.length - 1 && (
+                                            <Box style={{ width: 2, flex: 1, background: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0', marginTop: 4 }} />
+                                        )}
+                                    </Box>
+                                    <Box style={{ flex: 1, paddingBottom: i < statusLogs.length - 1 ? 4 : 0 }}>
+                                        <Group gap="sm" wrap="wrap">
+                                            <Box style={{ background: s.color + '18', border: `1px solid ${s.color}35`, borderRadius: 20, padding: '2px 10px' }}>
+                                                <Text size="xs" fw={700} style={{ color: s.color }}>{s.label}</Text>
+                                            </Box>
+                                            {log.location && (
+                                                <Text size="xs" style={{ color: textSec }}>📍 {log.location}</Text>
+                                            )}
+                                            <Text size="xs" style={{ color: isDark ? '#475569' : '#94A3B8', marginLeft: 'auto' }}>
+                                                {dt.toLocaleDateString('en-TZ', { day: '2-digit', month: 'short', year: 'numeric' })} {dt.toLocaleTimeString('en-TZ', { hour: '2-digit', minute: '2-digit' })}
+                                            </Text>
+                                        </Group>
+                                        {log.notes && (
+                                            <Text size="xs" style={{ color: textSec, marginTop: 4 }}>{log.notes}</Text>
+                                        )}
+                                        {log.user && (
+                                            <Text size="xs" style={{ color: isDark ? '#334155' : '#CBD5E1', marginTop: 2 }}>by {log.user.name}</Text>
+                                        )}
+                                    </Box>
+                                </Box>
+                            );
+                        })}
+                    </Box>
+                </Box>
+            )}
         </DashboardLayout>
     );
 }

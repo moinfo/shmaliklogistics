@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
 const MONTHS = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 function fmt(n) { return Number(n ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
 
@@ -68,7 +68,7 @@ const TH = ({ children, right }) => {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const textSec = isDark ? dk.textSec : '#64748B';
-    return <th style={{ padding: '9px 10px', textAlign: right ? 'right' : 'left', fontSize: 10, fontWeight: 700, color: textSec, whiteSpace: 'nowrap', background: isDark ? 'rgba(33,150,243,0.08)' : '#EFF6FF' }}>{children}</th>;
+    return <th style={{ padding: '9px 10px', textAlign: right ? 'right' : 'left', fontSize: 10, fontWeight: 700, color: textSec, whiteSpace: 'nowrap', background: isDark ? 'var(--c-thead)' : '#EFF6FF' }}>{children}</th>;
 };
 
 export default function ShowPayroll({ run, slips, totals, statuses }) {
@@ -191,7 +191,7 @@ export default function ShowPayroll({ run, slips, totals, statuses }) {
                             {/* Group label */}
                             {slips.length > 0 && (
                                 <tr>
-                                    <td colSpan={19} style={{ padding: '8px 14px', background: isDark ? 'rgba(33,150,243,0.06)' : '#F0F9FF', fontSize: 12, fontWeight: 700, color: '#3B82F6' }}>
+                                    <td colSpan={19} style={{ padding: '8px 14px', background: isDark ? 'var(--c-border-row)' : '#F0F9FF', fontSize: 12, fontWeight: 700, color: '#3B82F6' }}>
                                         HQ's Payroll
                                     </td>
                                 </tr>

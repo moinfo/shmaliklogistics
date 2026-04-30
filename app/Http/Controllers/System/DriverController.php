@@ -9,6 +9,7 @@ use App\Models\Trip;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class DriverController extends Controller
@@ -81,6 +82,7 @@ class DriverController extends Controller
             'emergency_contact_name'  => 'nullable|string|max:100',
             'emergency_contact_phone' => 'nullable|string|max:20',
             'notes'                   => 'nullable|string',
+            'visa_expiry'             => 'nullable|date',
         ]);
 
         $data['created_by'] = $request->user()->id;
@@ -166,6 +168,66 @@ class DriverController extends Controller
         $driver->update(['status' => $request->status]);
 
         return back()->with('success', 'Status updated.');
+    }
+
+    public function uploadLicenseDoc(Request $request, Driver $driver)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+        ]);
+
+        if ($driver->license_doc_path) {
+            Storage::disk('public')->delete($driver->license_doc_path);
+        }
+
+        $path = $request->file('file')->store("drivers/{$driver->id}", 'public');
+        $driver->update(['license_doc_path' => $path]);
+
+        return back()->with('success', 'Licence document uploaded.');
+    }
+
+    public function uploadVisaDoc(Request $request, Driver $driver)
+    {
+        $request->validate([
+            'file'        => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'visa_expiry' => 'nullable|date',
+        ]);
+
+        $updates = [];
+
+        if ($request->hasFile('file')) {
+            if ($driver->visa_doc_path) {
+                Storage::disk('public')->delete($driver->visa_doc_path);
+            }
+            $updates['visa_doc_path'] = $request->file('file')->store("drivers/{$driver->id}", 'public');
+        }
+
+        if ($request->filled('visa_expiry')) {
+            $updates['visa_expiry'] = $request->visa_expiry;
+        }
+
+        if ($updates) {
+            $driver->update($updates);
+        }
+
+        return back()->with('success', 'Visa details saved.');
+    }
+
+    public function deleteDocument(Request $request, Driver $driver, string $type)
+    {
+        if ($type === 'license') {
+            if ($driver->license_doc_path) {
+                Storage::disk('public')->delete($driver->license_doc_path);
+                $driver->update(['license_doc_path' => null]);
+            }
+        } elseif ($type === 'visa') {
+            if ($driver->visa_doc_path) {
+                Storage::disk('public')->delete($driver->visa_doc_path);
+                $driver->update(['visa_doc_path' => null]);
+            }
+        }
+
+        return back()->with('success', 'Document removed.');
     }
 
     public function assignVehicle(Request $request, Driver $driver)

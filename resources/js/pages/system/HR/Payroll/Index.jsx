@@ -4,7 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState, useRef, useEffect } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
 const MONTHS = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 function fmt(n) { return Number(n ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
 
@@ -94,7 +94,7 @@ export default function PayrollIndex({ runs, stats, statuses, available }) {
                 <Box style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
-                            <tr style={{ borderBottom: `1px solid ${isDark ? dk.divider : '#E2E8F0'}`, background: isDark ? 'rgba(33,150,243,0.06)' : '#EFF6FF' }}>
+                            <tr style={{ borderBottom: `1px solid ${isDark ? dk.divider : '#E2E8F0'}`, background: isDark ? 'var(--c-border-row)' : '#EFF6FF' }}>
                                 {['#', 'DOCUMENT NUMBER', 'PAYROLL NUMBER', 'PAYROLL MONTH', 'EMPLOYEES', 'STATUS', 'ACTION'].map((h, i) => (
                                     <th key={i} style={{ padding: '12px 14px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: textSec, whiteSpace: 'nowrap' }}>{h}</th>
                                 ))}

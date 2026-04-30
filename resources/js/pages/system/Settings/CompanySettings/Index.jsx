@@ -3,7 +3,7 @@ import { Box, Text, Group, Stack, SimpleGrid } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', textPri: '#E2E8F0', textSec: '#94A3B8' };
 
 export default function CompanySettingsIndex({ company }) {
     const { colorScheme } = useMantineColorScheme();
@@ -61,7 +61,7 @@ export default function CompanySettingsIndex({ company }) {
                         {inp('Email', 'company_email', 'e.g. info@company.co.tz')}
                     </Box>
 
-                    <Box mt="xl" style={{ padding: '14px 16px', background: isDark ? 'rgba(33,150,243,0.06)' : '#EFF6FF', borderRadius: 8, border: '1px solid rgba(33,150,243,0.2)' }}>
+                    <Box mt="xl" style={{ padding: '14px 16px', background: isDark ? 'var(--c-border-row)' : '#EFF6FF', borderRadius: 8, border: '1px solid var(--c-border-input)' }}>
                         <Text size="sm" style={{ color: '#3B82F6' }}>💡 The company name and address will appear on all printed salary slips. Update these before printing payslips for the first time.</Text>
                     </Box>
                 </Box>

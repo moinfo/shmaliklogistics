@@ -15,12 +15,14 @@ class Driver extends Model
         'phone', 'phone_alt', 'email',
         'national_id', 'address',
         'license_number', 'license_class', 'license_classes', 'license_expiry',
+        'license_doc_path', 'visa_doc_path', 'visa_expiry',
         'emergency_contact_name', 'emergency_contact_phone',
         'notes', 'created_by',
     ];
 
     protected $casts = [
         'license_expiry'  => 'date',
+        'visa_expiry'     => 'date',
         'license_classes' => 'array',
     ];
 

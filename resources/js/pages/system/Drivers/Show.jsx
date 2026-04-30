@@ -4,8 +4,9 @@ import { Box, Text, Group, Stack, SimpleGrid, Select, Tooltip, ActionIcon } from
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import DriverDocumentsCard from './DriverDocumentsCard';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
 
 function DataRow({ label, value, isDark }) {
     const d = isDark ? dk : { textSec: '#64748B', textPri: '#1E293B', divider: '#E2E8F0' };
@@ -59,6 +60,7 @@ function Avatar({ name, size = 56 }) {
         </Box>
     );
 }
+
 
 export default function ShowDriver({ driver, trips, statuses, licenseClasses, availableVehicles, vehicleStatuses, vehicleTypeIcons }) {
     const { colorScheme } = useMantineColorScheme();
@@ -154,7 +156,7 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
                             <Group gap={6} wrap="wrap">
                                 {(driver.license_classes ?? []).map(code => (
                                     <Tooltip key={code} label={licenseClasses?.[code] ?? code} withArrow position="top">
-                                        <Box style={{ background: 'rgba(33,150,243,0.12)', border: '1px solid rgba(33,150,243,0.3)', borderRadius: 6, padding: '3px 10px', color: '#60A5FA', fontWeight: 800, fontSize: 13, cursor: 'default' }}>
+                                        <Box style={{ background: 'var(--c-border-color)', border: '1px solid rgba(33,150,243,0.3)', borderRadius: 6, padding: '3px 10px', color: '#60A5FA', fontWeight: 800, fontSize: 13, cursor: 'default' }}>
                                             {code}
                                         </Box>
                                     </Tooltip>
@@ -214,6 +216,11 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
                         </motion.div>
                     </Group>
                 </Card>
+            </Box>
+
+            {/* Documents */}
+            <Box mb="md">
+                <DriverDocumentsCard driver={driver} />
             </Box>
 
             {/* Trip history */}

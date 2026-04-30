@@ -4,6 +4,7 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cargo;
+use App\Models\CargoStatusLog;
 use App\Models\Client;
 use App\Models\Trip;
 use Illuminate\Http\Request;
@@ -93,11 +94,16 @@ class CargoController extends Controller
     public function show(Cargo $cargo)
     {
         $cargo->load(['trip:id,trip_number,route_from,route_to,status,driver_name,vehicle_plate', 'client:id,name,company_name,phone,email']);
+        $statusLogs = CargoStatusLog::where('cargo_id', $cargo->id)
+            ->with('user:id,name')
+            ->latest()
+            ->get();
 
         return Inertia::render('system/Cargo/Show', [
-            'cargo'    => $cargo,
-            'statuses' => Cargo::$statuses,
-            'types'    => Cargo::$types,
+            'cargo'      => $cargo,
+            'statusLogs' => $statusLogs,
+            'statuses'   => Cargo::$statuses,
+            'types'      => Cargo::$types,
         ]);
     }
 
@@ -149,8 +155,22 @@ class CargoController extends Controller
 
     public function updateStatus(Request $request, Cargo $cargo)
     {
-        $request->validate(['status' => 'required|in:' . implode(',', array_keys(Cargo::$statuses))]);
-        $cargo->update(['status' => $request->status]);
+        $data = $request->validate([
+            'status'   => 'required|in:' . implode(',', array_keys(Cargo::$statuses)),
+            'location' => 'nullable|string|max:150',
+            'notes'    => 'nullable|string',
+        ]);
+
+        $cargo->update(['status' => $data['status']]);
+
+        CargoStatusLog::create([
+            'cargo_id' => $cargo->id,
+            'status'   => $data['status'],
+            'location' => $data['location'] ?? null,
+            'notes'    => $data['notes'] ?? null,
+            'user_id'  => auth()->id(),
+        ]);
+
         return back()->with('success', 'Cargo status updated.');
     }
 }

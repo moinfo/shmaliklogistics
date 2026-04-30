@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Models\BillingDocument;
+use App\Models\Expense;
 use App\Models\Permit;
 use App\Models\Trip;
 use App\Models\Vehicle;
+use App\Services\AlertService;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -46,6 +50,38 @@ class DashboardController extends Controller
             ->limit(6)
             ->get(['id', 'plate', 'type', 'status', 'driver_id']);
 
-        return Inertia::render('system/Dashboard', compact('stats', 'recentTrips', 'fleetStatus'));
+        $alerts = array_slice(AlertService::all(30), 0, 8);
+
+        // 12-month revenue & expense trend
+        $monthlyTrend = collect(range(11, 0))->map(function ($offset) {
+            $date    = now()->subMonths($offset);
+            $year    = $date->year;
+            $month   = $date->month;
+            $revenue = (float) BillingDocument::where('type', 'invoice')
+                ->whereIn('status', ['paid', 'partial'])
+                ->whereYear('issue_date', $year)
+                ->whereMonth('issue_date', $month)
+                ->sum('total');
+            $expenses = (float) Expense::whereYear('expense_date', $year)
+                ->whereMonth('expense_date', $month)
+                ->sum('amount');
+            return [
+                'month'    => $date->format('M'),
+                'year'     => $year,
+                'revenue'  => $revenue,
+                'expenses' => $expenses,
+                'profit'   => $revenue - $expenses,
+            ];
+        })->values()->all();
+
+        // Expense breakdown by category (current month)
+        $expenseByCategory = Expense::whereYear('expense_date', now()->year)
+            ->whereMonth('expense_date', now()->month)
+            ->select('category', DB::raw('SUM(amount) as total'))
+            ->groupBy('category')
+            ->orderByDesc('total')
+            ->get();
+
+        return Inertia::render('system/Dashboard', compact('stats', 'recentTrips', 'fleetStatus', 'alerts', 'monthlyTrend', 'expenseByCategory'));
     }
 }

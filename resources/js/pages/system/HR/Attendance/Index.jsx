@@ -5,7 +5,7 @@ import { useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import DatePicker from '../../../../components/DatePicker';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
 
 function ManualEntryModal({ employees, onClose, isDark, cardBorder }) {
     const { data, setData, post, processing, errors } = useForm({ employee_id: '', punch_time: '', punch_type: 'in', notes: '' });

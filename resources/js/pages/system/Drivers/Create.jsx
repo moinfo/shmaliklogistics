@@ -13,7 +13,7 @@ export default function CreateDriver({ statuses, licenseClasses }) {
     const { data, setData, post, processing, errors } = useForm({
         name: '', status: 'active',
         phone: '', phone_alt: '', email: '', national_id: '', address: '',
-        license_number: '', license_classes: [], license_expiry: '',
+        license_number: '', license_classes: [], license_expiry: '', visa_expiry: '',
         emergency_contact_name: '', emergency_contact_phone: '',
         notes: '',
     });

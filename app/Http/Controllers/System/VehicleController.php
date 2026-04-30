@@ -46,12 +46,18 @@ class VehicleController extends Controller
             })->count(),
         ];
 
+        $gpsVehicles = Vehicle::whereNotNull('gps_lat')
+            ->whereNotNull('gps_lng')
+            ->with('driver:id,name')
+            ->get(['id', 'plate', 'make', 'model_name', 'type', 'status', 'driver_id', 'gps_lat', 'gps_lng', 'gps_last_seen', 'gps_location_name']);
+
         return Inertia::render('system/Fleet/Index', [
-            'vehicles'  => $vehicles,
-            'stats'     => $stats,
-            'statuses'  => Vehicle::$statuses,
-            'typeIcons' => Vehicle::$typeIcons,
-            'filters'   => $request->only(['status', 'search']),
+            'vehicles'    => $vehicles,
+            'gpsVehicles' => $gpsVehicles,
+            'stats'       => $stats,
+            'statuses'    => Vehicle::$statuses,
+            'typeIcons'   => Vehicle::$typeIcons,
+            'filters'     => $request->only(['status', 'search']),
         ]);
     }
 
@@ -222,5 +228,19 @@ class VehicleController extends Controller
         $vehicle->update(['status' => $request->status]);
 
         return back()->with('success', 'Status updated.');
+    }
+
+    public function updateGps(Request $request, Vehicle $vehicle)
+    {
+        $data = $request->validate([
+            'gps_lat'           => 'required|numeric|between:-90,90',
+            'gps_lng'           => 'required|numeric|between:-180,180',
+            'gps_location_name' => 'nullable|string|max:200',
+        ]);
+
+        $data['gps_last_seen'] = now();
+        $vehicle->update($data);
+
+        return back()->with('success', 'GPS position updated.');
     }
 }

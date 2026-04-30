@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import DatePicker from '../../../../components/DatePicker';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', textPri: '#E2E8F0', textSec: '#94A3B8' };
 
 export default function CreateLoan({ employees, prefillEmployee }) {
     const { colorScheme } = useMantineColorScheme();
@@ -103,7 +103,7 @@ export default function CreateLoan({ employees, prefillEmployee }) {
                     />
 
                     {endPreview && (
-                        <Box mb="md" style={{ padding: '10px 14px', background: isDark ? 'rgba(33,150,243,0.08)' : '#EFF6FF', borderRadius: 8, border: '1px solid rgba(33,150,243,0.2)' }}>
+                        <Box mb="md" style={{ padding: '10px 14px', background: isDark ? 'var(--c-thead)' : '#EFF6FF', borderRadius: 8, border: '1px solid var(--c-border-input)' }}>
                             <Text size="xs" style={{ color: '#3B82F6' }}>
                                 📅 Expected completion: <strong>{endPreview}</strong> ({months} month{months !== 1 ? 's' : ''})
                             </Text>

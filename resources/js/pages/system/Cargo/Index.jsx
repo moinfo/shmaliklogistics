@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
 
 const fmt  = n => new Intl.NumberFormat('en-TZ').format(Math.round(n ?? 0));
 const fmtW = kg => kg >= 1000 ? `${(kg / 1000).toFixed(1)} t` : `${Math.round(kg)} kg`;
@@ -139,7 +139,7 @@ export default function CargoIndex({ cargos, stats, statuses, types, filters }) 
                                         <td style={{ padding: '12px 14px' }}>
                                             <Group gap={6} wrap="nowrap">
                                                 <Box component={Link} href={`/system/cargo/${c.id}`}
-                                                    style={{ padding: '5px 12px', borderRadius: 6, background: isDark ? 'rgba(33,150,243,0.15)' : '#EFF6FF', color: '#3B82F6', textDecoration: 'none', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                                    style={{ padding: '5px 12px', borderRadius: 6, background: isDark ? 'var(--c-border-strong)' : '#EFF6FF', color: '#3B82F6', textDecoration: 'none', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>
                                                     View
                                                 </Box>
                                                 <Box component={Link} href={`/system/cargo/${c.id}/edit`}

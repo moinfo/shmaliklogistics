@@ -4,7 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569', cardHov: '#132436' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569', cardHov: '#132436' };
 
 export default function LicenseClassesIndex({ classes }) {
     const { colorScheme } = useMantineColorScheme();
@@ -76,7 +76,7 @@ export default function LicenseClassesIndex({ classes }) {
                             >
                                 {/* Code badge */}
                                 <Box>
-                                    <Box style={{ display: 'inline-block', background: cls.is_active ? 'rgba(33,150,243,0.12)' : 'rgba(255,255,255,0.05)', border: `1px solid ${cls.is_active ? 'rgba(33,150,243,0.3)' : cardBorder}`, borderRadius: 6, padding: '4px 10px' }}>
+                                    <Box style={{ display: 'inline-block', background: cls.is_active ? 'var(--c-border-color)' : 'rgba(255,255,255,0.05)', border: `1px solid ${cls.is_active ? 'rgba(33,150,243,0.3)' : cardBorder}`, borderRadius: 6, padding: '4px 10px' }}>
                                         <Text fw={800} size="sm" style={{ color: cls.is_active ? '#60A5FA' : textMut, fontFamily: 'monospace', letterSpacing: 0.5 }}>{cls.code}</Text>
                                     </Box>
                                 </Box>

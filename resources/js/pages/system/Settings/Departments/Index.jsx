@@ -4,7 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
 
 function DeptForm({ dept, onClose, isDark, cardBorder }) {
     const isEdit = !!dept;
@@ -115,7 +115,7 @@ export default function DepartmentsIndex({ departments }) {
                         ) : (
                             <Box style={{ padding: '14px 20px', borderBottom: i < departments.length - 1 ? `1px solid ${divider}` : 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                                 <Group gap="md" align="center" style={{ flex: 1 }}>
-                                    <Box style={{ width: 40, height: 40, borderRadius: 10, background: isDark ? 'rgba(33,150,243,0.15)' : '#EFF6FF', border: `1px solid rgba(33,150,243,0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Box style={{ width: 40, height: 40, borderRadius: 10, background: isDark ? 'var(--c-border-strong)' : '#EFF6FF', border: `1px solid rgba(33,150,243,0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <Text size="xs" fw={800} style={{ color: '#3B82F6' }}>{d.code || d.name.slice(0, 3).toUpperCase()}</Text>
                                     </Box>
                                     <Box>

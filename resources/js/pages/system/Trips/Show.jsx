@@ -2,11 +2,12 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Box, Text, Group, Stack, SimpleGrid, Select, Tooltip, ActionIcon } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 
 const dk = {
     card:    '#0F1E32',
-    border:  'rgba(33,150,243,0.12)',
+    border:  'var(--c-border-color)',
     divider: 'rgba(255,255,255,0.06)',
     textPri: '#E2E8F0',
     textSec: '#94A3B8',
@@ -45,7 +46,7 @@ function Card({ title, children, isDark, accent }) {
     );
 }
 
-export default function ShowTrip({ trip, statuses }) {
+export default function ShowTrip({ trip, statuses, expenses = [], expenseCategories = {} }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const { props } = usePage();
@@ -60,6 +61,19 @@ export default function ShowTrip({ trip, statuses }) {
 
     const totalCosts = Number(trip.fuel_cost) + Number(trip.driver_allowance) + Number(trip.border_costs) + Number(trip.other_costs);
     const profit = Number(trip.freight_amount) - totalCosts;
+
+    const [expForm, setExpForm] = useState({ category: 'fuel', description: '', amount: '', currency: 'TZS', expense_date: new Date().toISOString().slice(0, 10), receipt_number: '', notes: '' });
+    const [showExpForm, setShowExpForm] = useState(false);
+
+    const addExpense = (e) => {
+        e.preventDefault();
+        router.post('/system/expenses', { ...expForm, trip_id: trip.id }, {
+            onSuccess: () => { setShowExpForm(false); setExpForm(p => ({ ...p, description: '', amount: '', receipt_number: '', notes: '' })); }
+        });
+    };
+
+    const expenseTotal  = expenses.reduce((s, e) => s + Number(e.amount), 0);
+    const inputStyle    = { padding: '8px 12px', borderRadius: 8, border: `1px solid ${cardBorder}`, background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', color: textPri, fontSize: 13, outline: 'none', width: '100%', boxSizing: 'border-box' };
 
     const confirmDelete = () => {
         if (window.confirm(`Delete ${trip.trip_number}? This cannot be undone.`)) {
@@ -176,6 +190,93 @@ export default function ShowTrip({ trip, statuses }) {
                     </Card>
                 </Box>
             )}
+
+            {/* Linked Expenses */}
+            <Box mt="md">
+                <Box style={{ background: isDark ? dk.card : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden' }}>
+                    <Group justify="space-between" style={{ padding: '14px 20px', borderBottom: `1px solid ${isDark ? dk.divider : '#E2E8F0'}` }}>
+                        <Group gap={8}>
+                            <Text fw={700} size="sm" style={{ color: textPri }}>💸 Trip Expenses</Text>
+                            {expenses.length > 0 && (
+                                <Box style={{ background: '#EF444420', border: '1px solid #EF444440', borderRadius: 12, padding: '1px 8px' }}>
+                                    <Text size="xs" fw={700} style={{ color: '#EF4444' }}>{fmt(expenseTotal)} TZS total</Text>
+                                </Box>
+                            )}
+                        </Group>
+                        <Box component="button" type="button" onClick={() => setShowExpForm(v => !v)}
+                            style={{ padding: '5px 14px', borderRadius: 8, background: showExpForm ? 'transparent' : 'linear-gradient(135deg,#1565C0,#2196F3)', color: showExpForm ? textMut : '#fff', border: showExpForm ? `1px solid ${cardBorder}` : 'none', cursor: 'pointer', fontWeight: 600, fontSize: 12 }}>
+                            {showExpForm ? 'Cancel' : '＋ Add Expense'}
+                        </Box>
+                    </Group>
+
+                    {showExpForm && (
+                        <Box style={{ padding: '16px 20px', borderBottom: `1px solid ${isDark ? dk.divider : '#E2E8F0'}`, background: isDark ? 'rgba(59,130,246,0.04)' : '#F8FBFF' }}>
+                            <form onSubmit={addExpense}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10, marginBottom: 10 }}>
+                                    <div>
+                                        <Text size="xs" fw={600} style={{ color: textMut, marginBottom: 3 }}>Category *</Text>
+                                        <select value={expForm.category} onChange={e => setExpForm(p => ({ ...p, category: e.target.value }))} style={inputStyle} required>
+                                            {Object.entries(expenseCategories).map(([k, v]) => <option key={k} value={k}>{v.icon} {v.label}</option>)}
+                                        </select>
+                                    </div>
+                                    <div style={{ gridColumn: 'span 2' }}>
+                                        <Text size="xs" fw={600} style={{ color: textMut, marginBottom: 3 }}>Description *</Text>
+                                        <input type="text" placeholder="e.g. Fuel at Total Morogoro" value={expForm.description} onChange={e => setExpForm(p => ({ ...p, description: e.target.value }))} style={inputStyle} required />
+                                    </div>
+                                    <div>
+                                        <Text size="xs" fw={600} style={{ color: textMut, marginBottom: 3 }}>Amount *</Text>
+                                        <input type="number" step="0.01" min="0" placeholder="0.00" value={expForm.amount} onChange={e => setExpForm(p => ({ ...p, amount: e.target.value }))} style={inputStyle} required />
+                                    </div>
+                                    <div>
+                                        <Text size="xs" fw={600} style={{ color: textMut, marginBottom: 3 }}>Currency</Text>
+                                        <select value={expForm.currency} onChange={e => setExpForm(p => ({ ...p, currency: e.target.value }))} style={inputStyle}>
+                                            {['TZS','USD','ZMW','KES','CDF'].map(c => <option key={c} value={c}>{c}</option>)}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <Text size="xs" fw={600} style={{ color: textMut, marginBottom: 3 }}>Date *</Text>
+                                        <input type="date" value={expForm.expense_date} onChange={e => setExpForm(p => ({ ...p, expense_date: e.target.value }))} style={inputStyle} required />
+                                    </div>
+                                    <div>
+                                        <Text size="xs" fw={600} style={{ color: textMut, marginBottom: 3 }}>Receipt #</Text>
+                                        <input type="text" placeholder="Optional" value={expForm.receipt_number} onChange={e => setExpForm(p => ({ ...p, receipt_number: e.target.value }))} style={inputStyle} />
+                                    </div>
+                                </div>
+                                <button type="submit" style={{ padding: '8px 20px', borderRadius: 8, background: 'linear-gradient(135deg,#065F46,#059669)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13 }}>
+                                    Save Expense
+                                </button>
+                            </form>
+                        </Box>
+                    )}
+
+                    {expenses.length === 0 ? (
+                        <Box style={{ textAlign: 'center', padding: '28px 0' }}>
+                            <Text size="sm" style={{ color: textMut }}>No expenses recorded for this trip yet.</Text>
+                        </Box>
+                    ) : (
+                        <Box>
+                            {expenses.map((exp, i) => {
+                                const cat = expenseCategories[exp.category] ?? { icon: '📦', label: exp.category };
+                                return (
+                                    <Group key={exp.id} justify="space-between" style={{ padding: '12px 20px', borderBottom: i < expenses.length - 1 ? `1px solid ${isDark ? dk.divider : '#E2E8F0'}` : 'none' }}>
+                                        <Group gap={10}>
+                                            <Text size="md">{cat.icon}</Text>
+                                            <Box>
+                                                <Text size="sm" fw={600} style={{ color: textPri }}>{exp.description}</Text>
+                                                <Text size="xs" style={{ color: textMut }}>{cat.label} · {new Date(exp.expense_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</Text>
+                                            </Box>
+                                        </Group>
+                                        <Text fw={700} size="sm" style={{ color: '#EF4444' }}>{exp.currency} {fmt(exp.amount)}</Text>
+                                    </Group>
+                                );
+                            })}
+                            <Group justify="flex-end" style={{ padding: '12px 20px', borderTop: `1px solid ${isDark ? dk.divider : '#E2E8F0'}` }}>
+                                <Text size="sm" fw={800} style={{ color: textPri }}>Total: <span style={{ color: '#EF4444' }}>TZS {fmt(expenseTotal)}</span></Text>
+                            </Group>
+                        </Box>
+                    )}
+                </Box>
+            </Box>
 
             {/* Back link */}
             <Box mt="xl">

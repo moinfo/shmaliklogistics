@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
 
 function DeviceForm({ device, onClose, isDark, cardBorder }) {
     const isEdit = !!device;
@@ -50,7 +50,7 @@ function DeviceForm({ device, onClose, isDark, cardBorder }) {
                 <Box component="input" type="checkbox" checked={data.is_active} onChange={e => setData('is_active', e.target.checked)} id="dev_active" />
                 <Text component="label" htmlFor="dev_active" size="sm" style={{ color: textSec, cursor: 'pointer' }}>Active</Text>
             </Group>}
-            <Box mb="md" style={{ padding: '10px 14px', background: isDark ? 'rgba(33,150,243,0.06)' : '#EFF6FF', borderRadius: 8, border: '1px solid rgba(33,150,243,0.2)' }}>
+            <Box mb="md" style={{ padding: '10px 14px', background: isDark ? 'var(--c-border-row)' : '#EFF6FF', borderRadius: 8, border: '1px solid var(--c-border-input)' }}>
                 <Text size="xs" style={{ color: '#3B82F6' }}>💡 ZKTeco devices communicate on TCP port 4370 by default. Ensure the device and server are on the same network or the port is reachable.</Text>
             </Box>
             <Group justify="flex-end" gap="sm">

@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\System\Billing;
 
 use App\Http\Controllers\Controller;
+use App\Mail\BillingDocumentMail;
 use App\Models\BillingDocument;
 use App\Models\BillingItem;
 use App\Models\Client;
+use App\Models\CompanySetting;
 use App\Models\Trip;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class QuoteController extends Controller
@@ -83,6 +87,7 @@ class QuoteController extends Controller
         return Inertia::render('system/Billing/Quotes/Show', [
             'quote'    => $quote,
             'statuses' => BillingDocument::$quoteStatuses,
+            'company'  => CompanySetting::first(),
         ]);
     }
 
@@ -156,6 +161,29 @@ class QuoteController extends Controller
             ->with('success', "Proforma {$proforma->document_number} created from {$quote->document_number}.");
     }
 
+    public function send(Request $request, BillingDocument $quote)
+    {
+        $data = $request->validate([
+            'to'      => 'required|email',
+            'subject' => 'required|string|max:255',
+            'message' => 'nullable|string|max:5000',
+        ]);
+
+        $quote->load(['client', 'trip', 'items']);
+        $quote->append(['amount_paid', 'balance_due']);
+
+        Mail::to($data['to'])->send(
+            new BillingDocumentMail(
+                document:      $quote,
+                company:       CompanySetting::first(),
+                customMessage: $data['message'] ?? '',
+                emailSubject:  $data['subject'],
+            )
+        );
+
+        return back()->with('success', "Quote {$quote->document_number} sent to {$data['to']}.");
+    }
+
     // ── Shared helpers ──────────────────────────────────────────────────────
 
     private function validateDocument(Request $request): array
@@ -200,6 +228,18 @@ class QuoteController extends Controller
                 'sort_order'  => $i,
             ]);
         }
+    }
+
+    public function download(BillingDocument $quote)
+    {
+        $quote->load('client', 'trip', 'items');
+        $company  = CompanySetting::get();
+        $statuses = BillingDocument::$quoteStatuses;
+
+        $pdf = Pdf::loadView('pdf.billing-document', ['doc' => $quote, 'company' => $company, 'statuses' => $statuses])
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download("{$quote->document_number}.pdf");
     }
 
     private function recalculate(BillingDocument $doc): void

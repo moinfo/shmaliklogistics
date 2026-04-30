@@ -5,6 +5,7 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
 class ClientController extends Controller
@@ -78,16 +79,35 @@ class ClientController extends Controller
         $client->load(['billingDocuments' => fn ($q) => $q->latest()->limit(10)]);
 
         $stats = [
-            'quotes'    => $client->billingDocuments()->where('type', 'quote')->count(),
-            'invoices'  => $client->billingDocuments()->where('type', 'invoice')->count(),
-            'total_billed' => $client->billingDocuments()->where('type', 'invoice')->sum('total'),
+            'quotes'      => $client->billingDocuments()->where('type', 'quote')->count(),
+            'invoices'    => $client->billingDocuments()->where('type', 'invoice')->count(),
+            'total_billed'=> $client->billingDocuments()->where('type', 'invoice')->sum('total'),
         ];
 
         return Inertia::render('system/Clients/Show', [
-            'client'   => $client,
-            'stats'    => $stats,
-            'statuses' => Client::$statuses,
+            'client'       => $client->makeVisible(['portal_active', 'last_portal_login']),
+            'stats'        => $stats,
+            'statuses'     => Client::$statuses,
+            'portalActive' => $client->portal_active,
         ]);
+    }
+
+    public function updatePortal(Request $request, Client $client)
+    {
+        $data = $request->validate([
+            'portal_active'   => 'required|boolean',
+            'portal_password' => 'nullable|string|min:6',
+        ]);
+
+        $update = ['portal_active' => $data['portal_active']];
+        if (! empty($data['portal_password'])) {
+            $update['portal_password'] = Hash::make($data['portal_password']);
+        }
+
+        $client->update($update);
+
+        $msg = $data['portal_active'] ? 'Portal access enabled.' : 'Portal access disabled.';
+        return back()->with('success', $msg);
     }
 
     public function edit(Client $client)

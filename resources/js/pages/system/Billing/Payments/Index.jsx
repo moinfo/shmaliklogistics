@@ -3,12 +3,13 @@ import { Box, Text, Group, Stack, SimpleGrid, TextInput, Select, Badge, ActionIc
 import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { printPaymentsReport } from '../../../../utils/billingPrint';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
 const fmt = (n) => new Intl.NumberFormat('en-TZ').format(Math.round(Number(n) || 0));
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
-export default function PaymentsIndex({ payments, stats, methods, filters }) {
+export default function PaymentsIndex({ payments, stats, methods, filters, company }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark     = colorScheme === 'dark';
     const textPri    = isDark ? dk.textPri : '#1E293B';
@@ -37,9 +38,15 @@ export default function PaymentsIndex({ payments, stats, methods, filters }) {
                     <Text fw={800} size="xl" style={{ color: textPri }}>Payments</Text>
                     <Text size="sm" style={{ color: textSec }}>All received payments across invoices</Text>
                 </Stack>
-                <Box component={Link} href="/system/billing/invoices" style={{ padding: '9px 18px', borderRadius: 10, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>
-                    View Invoices →
-                </Box>
+                <Group gap="sm">
+                    <Box component="button" onClick={() => printPaymentsReport(payments.data, company, filters)}
+                        style={{ padding: '9px 18px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+                        🖨 Print Report
+                    </Box>
+                    <Box component={Link} href="/system/billing/invoices" style={{ padding: '9px 18px', borderRadius: 10, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>
+                        View Invoices →
+                    </Box>
+                </Group>
             </Group>
 
             {/* Stats */}
@@ -148,7 +155,7 @@ export default function PaymentsIndex({ payments, stats, methods, filters }) {
                                         <Badge
                                             size="sm"
                                             style={{
-                                                background: isDark ? 'rgba(33,150,243,0.12)' : '#EFF6FF',
+                                                background: isDark ? 'var(--c-border-color)' : '#EFF6FF',
                                                 color: '#3B82F6',
                                                 border: '1px solid rgba(33,150,243,0.3)',
                                             }}

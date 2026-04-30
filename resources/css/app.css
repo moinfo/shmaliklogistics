@@ -1,5 +1,32 @@
 @import 'tailwindcss';
 
+/* ── Theme tokens (dark default, overridden for light) ────────────────────── */
+:root {
+    --c-card:          #0F1E32;
+    --c-input:         #07111F;
+    --c-thead:         rgba(33,150,243,0.08);
+    --c-border-color:  rgba(33,150,243,0.12);
+    --c-border-input:  rgba(33,150,243,0.2);
+    --c-border-strong: rgba(33,150,243,0.15);
+    --c-border-row:    rgba(33,150,243,0.06);
+    --c-border-subtle: rgba(33,150,243,0.1);
+    --c-text:          #E2E8F0;
+    --c-hover:         rgba(33,150,243,0.04);
+}
+
+[data-mantine-color-scheme="light"] {
+    --c-card:          #FFFFFF;
+    --c-input:         #FFFFFF;
+    --c-thead:         #F1F5F9;
+    --c-border-color:  rgba(0,0,0,0.09);
+    --c-border-input:  rgba(0,0,0,0.15);
+    --c-border-strong: rgba(0,0,0,0.1);
+    --c-border-row:    rgba(0,0,0,0.05);
+    --c-border-subtle: rgba(0,0,0,0.06);
+    --c-text:          #1E293B;
+    --c-hover:         rgba(0,0,0,0.025);
+}
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';

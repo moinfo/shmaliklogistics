@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\System\Billing;
 
 use App\Http\Controllers\Controller;
+use App\Mail\BillingDocumentMail;
 use App\Models\BillingDocument;
 use App\Models\Client;
+use App\Models\CompanySetting;
 use App\Models\Payment;
 use App\Models\Trip;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class InvoiceController extends Controller
@@ -92,6 +96,7 @@ class InvoiceController extends Controller
             'invoice'  => $invoice,
             'statuses' => BillingDocument::$invoiceStatuses,
             'methods'  => Payment::$methods,
+            'company'  => CompanySetting::first(),
         ]);
     }
 
@@ -125,6 +130,29 @@ class InvoiceController extends Controller
     {
         $invoice->delete();
         return redirect()->route('system.billing.invoices.index')->with('success', "Invoice deleted.");
+    }
+
+    public function send(Request $request, BillingDocument $invoice)
+    {
+        $data = $request->validate([
+            'to'      => 'required|email',
+            'subject' => 'required|string|max:255',
+            'message' => 'nullable|string|max:5000',
+        ]);
+
+        $invoice->load(['client', 'trip', 'items', 'payments']);
+        $invoice->append(['amount_paid', 'balance_due']);
+
+        Mail::to($data['to'])->send(
+            new BillingDocumentMail(
+                document:      $invoice,
+                company:       CompanySetting::first(),
+                customMessage: $data['message'] ?? '',
+                emailSubject:  $data['subject'],
+            )
+        );
+
+        return back()->with('success', "Invoice {$invoice->document_number} sent to {$data['to']}.");
     }
 
     public function recordPayment(Request $request, BillingDocument $invoice)
@@ -198,6 +226,18 @@ class InvoiceController extends Controller
                 'sort_order'  => $i,
             ]);
         }
+    }
+
+    public function download(BillingDocument $invoice)
+    {
+        $invoice->load('client', 'trip', 'items', 'payments');
+        $company  = CompanySetting::get();
+        $statuses = BillingDocument::$invoiceStatuses;
+
+        $pdf = Pdf::loadView('pdf.billing-document', ['doc' => $invoice, 'company' => $company, 'statuses' => $statuses])
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download("{$invoice->document_number}.pdf");
     }
 
     private function recalculate(BillingDocument $doc): void

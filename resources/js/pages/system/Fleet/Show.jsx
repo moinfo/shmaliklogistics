@@ -5,7 +5,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
 
 function DataRow({ label, value, isDark, mono }) {
     const textSec = isDark ? dk.textSec : '#64748B';
@@ -55,6 +55,63 @@ function Card({ title, children, isDark, accent }) {
     );
 }
 
+function GpsPanel({ vehicle, isDark, cardBg, cardBorder, textPri, textSec, textMut, divider }) {
+    const [lat, setLat] = useState(vehicle.gps_lat ? String(vehicle.gps_lat) : '');
+    const [lng, setLng] = useState(vehicle.gps_lng ? String(vehicle.gps_lng) : '');
+    const [locName, setLocName] = useState(vehicle.gps_location_name ?? '');
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        router.patch(`/system/fleet/${vehicle.id}/gps`, { gps_lat: lat, gps_lng: lng, gps_location_name: locName });
+    };
+
+    const fmtLastSeen = vehicle.gps_last_seen
+        ? new Date(vehicle.gps_last_seen).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+        : null;
+
+    const inputStyle = { width: '100%', padding: '8px 12px', borderRadius: 8, border: `1px solid ${cardBorder}`, background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', color: textPri, fontSize: 13, outline: 'none', boxSizing: 'border-box' };
+
+    return (
+        <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden' }}>
+            <Box style={{ padding: '14px 20px', borderBottom: `1px solid ${divider}` }}>
+                <Group justify="space-between">
+                    <Text fw={700} size="sm" style={{ color: textPri }}>📡 GPS Location</Text>
+                    {fmtLastSeen && <Text size="xs" style={{ color: textMut }}>Last updated: {fmtLastSeen}</Text>}
+                </Group>
+            </Box>
+            <Box style={{ padding: 20 }}>
+                {vehicle.gps_lat && vehicle.gps_lng && (
+                    <Box style={{ background: isDark ? 'rgba(59,130,246,0.08)' : '#EFF6FF', border: `1px solid ${isDark ? 'rgba(59,130,246,0.2)' : '#BFDBFE'}`, borderRadius: 8, padding: '8px 14px', marginBottom: 16 }}>
+                        <Text size="sm" style={{ color: '#3B82F6' }}>
+                            Current: <strong>{vehicle.gps_lat}, {vehicle.gps_lng}</strong>
+                            {vehicle.gps_location_name ? ` — ${vehicle.gps_location_name}` : ''}
+                        </Text>
+                    </Box>
+                )}
+                <form onSubmit={handleSubmit}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr auto', gap: 10, alignItems: 'end' }}>
+                        <div>
+                            <Text size="xs" fw={600} style={{ color: textMut, marginBottom: 4 }}>Latitude</Text>
+                            <input type="number" step="any" placeholder="-6.369" value={lat} onChange={e => setLat(e.target.value)} style={inputStyle} required />
+                        </div>
+                        <div>
+                            <Text size="xs" fw={600} style={{ color: textMut, marginBottom: 4 }}>Longitude</Text>
+                            <input type="number" step="any" placeholder="34.889" value={lng} onChange={e => setLng(e.target.value)} style={inputStyle} required />
+                        </div>
+                        <div>
+                            <Text size="xs" fw={600} style={{ color: textMut, marginBottom: 4 }}>Location Name (optional)</Text>
+                            <input type="text" placeholder="e.g. Namanga Border, Dar es Salaam Port" value={locName} onChange={e => setLocName(e.target.value)} style={inputStyle} />
+                        </div>
+                        <button type="submit" style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap' }}>
+                            Update GPS
+                        </button>
+                    </div>
+                </form>
+            </Box>
+        </Box>
+    );
+}
+
 export default function ShowVehicle({ vehicle, trips, statuses, typeIcons, availableDrivers, driverStatuses, licenseClasses, customDocumentTypes = [] }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
@@ -99,7 +156,7 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons, avail
             {/* Header */}
             <Group justify="space-between" mb="xl" align="flex-start" wrap="wrap" gap="md">
                 <Group gap="md" align="center">
-                    <Box style={{ width: 56, height: 56, borderRadius: 14, background: isDark ? 'rgba(33,150,243,0.12)' : '#EFF6FF', border: `1px solid ${cardBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', flexShrink: 0 }}>
+                    <Box style={{ width: 56, height: 56, borderRadius: 14, background: isDark ? 'var(--c-border-color)' : '#EFF6FF', border: `1px solid ${cardBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', flexShrink: 0 }}>
                         {typeIcon}
                     </Box>
                     <Stack gap={4}>
@@ -169,7 +226,7 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons, avail
                                     <Group gap={5} mt={2}>
                                         {(driver.license_classes ?? []).map(code => (
                                             <Tooltip key={code} label={licenseClasses?.[code] ?? code} withArrow position="top">
-                                                <Box style={{ background: 'rgba(33,150,243,0.12)', border: '1px solid rgba(33,150,243,0.3)', borderRadius: 5, padding: '2px 8px', color: '#60A5FA', fontWeight: 800, fontSize: 12, cursor: 'default' }}>
+                                                <Box style={{ background: 'var(--c-border-color)', border: '1px solid rgba(33,150,243,0.3)', borderRadius: 5, padding: '2px 8px', color: '#60A5FA', fontWeight: 800, fontSize: 12, cursor: 'default' }}>
                                                     {code}
                                                 </Box>
                                             </Tooltip>
@@ -274,6 +331,11 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons, avail
                     </Card>
                 </Box>
             )}
+
+            {/* GPS Location */}
+            <Box mt="md">
+                <GpsPanel vehicle={vehicle} isDark={isDark} cardBg={cardBg} cardBorder={cardBorder} textPri={textPri} textSec={textSec} textMut={textMut} divider={divider} />
+            </Box>
 
             <Box mt="xl">
                 <Box component={Link} href="/system/fleet" style={{ color: textMut, textDecoration: 'none', fontSize: 13 }}>← Back to Fleet</Box>

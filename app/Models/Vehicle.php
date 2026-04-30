@@ -19,6 +19,7 @@ class Vehicle extends Model
         'insurance_expiry', 'road_licence_expiry', 'fitness_expiry',
         'tra_sticker_expiry', 'goods_vehicle_licence_expiry', 'next_service_date',
         'owner_name', 'notes', 'extra_documents', 'created_by',
+        'gps_lat', 'gps_lng', 'gps_last_seen', 'gps_location_name',
     ];
 
     protected $casts = [
@@ -30,6 +31,9 @@ class Vehicle extends Model
         'next_service_date'            => 'date',
         'payload_tons'                 => 'decimal:2',
         'extra_documents'              => 'array',
+        'gps_lat'                      => 'decimal:7',
+        'gps_lng'                      => 'decimal:7',
+        'gps_last_seen'                => 'datetime',
     ];
 
     public function driver()

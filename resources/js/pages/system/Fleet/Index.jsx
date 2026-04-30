@@ -2,13 +2,13 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Box, Text, Group, Stack, SimpleGrid, TextInput, Select, ActionIcon, Tooltip, Pagination } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 
 const dk = {
     card:    '#0F1E32',
     cardHov: '#132436',
-    border:  'rgba(33,150,243,0.12)',
+    border:  'var(--c-border-color)',
     divider: 'rgba(255,255,255,0.06)',
     textPri: '#E2E8F0',
     textSec: '#94A3B8',
@@ -36,7 +36,89 @@ function DocBadge({ label, date, isDark }) {
     );
 }
 
-export default function FleetIndex({ vehicles, stats, statuses, filters }) {
+// Leaflet map mounted lazily to avoid SSR/import issues
+function FleetMap({ gpsVehicles, statuses, isDark }) {
+    const mapRef     = useRef(null);
+    const instanceRef = useRef(null);
+    const markersRef  = useRef([]);
+
+    useEffect(() => {
+        if (!mapRef.current || instanceRef.current) return;
+
+        // Dynamic import avoids Vite SSR issues with Leaflet's window access
+        import('leaflet').then(({ default: L }) => {
+            import('leaflet/dist/leaflet.css');
+
+            const map = L.map(mapRef.current, { zoomControl: true, scrollWheelZoom: true });
+            instanceRef.current = map;
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 18,
+            }).addTo(map);
+
+            const bounds = [];
+
+            gpsVehicles.forEach(v => {
+                const color = statuses[v.status]?.color ?? '#94A3B8';
+                const icon = L.divIcon({
+                    html: `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;">🚛</div>`,
+                    className: '',
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 14],
+                    popupAnchor: [0, -16],
+                });
+
+                const lastSeen = v.gps_last_seen
+                    ? new Date(v.gps_last_seen).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+                    : 'Unknown';
+
+                const popup = `
+                    <div style="font-family:system-ui,sans-serif;min-width:160px">
+                        <div style="font-weight:800;font-size:14px;margin-bottom:4px">${v.plate}</div>
+                        <div style="font-size:12px;color:#555;margin-bottom:2px">${v.make ?? ''} · ${v.type ?? ''}</div>
+                        ${v.driver ? `<div style="font-size:12px;color:#555;margin-bottom:2px">👤 ${v.driver.name}</div>` : ''}
+                        <div style="font-size:11px;padding:3px 7px;background:${color}22;color:${color};border-radius:12px;display:inline-block;margin-bottom:6px;border:1px solid ${color}44">${statuses[v.status]?.label ?? v.status}</div>
+                        ${v.gps_location_name ? `<div style="font-size:11px;color:#666;margin-bottom:4px">📍 ${v.gps_location_name}</div>` : ''}
+                        <div style="font-size:10px;color:#999">Last seen: ${lastSeen}</div>
+                        <a href="/system/fleet/${v.id}" style="display:block;margin-top:8px;font-size:12px;color:#3B82F6;text-decoration:none;font-weight:600">View vehicle →</a>
+                    </div>
+                `;
+
+                const marker = L.marker([parseFloat(v.gps_lat), parseFloat(v.gps_lng)], { icon })
+                    .addTo(map)
+                    .bindPopup(popup);
+
+                markersRef.current.push(marker);
+                bounds.push([parseFloat(v.gps_lat), parseFloat(v.gps_lng)]);
+            });
+
+            if (bounds.length > 0) {
+                map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
+            } else {
+                // Default center: Tanzania
+                map.setView([-6.369, 34.889], 5);
+            }
+        });
+
+        return () => {
+            if (instanceRef.current) {
+                instanceRef.current.remove();
+                instanceRef.current = null;
+                markersRef.current = [];
+            }
+        };
+    }, []);
+
+    return (
+        <div
+            ref={mapRef}
+            style={{ width: '100%', height: 420, borderRadius: 14, overflow: 'hidden', zIndex: 0 }}
+        />
+    );
+}
+
+export default function FleetIndex({ vehicles, gpsVehicles = [], stats, statuses, filters }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
 
@@ -96,6 +178,44 @@ export default function FleetIndex({ vehicles, stats, statuses, filters }) {
                 ))}
             </SimpleGrid>
 
+            {/* GPS Map */}
+            <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden', marginBottom: 16 }}>
+                <Group justify="space-between" style={{ padding: '14px 20px', borderBottom: `1px solid ${divider}` }}>
+                    <Group gap={8}>
+                        <Text fw={700} size="sm" style={{ color: textPri }}>🗺️ Live Fleet Map</Text>
+                        {gpsVehicles.length > 0 && (
+                            <Box style={{ background: '#3B82F620', border: '1px solid #3B82F640', borderRadius: 12, padding: '2px 8px' }}>
+                                <Text size="xs" fw={600} style={{ color: '#3B82F6' }}>{gpsVehicles.length} tracked</Text>
+                            </Box>
+                        )}
+                    </Group>
+                    <Text size="xs" style={{ color: textMut }}>Update GPS from a vehicle's detail page</Text>
+                </Group>
+
+                {gpsVehicles.length === 0 ? (
+                    <Box style={{ textAlign: 'center', padding: '60px 20px' }}>
+                        <Text style={{ fontSize: '2.5rem', marginBottom: 10 }}>📡</Text>
+                        <Text fw={600} style={{ color: textPri }}>No GPS data yet</Text>
+                        <Text size="sm" style={{ color: textMut, marginTop: 4 }}>Open a vehicle's detail page to set its coordinates</Text>
+                    </Box>
+                ) : (
+                    <Box style={{ padding: 16 }}>
+                        <FleetMap gpsVehicles={gpsVehicles} statuses={statuses} isDark={isDark} />
+                        {/* Status legend */}
+                        <Group gap={12} mt={10} wrap="wrap">
+                            {Object.entries(statuses).map(([k, v]) => (
+                                gpsVehicles.some(gv => gv.status === k) && (
+                                    <Group key={k} gap={5}>
+                                        <Box style={{ width: 8, height: 8, borderRadius: '50%', background: v.color }} />
+                                        <Text size="xs" style={{ color: textMut }}>{v.label}</Text>
+                                    </Group>
+                                )
+                            ))}
+                        </Group>
+                    </Box>
+                )}
+            </Box>
+
             {/* Filters */}
             <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, padding: '16px 20px', marginBottom: 16 }}>
                 <Group gap="md">
@@ -147,7 +267,10 @@ export default function FleetIndex({ vehicles, stats, statuses, filters }) {
                                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                 onClick={() => router.visit(`/system/fleet/${v.id}`)}
                             >
-                                <Text size="sm" fw={700} style={{ color: '#3B82F6' }}>{v.plate}</Text>
+                                <Group gap={5}>
+                                    <Text size="sm" fw={700} style={{ color: '#3B82F6' }}>{v.plate}</Text>
+                                    {v.gps_lat && <Text size="xs" title="GPS tracked">📡</Text>}
+                                </Group>
                                 <Stack gap={1}>
                                     <Text size="sm" fw={600} style={{ color: textPri }}>{v.make} {v.model_name}</Text>
                                     <Text size="xs" style={{ color: textMut }}>{v.payload_tons ? `${v.payload_tons}t payload` : ''}</Text>

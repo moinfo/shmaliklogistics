@@ -4,7 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569', cardHov: '#132436' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569', cardHov: '#132436' };
 
 export default function DocumentTypesIndex({ types }) {
     const { colorScheme } = useMantineColorScheme();
@@ -85,7 +85,7 @@ export default function DocumentTypesIndex({ types }) {
 
                                 {/* Built-in / Custom badge */}
                                 <Box>
-                                    <Box style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: type.is_builtin ? 'rgba(99,102,241,0.1)' : 'rgba(33,150,243,0.1)', border: `1px solid ${type.is_builtin ? 'rgba(99,102,241,0.3)' : 'rgba(33,150,243,0.3)'}`, borderRadius: 20, padding: '2px 8px' }}>
+                                    <Box style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: type.is_builtin ? 'rgba(99,102,241,0.1)' : 'var(--c-border-subtle)', border: `1px solid ${type.is_builtin ? 'rgba(99,102,241,0.3)' : 'rgba(33,150,243,0.3)'}`, borderRadius: 20, padding: '2px 8px' }}>
                                         <Text size="10px" fw={700} style={{ color: type.is_builtin ? '#818CF8' : '#60A5FA' }}>{type.is_builtin ? 'Built-in' : 'Custom'}</Text>
                                     </Box>
                                 </Box>

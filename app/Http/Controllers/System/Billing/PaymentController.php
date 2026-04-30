@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\System\Billing;
 
 use App\Http\Controllers\Controller;
+use App\Models\CompanySetting;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -44,6 +45,7 @@ class PaymentController extends Controller
             'stats'    => $stats,
             'methods'  => \App\Models\Payment::$methods,
             'filters'  => $request->only(['search', 'method']),
+            'company'  => CompanySetting::first(),
         ]);
     }
 

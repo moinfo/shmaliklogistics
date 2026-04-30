@@ -1,14 +1,17 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Box, Text, Group, Stack, Badge, SimpleGrid } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { printBillingDoc } from '../../../../utils/billingPrint';
+import SendDocModal from '../../../../components/SendDocModal';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
 const fmt = (n) => new Intl.NumberFormat('en-TZ').format(Math.round(Number(n) || 0));
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
-export default function ShowQuote({ quote, statuses }) {
+export default function ShowQuote({ quote, statuses, company }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark     = colorScheme === 'dark';
     const textPri    = isDark ? dk.textPri : '#1E293B';
@@ -17,6 +20,8 @@ export default function ShowQuote({ quote, statuses }) {
     const divider    = isDark ? dk.divider : '#E2E8F0';
     const statusInfo = statuses[quote.status] ?? {};
     const cur        = quote.currency ?? 'TZS';
+
+    const [sendOpen, setSendOpen] = useState(false);
 
     const handleDelete = () => {
         if (confirm(`Delete quote ${quote.document_number}?`)) router.delete(`/system/billing/quotes/${quote.id}`);
@@ -47,6 +52,18 @@ export default function ShowQuote({ quote, statuses }) {
                             </Box>
                         </motion.div>
                     )}
+                    <Box component="button" onClick={() => setSendOpen(true)}
+                        style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#059669,#10B981)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+                        ✉ Send
+                    </Box>
+                    <Box component="button" onClick={() => printBillingDoc(quote, company, 'quote')}
+                        style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+                        🖨 Print
+                    </Box>
+                    <Box component="a" href={`/system/billing/quotes/${quote.id}/pdf`} target="_blank"
+                        style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#065F46,#059669)', color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>
+                        ⬇ Download PDF
+                    </Box>
                     <Box component={Link} href={`/system/billing/quotes/${quote.id}/edit`} style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>Edit</Box>
                     <Box component="button" onClick={handleDelete} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #EF444444', color: '#EF4444', background: 'transparent', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>Delete</Box>
                 </Group>
@@ -127,6 +144,11 @@ export default function ShowQuote({ quote, statuses }) {
             <Group mt="md">
                 <Box component={Link} href="/system/billing/quotes" style={{ color: textSec, textDecoration: 'none', fontSize: 13 }}>← Back to Quotes</Box>
             </Group>
+
+            <SendDocModal
+                doc={quote} docType="quote" company={company}
+                opened={sendOpen} onClose={() => setSendOpen(false)}
+            />
         </DashboardLayout>
     );
 }

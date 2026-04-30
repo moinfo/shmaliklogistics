@@ -4,7 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
 
 const MODULES = [
     { key: 'trips',           label: 'Trips',              actions: ['view', 'create', 'edit', 'delete'] },
@@ -113,7 +113,7 @@ function RoleForm({ role, onClose, isDark, cardBorder }) {
             <Text size="xs" fw={700} style={{ color: textSec, marginBottom: 10, letterSpacing: 0.5, textTransform: 'uppercase' }}>Permissions Matrix</Text>
 
             {/* Admin shortcut */}
-            <Box mb="md" style={{ padding: '10px 14px', background: isDark ? 'rgba(33,150,243,0.08)' : '#EFF6FF', borderRadius: 8, border: '1px solid rgba(33,150,243,0.2)', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Box mb="md" style={{ padding: '10px 14px', background: isDark ? 'var(--c-thead)' : '#EFF6FF', borderRadius: 8, border: '1px solid var(--c-border-input)', display: 'flex', alignItems: 'center', gap: 12 }}>
                 <input type="checkbox" id="perm-all"
                     checked={hasWildcard(data.permissions)}
                     onChange={e => setData('permissions', e.target.checked ? ['*'] : [])} />
@@ -244,7 +244,7 @@ export default function RolesIndex({ roles }) {
                         ) : (
                             <Box style={{ padding: '14px 20px', borderBottom: i < roles.length - 1 ? `1px solid ${divider}` : 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                                 <Group gap="md" align="center" style={{ flex: 1 }}>
-                                    <Box style={{ width: 42, height: 42, borderRadius: 10, background: isDark ? 'rgba(33,150,243,0.15)' : '#EFF6FF', border: '1px solid rgba(33,150,243,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                                    <Box style={{ width: 42, height: 42, borderRadius: 10, background: isDark ? 'var(--c-border-strong)' : '#EFF6FF', border: '1px solid rgba(33,150,243,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
                                         🔑
                                     </Box>
                                     <Box>

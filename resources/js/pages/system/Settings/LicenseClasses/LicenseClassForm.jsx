@@ -3,7 +3,7 @@ import { Box, Text, Group, Stack, TextInput, Textarea, NumberInput, Switch } fro
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', textPri: '#E2E8F0', textSec: '#94A3B8' };
 
 export default function LicenseClassForm({ data, setData, errors, processing, onSubmit, backHref, submitLabel = 'Save' }) {
     const { colorScheme } = useMantineColorScheme();
@@ -94,7 +94,7 @@ export default function LicenseClassForm({ data, setData, errors, processing, on
                 <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, padding: '16px 20px', marginBottom: 16 }}>
                     <Text size="xs" fw={700} style={{ color: textSec, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Badge Preview</Text>
                     <Group gap={10} align="center">
-                        <Box style={{ background: 'rgba(33,150,243,0.12)', border: '1.5px solid rgba(33,150,243,0.4)', borderRadius: 8, padding: '7px 16px', color: '#60A5FA', fontWeight: 800, fontSize: 14, fontFamily: 'monospace', letterSpacing: 0.5 }}>
+                        <Box style={{ background: 'var(--c-border-color)', border: '1.5px solid rgba(33,150,243,0.4)', borderRadius: 8, padding: '7px 16px', color: '#60A5FA', fontWeight: 800, fontSize: 14, fontFamily: 'monospace', letterSpacing: 0.5 }}>
                             {data.code}
                         </Box>
                         {data.name && (

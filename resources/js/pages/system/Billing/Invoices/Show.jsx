@@ -5,12 +5,14 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import DatePicker from '../../../../components/DatePicker';
+import { printBillingDoc } from '../../../../utils/billingPrint';
+import SendDocModal from '../../../../components/SendDocModal';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
 const fmt = (n) => new Intl.NumberFormat('en-TZ').format(Math.round(Number(n) || 0));
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
-export default function ShowInvoice({ invoice, statuses, methods }) {
+export default function ShowInvoice({ invoice, statuses, methods, company }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark     = colorScheme === 'dark';
     const textPri    = isDark ? dk.textPri : '#1E293B';
@@ -28,6 +30,7 @@ export default function ShowInvoice({ invoice, statuses, methods }) {
     const dropdownStyle = { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` };
 
     const [showPayForm, setShowPayForm] = useState(false);
+    const [sendOpen, setSendOpen]       = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
         amount:           invoice.balance_due ?? '',
         payment_date:     new Date().toISOString().slice(0, 10),
@@ -69,6 +72,18 @@ export default function ShowInvoice({ invoice, statuses, methods }) {
                             </Box>
                         </motion.div>
                     )}
+                    <Box component="button" onClick={() => setSendOpen(true)}
+                        style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#059669,#10B981)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+                        ✉ Send
+                    </Box>
+                    <Box component="button" onClick={() => printBillingDoc(invoice, company, 'invoice')}
+                        style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+                        🖨 Print
+                    </Box>
+                    <Box component="a" href={`/system/billing/invoices/${invoice.id}/pdf`} target="_blank"
+                        style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#065F46,#059669)', color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>
+                        ⬇ Download PDF
+                    </Box>
                     <Box component={Link} href={`/system/billing/invoices/${invoice.id}/edit`} style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>Edit</Box>
                     <Box component="button" onClick={handleDelete} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #EF444444', color: '#EF4444', background: 'transparent', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>Delete</Box>
                 </Group>
@@ -201,6 +216,11 @@ export default function ShowInvoice({ invoice, statuses, methods }) {
             <Group mt="md">
                 <Box component={Link} href="/system/billing/invoices" style={{ color: textSec, textDecoration: 'none', fontSize: 13 }}>← Back to Invoices</Box>
             </Group>
+
+            <SendDocModal
+                doc={invoice} docType="invoice" company={company}
+                opened={sendOpen} onClose={() => setSendOpen(false)}
+            />
         </DashboardLayout>
     );
 }

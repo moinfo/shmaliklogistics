@@ -13,6 +13,14 @@ class Client extends Model
     protected $fillable = [
         'name', 'company_name', 'email', 'phone', 'phone_alt',
         'address', 'tin_number', 'vrn_number', 'status', 'notes', 'created_by',
+        'portal_password', 'portal_active', 'last_portal_login',
+    ];
+
+    protected $hidden = ['portal_password'];
+
+    protected $casts = [
+        'portal_active'      => 'boolean',
+        'last_portal_login'  => 'datetime',
     ];
 
     public function billingDocuments()

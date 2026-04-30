@@ -4,6 +4,7 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\Driver;
+use App\Models\Expense;
 use App\Models\Trip;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
@@ -115,9 +116,15 @@ class TripController extends Controller
     {
         $trip->append(['total_costs', 'profit']);
 
+        $expenses = Expense::where('trip_id', $trip->id)
+            ->orderBy('expense_date')
+            ->get();
+
         return Inertia::render('system/Trips/Show', [
-            'trip'     => $trip,
-            'statuses' => Trip::$statuses,
+            'trip'              => $trip,
+            'statuses'          => Trip::$statuses,
+            'expenses'          => $expenses,
+            'expenseCategories' => Expense::$categories,
         ]);
     }
 

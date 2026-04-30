@@ -1,10 +1,10 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { Box, Text, Group, Stack, Badge, SimpleGrid } from '@mantine/core';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Box, Text, Group, Stack, Badge, SimpleGrid, Switch, PasswordInput, Button } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
-import { motion } from 'framer-motion';
+import { useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
 const fmt = (n) => new Intl.NumberFormat('en-TZ').format(Math.round(Number(n) || 0));
 
 function Card({ title, icon, children, isDark }) {
@@ -34,9 +34,15 @@ function Row({ label, value, isDark }) {
     );
 }
 
-export default function ShowClient({ client, stats, statuses }) {
+export default function ShowClient({ client, stats, statuses, portalActive }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
+
+    const portal = useForm({ portal_active: client.portal_active ?? false, portal_password: '' });
+    const savePortal = (e) => {
+        e.preventDefault();
+        portal.patch(`/system/clients/${client.id}/portal`);
+    };
     const textPri = isDark ? dk.textPri : '#1E293B';
     const textSec = isDark ? dk.textSec : '#64748B';
     const cardBorder = isDark ? dk.border : '#E2E8F0';
@@ -113,6 +119,53 @@ export default function ShowClient({ client, stats, statuses }) {
                     <Text size="sm" style={{ color: textSec, whiteSpace: 'pre-wrap' }}>{client.notes}</Text>
                 </Card>
             )}
+
+            {/* Customer Portal Management */}
+            <Card title="Customer Portal Access" icon="🌐" isDark={isDark}>
+                <form onSubmit={savePortal}>
+                    <Stack gap="md">
+                        <Group justify="space-between" style={{ padding: '12px 16px', background: isDark ? '#07111F' : '#F8FAFC', borderRadius: 10, border: `1px solid ${isDark ? 'var(--c-border-color)' : '#E2E8F0'}` }}>
+                            <Box>
+                                <Text fw={600} size="sm" style={{ color: textPri }}>Portal Access Enabled</Text>
+                                <Text size="xs" style={{ color: textSec }}>Client can log in to track shipments and invoices</Text>
+                            </Box>
+                            <Switch checked={portal.data.portal_active} onChange={e => portal.setData('portal_active', e.currentTarget.checked)} />
+                        </Group>
+
+                        {portal.data.portal_active && (
+                            <PasswordInput
+                                label="Set New Password"
+                                placeholder="Leave blank to keep current password"
+                                value={portal.data.portal_password}
+                                onChange={e => portal.setData('portal_password', e.target.value)}
+                                styles={{ label: { color: textSec, marginBottom: 6 }, input: { background: isDark ? '#07111F' : '#fff', border: `1px solid ${isDark ? 'var(--c-border-input)' : '#E2E8F0'}`, color: textPri }, innerInput: { color: textPri } }}
+                            />
+                        )}
+
+                        {client.last_portal_login && (
+                            <Text size="xs" style={{ color: textSec }}>
+                                Last login: {new Date(client.last_portal_login).toLocaleString()}
+                            </Text>
+                        )}
+
+                        <Group gap="sm">
+                            <Button type="submit" loading={portal.processing} style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 8, fontWeight: 700 }}>
+                                Save Portal Settings
+                            </Button>
+                            {client.portal_active && (
+                                <Box
+                                    component="a"
+                                    href="/portal/login"
+                                    target="_blank"
+                                    style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${isDark ? 'rgba(33,150,243,0.3)' : '#BFDBFE'}`, color: '#60A5FA', textDecoration: 'none', fontWeight: 600, fontSize: 13 }}
+                                >
+                                    Open Portal ↗
+                                </Box>
+                            )}
+                        </Group>
+                    </Stack>
+                </form>
+            </Card>
 
             <Group mt="md">
                 <Box component={Link} href="/system/clients" style={{ color: textSec, textDecoration: 'none', fontSize: 13 }}>← Back to Clients</Box>

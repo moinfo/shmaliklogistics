@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\AlertService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -48,6 +49,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->session()->get('success'),
                 'error'   => $request->session()->get('error'),
             ],
+            'alert_count' => fn () => $request->user() ? AlertService::count() : 0,
         ];
     }
 }

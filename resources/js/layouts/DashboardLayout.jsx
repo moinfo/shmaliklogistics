@@ -8,7 +8,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 const navItems = [
     { icon: '📊', label: 'Dashboard', href: '/system/dashboard' },
     { icon: '🚛', label: 'Trips',     href: '/system/trips' },
-    { icon: '🚗', label: 'Fleet',     href: '/system/fleet' },
+    {
+        icon: '🚗', label: 'Fleet', href: '/system/fleet',
+        children: [
+            { icon: '🚗', label: 'All Vehicles',  href: '/system/fleet' },
+            { icon: '⛽', label: 'Fuel Logs',     href: '/system/fleet/fuel-logs' },
+        ],
+    },
     { icon: '👤', label: 'Drivers',   href: '/system/drivers' },
     { icon: '🛂', label: 'Permits',   href: '/system/permits' },
     { icon: '👥', label: 'Clients',   href: '/system/clients' },
@@ -18,7 +24,8 @@ const navItems = [
             { icon: '💬', label: 'Quotes',    href: '/system/billing/quotes' },
             { icon: '📋', label: 'Proforma',  href: '/system/billing/proformas' },
             { icon: '📄', label: 'Invoices',  href: '/system/billing/invoices' },
-            { icon: '💳', label: 'Payments',  href: '/system/billing/payments' },
+            { icon: '💳', label: 'Payments',        href: '/system/billing/payments' },
+            { icon: '📥', label: 'Quote Requests',  href: '/system/billing/quote-requests' },
         ],
     },
     { icon: '💸', label: 'Expenses',    href: '/system/expenses' },
@@ -35,8 +42,18 @@ const navItems = [
             { icon: '🎁',  label: 'Allowances',  href: '/system/hr/allowances' },
             { icon: '🕐',  label: 'Attendance',  href: '/system/hr/attendance' },
             { icon: '📑',  label: 'Salary Slip', href: '/system/hr/salary-slips' },
+            { icon: '⭐',  label: 'Appraisals',  href: '/system/hr/appraisals' },
+            { icon: '🎯',  label: 'Recruitment', href: '/system/hr/recruitment' },
         ],
     },
+    {
+        icon: '🛒', label: 'Procurement', href: '/system/procurement',
+        children: [
+            { icon: '🏭', label: 'Suppliers',       href: '/system/procurement/suppliers' },
+            { icon: '📋', label: 'Purchase Orders', href: '/system/procurement/orders' },
+        ],
+    },
+    { icon: '🏗️', label: 'Inventory', href: '/system/inventory' },
     {
         icon: '📈', label: 'Reports', href: '/system/reports',
         children: [
@@ -57,9 +74,11 @@ const navItems = [
             { icon: '🔗', label: 'Deduction Subscriptions', href: '/system/settings/deduction-subscriptions' },
             { icon: '🏛️', label: 'Staff Bank Details',      href: '/system/settings/bank-details' },
             { icon: '🏢', label: 'Departments',              href: '/system/settings/departments' },
-            { icon: '🔑', label: 'Roles & Permissions',      href: '/system/settings/roles' },
+            { icon: '🔑', label: 'Roles & Permissions', href: '/system/settings/roles' },
+            { icon: '👤', label: 'Users',               href: '/system/settings/users' },
         ],
     },
+    { icon: '🔔', label: 'Notifications', href: '/system/notifications' },
 ];
 
 // Dark layer system: sidebar < header < main < card < hover
@@ -92,7 +111,8 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
     const isDark = colorScheme === 'dark';
     const user = props.auth?.user;
 
-    const flash = props.flash ?? {};
+    const flash       = props.flash ?? {};
+    const alertCount  = props.alert_count ?? 0;
     const [toast, setToast] = useState(null);
     useEffect(() => {
         const msg = flash.success ? { type: 'success', text: flash.success }
@@ -156,6 +176,19 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
                                     </motion.span>
                                 </AnimatePresence>
                             </ActionIcon>
+                        </Tooltip>
+
+                        {/* Notification bell */}
+                        <Tooltip label="Alerts & Notifications" position="bottom">
+                            <Box component={Link} href="/system/notifications"
+                                style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: '50%', background: alertCount > 0 ? 'rgba(239,68,68,0.08)' : (isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9'), border: alertCount > 0 ? '1px solid rgba(239,68,68,0.2)' : (isDark ? `1px solid ${dk.divider}` : '1px solid #E2E8F0'), textDecoration: 'none', flexShrink: 0 }}>
+                                <Text style={{ fontSize: 15, lineHeight: 1 }}>🔔</Text>
+                                {alertCount > 0 && (
+                                    <Box style={{ position: 'absolute', top: -4, right: -4, background: '#EF4444', borderRadius: '50%', minWidth: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid ' + (isDark ? '#07111F' : '#fff') }}>
+                                        <Text style={{ color: '#fff', fontSize: 10, fontWeight: 800, lineHeight: 1, padding: '0 3px' }}>{alertCount > 99 ? '99+' : alertCount}</Text>
+                                    </Box>
+                                )}
+                            </Box>
                         </Tooltip>
 
                         {/* Divider */}

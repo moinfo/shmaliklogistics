@@ -3,6 +3,7 @@ import { Text, Stack } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import DriverForm from './DriverForm';
+import DriverDocumentsCard from './DriverDocumentsCard';
 
 function fmt(d) { return d ? d.slice(0, 10) : ''; }
 
@@ -18,6 +19,7 @@ export default function EditDriver({ driver, statuses, licenseClasses }) {
         national_id: driver.national_id ?? '', address: driver.address ?? '',
         license_number: driver.license_number ?? '', license_classes: driver.license_classes ?? [],
         license_expiry: fmt(driver.license_expiry),
+        visa_expiry: fmt(driver.visa_expiry),
         emergency_contact_name: driver.emergency_contact_name ?? '',
         emergency_contact_phone: driver.emergency_contact_phone ?? '',
         notes: driver.notes ?? '',
@@ -33,6 +35,7 @@ export default function EditDriver({ driver, statuses, licenseClasses }) {
                 <Text size="sm" style={{ color: textSec }}>{driver.name}</Text>
             </Stack>
             <DriverForm data={data} setData={setData} errors={errors} statuses={statuses} licenseClasses={licenseClasses} processing={processing} onSubmit={submit} backHref={`/system/drivers/${driver.id}`} submitLabel="Update Driver" />
+            <DriverDocumentsCard driver={driver} />
         </DashboardLayout>
     );
 }

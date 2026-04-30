@@ -5,7 +5,7 @@ import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import DatePicker from '../../../components/DatePicker';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', textPri: '#E2E8F0', textSec: '#94A3B8' };
 
 export default function ExpenseForm({ expense, categories, currencies, trips, vehicles, submitUrl, method, submitLabel, prefillTrip }) {
     const { colorScheme } = useMantineColorScheme();

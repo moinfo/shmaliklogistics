@@ -1,58 +1,286 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SH Malik Logistics Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> **Full-stack ERP for East & Central African cross-border freight operations**
+> Built by [Moinfotech Company Limited](https://moinfotech.co.tz) · [Makutano Digital Management](https://makutano.co.tz)
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Overview
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+A comprehensive, modular logistics ERP designed specifically for Tanzanian freight and fleet operations. Covers the full business lifecycle — from trip dispatch and border permits, through billing and payroll, to HR and fleet maintenance — with a bilingual (Swahili/English) public website.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Company:** SH Malik Logistics Company Limited  
+**Base:** Buza, Dar es Salaam, Tanzania  
+**Routes:** Dar es Salaam → DRC · Zambia · Malawi · Mozambique
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Tech Stack
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Layer | Technology |
+|-------|-----------|
+| Backend | Laravel 13.7 (PHP 8.3) |
+| Frontend | React 18 + Inertia.js |
+| UI Components | Mantine v7 |
+| Animations | Framer Motion |
+| Database | SQLite (dev) — MySQL/PostgreSQL ready |
+| Build Tool | Vite 6 |
+| Node | v24.13 |
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+---
 
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Quick Start
 
 ```bash
-composer require laravel/boost --dev
+# 1. Install dependencies
+composer install
+npm install
 
-php artisan boost:install
+# 2. Environment
+cp .env.example .env
+php artisan key:generate
+
+# 3. Database
+php artisan migrate
+php artisan db:seed          # loads full demo data (Jan–Apr 2026)
+
+# 4. Storage link
+php artisan storage:link
+
+# 5. Development server
+composer run dev             # starts Laravel + Vite concurrently
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Default Login
 
-## Contributing
+| Field | Value |
+|-------|-------|
+| Email | `admin@shmalik.co.tz` |
+| Password | `password` |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## Module Status
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Group 1 — Operations & Trips (Custom)
 
-## Security Vulnerabilities
+| Module | Status | Notes |
+|--------|--------|-------|
+| Dashboard | ✅ Live | Real-time KPIs, fleet status, recent trips |
+| Trip Management | ✅ Complete | Full CRUD, status flow, driver/vehicle assignment |
+| Cargo & Load Tracking | ✅ Complete | Clickable status progression, linked to trips |
+| Border & Permit Tracking | ✅ Complete | Expiry alerts (7 / 30 days) |
+| Route Profitability Report | ✅ Complete | Revenue vs costs per route |
+| Customer Portal | ❌ Planned | Phase 4 — client self-service login |
+| GPS Integration | ❌ Planned | Phase 4 — real-time fleet map |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Group 2 — Finance
 
-## License
+| Module | Status | Notes |
+|--------|--------|-------|
+| Quotes | ✅ Complete | Auto-numbered QTE-YYYY-NNNN |
+| Proforma Invoices | ✅ Complete | Convert from quote in one click |
+| Tax Invoices | ✅ Complete | Record payments, balance tracking |
+| Payments | ✅ Complete | Payment history, bulk print report |
+| Expenses | ✅ Complete | Per-trip expense tracking |
+| Documents | ✅ Complete | Upload, download, expiry tracking |
+| Financial Summary Report | ✅ Complete | Revenue, expenses, profit by period |
+| Print / PDF Export | ✅ Complete | All billing docs — company logo + A4 layout |
+| Send via Email / WhatsApp | ✅ Complete | Compose & send directly from document |
+| Full Accounting (GL/TB) | ❌ Planned | General Ledger, Trial Balance, Balance Sheet |
+| Digital Signatures | ❌ Planned | Contract e-signing |
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Group 3 — Fleet & Drivers
+
+| Module | Status | Notes |
+|--------|--------|-------|
+| Vehicle Management | ✅ Complete | Status, assignment, document tracking |
+| Driver Management | ✅ Complete | License, assignment, status |
+| Fleet Utilization Report | ✅ Complete | Active vs idle, mileage analysis |
+| Maintenance / Service Records | ✅ Complete | Service history, cost tracking |
+| Clients (CRM) | ✅ Complete | Company, TIN, contact details |
+
+### Group 4 — Human Resources
+
+| Module | Status | Notes |
+|--------|--------|-------|
+| Employee Management | ✅ Complete | Full profile, bank details, TIN/NSSF/NHIF |
+| Leave Management | ✅ Complete | Apply, approve, reject |
+| Payroll | ✅ Complete | Tanzania statutory: PAYE, NSSF, NHIF, SDL, WCF, HESLB |
+| Salary Slips | ✅ Complete | Printable payslips per employee |
+| Allowances | ✅ Complete | Housing, transport, custom |
+| Advances | ✅ Complete | Request, approve, repayment tracking |
+| Loans | ✅ Complete | Approve, monthly deduction |
+| Attendance | ✅ Complete | Manual entry + ZKTeco biometric device sync |
+| Recruitment | ❌ Planned | CV management, interview tracking |
+| Appraisals | ❌ Planned | Driver/staff performance KPIs |
+
+### Group 5 — Supply Chain
+
+| Module | Status | Notes |
+|--------|--------|-------|
+| Maintenance | ✅ Complete | (see Fleet section above) |
+| Inventory | ❌ Planned | Spare parts stock management |
+| Purchase / Procurement | ❌ Planned | Supplier orders, diesel, spare parts |
+| Quality / Vehicle Inspection | ❌ Planned | Pre-trip safety checklists |
+
+### Group 6 — Marketing
+
+| Module | Status | Notes |
+|--------|--------|-------|
+| Email (per document) | ✅ Complete | Send any billing doc via email |
+| WhatsApp (per document) | ✅ Complete | Pre-composed WhatsApp message |
+| Bulk Email Campaigns | ❌ Planned | Phase 4 |
+| SMS Marketing | ❌ Planned | Phase 4 |
+| Social Marketing | ❌ Planned | Phase 4 |
+| Surveys | ❌ Planned | Phase 4 |
+
+### Group 7 — Settings
+
+| Module | Status | Notes |
+|--------|--------|-------|
+| Company Settings | ✅ Complete | Name, logo, address, TIN |
+| Roles & Permissions | ✅ Complete | Module-level permission matrix |
+| Departments | ✅ Complete | Employee grouping |
+| Payroll Settings | ✅ Complete | Configure statutory rates & bands |
+| License Classes | ✅ Complete | Driver license categories |
+| Vehicle Document Types | ✅ Complete | Custom document categories |
+| Deduction Types | ✅ Complete | Configurable deductions |
+| Bank Details | ✅ Complete | Employee bank accounts |
+
+### Group 8 — Productivity (Phase 4)
+
+| Module | Status |
+|--------|--------|
+| Internal Chat (Discuss) | ❌ Planned |
+| AI Assistant | ❌ Planned |
+| GPS / IoT Integration | ❌ Planned |
+| Knowledge Base | ❌ Planned |
+| VoIP | ❌ Planned |
+
+---
+
+## Project Stats
+
+| Metric | Count |
+|--------|-------|
+| Database migrations | 39 |
+| Eloquent models | 31 |
+| Controllers | 37 |
+| React pages / components | 107 |
+| API routes (system) | 185 |
+| Demo data rows (seeded) | ~3,500+ |
+
+---
+
+## Architecture
+
+```
+web/
+├── app/
+│   ├── Http/Controllers/
+│   │   ├── Auth/
+│   │   ├── Settings/
+│   │   └── System/
+│   │       ├── Billing/          # Quotes, Proformas, Invoices, Payments
+│   │       └── HR/               # Employees, Leave, Payroll, Attendance...
+│   ├── Mail/                     # Mailable classes
+│   └── Models/
+├── database/
+│   ├── migrations/               # 39 migrations
+│   └── seeders/                  # DatabaseSeeder — full demo data
+├── resources/
+│   ├── js/
+│   │   ├── components/           # Shared UI components
+│   │   ├── contexts/             # LanguageContext (EN/SW)
+│   │   ├── layouts/              # DashboardLayout, WebsiteLayout
+│   │   ├── pages/
+│   │   │   ├── system/           # All ERP pages
+│   │   │   └── website/          # Public website (Home, About, Services, Contact)
+│   │   └── utils/                # billingPrint.js, helpers
+│   └── views/
+│       └── mail/                 # HTML email templates
+└── routes/
+    └── web.php                   # All routes (auth + system + public website)
+```
+
+---
+
+## Demo Data
+
+The seeder (`php artisan db:seed`) loads **realistic Tanzanian data** from Jan 1 – Apr 30, 2026:
+
+- 1 admin user, 12 vehicles, 12 drivers, 10 clients
+- 33 trips across 7 routes (DSM → LBV, LUN, LLW, MPM, NBI, KLA, BYK)
+- 28 permits, 50 expenses, 26 service records
+- 35 billing documents (quotes, proformas, invoices) with 112 line items
+- 15 employees — full payroll: PAYE, NSSF, NHIF, SDL, WCF, HESLB
+- 4 payroll runs → 60 salary slips
+- 2,428 attendance logs (all working days)
+- 30 cargo records, 6 advances, 4 loans
+
+---
+
+## Mail Configuration
+
+Emails default to `log` driver (written to `storage/logs/laravel.log`). To send real emails, update `.env`:
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailgun.org
+MAIL_PORT=587
+MAIL_USERNAME=your_username
+MAIL_PASSWORD=your_password
+MAIL_FROM_ADDRESS=info@shmalik.co.tz
+MAIL_FROM_NAME="SH Malik Logistics"
+```
+
+---
+
+## Public Website
+
+A bilingual (English / Swahili) marketing website at `/`:
+
+- **Home** — hero, features, routes, stats
+- **Services** — freight types, service descriptions
+- **About** — company story, milestones, team
+- **Contact** — contact form, location, FAQ
+
+Language toggle persists in `localStorage`.
+
+---
+
+## Remaining Features
+
+See **[ROADMAP.md](./ROADMAP.md)** for a detailed specification of all planned modules with implementation notes, database schemas, and priority order.
+
+---
+
+## Development
+
+```bash
+# Run all together (recommended)
+composer run dev
+
+# Separately
+php artisan serve          # http://localhost:8000
+npm run dev                # Vite HMR
+
+# Build for production
+npm run build
+php artisan optimize
+```
+
+---
+
+## Built By
+
+**Moinfotech Company Limited** — Kibaha, Pwani, Tanzania  
+Web: [moinfotech.co.tz](https://moinfotech.co.tz) · Email: info@moinfo.co.tz
+
+**Makutano Digital Management**  
+Web: [makutano.co.tz](https://makutano.co.tz) · Email: info@makutano.co.tz
+
+---
+
+*Version 1.0 · April 2026*

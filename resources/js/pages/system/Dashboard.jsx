@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import DashboardLayout from '../../layouts/DashboardLayout';
 
 const dk = {
-    card: '#0F1E32', cardHov: '#132436', border: 'rgba(33,150,243,0.12)',
+    card: '#0F1E32', cardHov: '#132436', border: 'var(--c-border-color)',
     divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569',
 };
 
@@ -23,11 +23,42 @@ const quickActions = [
     { icon: '👤', label: 'New Driver',  desc: 'Register driver',    accent: '#6D28D9', href: '/system/drivers/create' },
 ];
 
+function RevenueChart({ data, isDark }) {
+    const textSec = isDark ? dk.textSec : '#64748B';
+    const textMut = isDark ? dk.textMut : '#94A3B8';
+    const maxVal  = Math.max(...data.map(d => Math.max(d.revenue, d.expenses)), 1);
+    const H = 100, W = 560, barW = 26, gap = 10;
+    const totalW = data.length * (barW * 2 + gap + 8);
+
+    return (
+        <Box style={{ overflowX: 'auto' }}>
+            <svg width="100%" viewBox={`0 0 ${totalW} ${H + 28}`} preserveAspectRatio="none" style={{ minWidth: 320 }}>
+                {data.map((d, i) => {
+                    const x = i * (barW * 2 + gap + 8);
+                    const rH = Math.max((d.revenue / maxVal) * H, 2);
+                    const eH = Math.max((d.expenses / maxVal) * H, 2);
+                    return (
+                        <g key={i}>
+                            <rect x={x} y={H - rH} width={barW} height={rH} rx={3} fill="#3B82F6" opacity={0.85} />
+                            <rect x={x + barW + 3} y={H - eH} width={barW} height={eH} rx={3} fill="#EF4444" opacity={0.75} />
+                            <text x={x + barW} y={H + 14} textAnchor="middle" fontSize={9} fill={textMut}>{d.month}</text>
+                        </g>
+                    );
+                })}
+            </svg>
+            <Group gap={16} mt={4}>
+                <Group gap={5}><Box style={{ width: 10, height: 10, borderRadius: 2, background: '#3B82F6' }} /><Text size="xs" style={{ color: textSec }}>Revenue</Text></Group>
+                <Group gap={5}><Box style={{ width: 10, height: 10, borderRadius: 2, background: '#EF4444' }} /><Text size="xs" style={{ color: textSec }}>Expenses</Text></Group>
+            </Group>
+        </Box>
+    );
+}
+
 export default function Dashboard() {
     const { props } = usePage();
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
-    const { stats = {}, recentTrips = [], fleetStatus = [] } = props;
+    const { stats = {}, recentTrips = [], fleetStatus = [], alerts = [], monthlyTrend = [], expenseByCategory = [] } = props;
 
     const hour = new Date().getHours();
     const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
@@ -171,7 +202,7 @@ export default function Dashboard() {
                             </Group>
                             <Box component={Link} href="/system/trips" style={{ textDecoration: 'none' }}>
                                 <Badge color="blue" variant={isDark ? 'filled' : 'light'} size="sm" radius="xl"
-                                    style={isDark ? { background: 'rgba(33,150,243,0.2)', color: '#60A5FA', border: '1px solid rgba(33,150,243,0.3)', cursor: 'pointer' } : { cursor: 'pointer' }}>
+                                    style={isDark ? { background: 'var(--c-border-input)', color: '#60A5FA', border: '1px solid rgba(33,150,243,0.3)', cursor: 'pointer' } : { cursor: 'pointer' }}>
                                     View all →
                                 </Badge>
                             </Box>
@@ -223,7 +254,7 @@ export default function Dashboard() {
                             </Group>
                             <Box component={Link} href="/system/fleet" style={{ textDecoration: 'none' }}>
                                 <Badge color="blue" variant={isDark ? 'filled' : 'light'} size="sm" radius="xl"
-                                    style={isDark ? { background: 'rgba(33,150,243,0.2)', color: '#60A5FA', border: '1px solid rgba(33,150,243,0.3)', cursor: 'pointer' } : { cursor: 'pointer' }}>
+                                    style={isDark ? { background: 'var(--c-border-input)', color: '#60A5FA', border: '1px solid rgba(33,150,243,0.3)', cursor: 'pointer' } : { cursor: 'pointer' }}>
                                     {stats.fleet_total ?? 0} vehicles →
                                 </Badge>
                             </Box>
@@ -262,6 +293,112 @@ export default function Dashboard() {
                     </Box>
                 </motion.div>
             </SimpleGrid>
+
+            {/* Alerts widget */}
+            {alerts.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}>
+                    <Box mt="xl" style={{ background: cardBg, border: cardBorder, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow }}>
+                        <Group style={{ padding: '16px 22px', borderBottom: divider }} justify="space-between">
+                            <Group gap="sm">
+                                <Text style={{ fontSize: '1.1rem' }}>🔔</Text>
+                                <Text fw={700} size="sm" style={{ color: textPri }}>Active Alerts</Text>
+                                <Box style={{ background: '#EF444420', border: '1px solid #EF444440', borderRadius: 20, padding: '1px 8px' }}>
+                                    <Text size="xs" fw={700} style={{ color: '#EF4444' }}>{alerts.length}</Text>
+                                </Box>
+                            </Group>
+                            <Box component={Link} href="/system/notifications" style={{ textDecoration: 'none', color: '#60A5FA', fontSize: 13, fontWeight: 600 }}>View all →</Box>
+                        </Group>
+                        <Stack gap={0}>
+                            {alerts.map((a, i) => {
+                                const daysLabel = a.days < 0 ? `${Math.abs(a.days)}d overdue` : a.days === 0 ? 'Today' : `${a.days}d left`;
+                                return (
+                                    <Box key={i} component={Link} href={a.href}
+                                        style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 22px', borderBottom: i < alerts.length - 1 ? divider : 'none', textDecoration: 'none', transition: 'background 0.12s' }}
+                                        onMouseEnter={e => e.currentTarget.style.background = rowHovBg}
+                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                        <Box style={{ width: 30, height: 30, borderRadius: 8, background: a.color + '20', border: `1px solid ${a.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.9rem' }}>{a.icon}</Box>
+                                        <Box style={{ flex: 1 }}>
+                                            <Text size="sm" fw={600} style={{ color: textPri }}>{a.title}</Text>
+                                            <Text size="xs" style={{ color: textSec }}>{a.subtitle}</Text>
+                                        </Box>
+                                        <Box style={{ background: a.color + '20', border: `1px solid ${a.color}40`, borderRadius: 20, padding: '2px 10px', flexShrink: 0 }}>
+                                            <Text size="xs" fw={700} style={{ color: a.color }}>{daysLabel}</Text>
+                                        </Box>
+                                    </Box>
+                                );
+                            })}
+                        </Stack>
+                    </Box>
+                </motion.div>
+            )}
+            {/* Monthly Revenue vs Expenses Chart */}
+            {monthlyTrend.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+                    <Box mt="xl" style={{ background: cardBg, border: cardBorder, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow }}>
+                        <Group style={{ padding: '16px 22px', borderBottom: divider }} justify="space-between">
+                            <Group gap="sm">
+                                <Text style={{ fontSize: '1.1rem' }}>📊</Text>
+                                <Text fw={700} size="sm" style={{ color: textPri }}>Revenue vs Expenses — Last 12 Months</Text>
+                            </Group>
+                            {(() => {
+                                const totalRev = monthlyTrend.reduce((s, d) => s + d.revenue, 0);
+                                const totalExp = monthlyTrend.reduce((s, d) => s + d.expenses, 0);
+                                const profit   = totalRev - totalExp;
+                                return (
+                                    <Group gap={12}>
+                                        <Text size="xs" style={{ color: textMut }}>Rev: <strong style={{ color: '#3B82F6' }}>TZS {fmt(totalRev)}</strong></Text>
+                                        <Text size="xs" style={{ color: textMut }}>Exp: <strong style={{ color: '#EF4444' }}>TZS {fmt(totalExp)}</strong></Text>
+                                        <Text size="xs" style={{ color: textMut }}>Profit: <strong style={{ color: profit >= 0 ? '#22C55E' : '#EF4444' }}>TZS {fmt(profit)}</strong></Text>
+                                    </Group>
+                                );
+                            })()}
+                        </Group>
+                        <Box style={{ padding: '16px 22px' }}>
+                            <RevenueChart data={monthlyTrend} isDark={isDark} />
+                        </Box>
+                    </Box>
+                </motion.div>
+            )}
+
+            {/* Expense Breakdown (current month) */}
+            {expenseByCategory.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}>
+                    <Box mt="xl" style={{ background: cardBg, border: cardBorder, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow }}>
+                        <Group style={{ padding: '16px 22px', borderBottom: divider }} justify="space-between">
+                            <Group gap="sm">
+                                <Text style={{ fontSize: '1.1rem' }}>💸</Text>
+                                <Text fw={700} size="sm" style={{ color: textPri }}>This Month's Expenses by Category</Text>
+                            </Group>
+                            <Box component={Link} href="/system/expenses" style={{ textDecoration: 'none', color: '#60A5FA', fontSize: 13, fontWeight: 600 }}>View all →</Box>
+                        </Group>
+                        <Box style={{ padding: '16px 22px' }}>
+                            {(() => {
+                                const total = expenseByCategory.reduce((s, e) => s + Number(e.total), 0);
+                                const CATS  = { fuel: ['⛽','#3B82F6'], tyre: ['🔄','#8B5CF6'], repair: ['🔧','#F59E0B'], driver_salary: ['👤','#10B981'], accommodation: ['🏨','#06B6D4'], toll: ['🛣️','#F97316'], port: ['🚢','#6366F1'], permit_fee: ['🛂','#84CC16'], communication: ['📱','#EC4899'], office: ['🏢','#64748B'], other: ['📦','#94A3B8'] };
+                                return (
+                                    <Stack gap={8}>
+                                        {expenseByCategory.slice(0, 6).map(e => {
+                                            const pct = total > 0 ? Math.round(Number(e.total) / total * 100) : 0;
+                                            const [icon, color] = CATS[e.category] ?? ['📦', '#94A3B8'];
+                                            return (
+                                                <Box key={e.category}>
+                                                    <Group justify="space-between" mb={3}>
+                                                        <Group gap={6}><Text size="xs">{icon}</Text><Text size="xs" style={{ color: textSec }}>{e.category?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</Text></Group>
+                                                        <Group gap={8}><Text size="xs" fw={700} style={{ color: textPri }}>TZS {fmt(e.total)}</Text><Text size="xs" style={{ color: textMut }}>{pct}%</Text></Group>
+                                                    </Group>
+                                                    <Box style={{ height: 5, borderRadius: 3, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9' }}>
+                                                        <Box style={{ height: 5, borderRadius: 3, width: `${pct}%`, background: color, transition: 'width 0.6s ease' }} />
+                                                    </Box>
+                                                </Box>
+                                            );
+                                        })}
+                                    </Stack>
+                                );
+                            })()}
+                        </Box>
+                    </Box>
+                </motion.div>
+            )}
         </DashboardLayout>
     );
 }

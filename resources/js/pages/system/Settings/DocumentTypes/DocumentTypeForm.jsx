@@ -3,7 +3,7 @@ import { Box, Text, Group, Stack, TextInput, NumberInput, Switch } from '@mantin
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', textPri: '#E2E8F0', textSec: '#94A3B8' };
 
 export default function DocumentTypeForm({ data, setData, errors, processing, onSubmit, backHref, submitLabel = 'Save', isBuiltin = false }) {
     const { colorScheme } = useMantineColorScheme();

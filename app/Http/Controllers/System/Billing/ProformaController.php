@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\System\Billing;
 
 use App\Http\Controllers\Controller;
+use App\Mail\BillingDocumentMail;
 use App\Models\BillingDocument;
 use App\Models\Client;
+use App\Models\CompanySetting;
 use App\Models\Trip;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class ProformaController extends Controller
@@ -82,6 +86,7 @@ class ProformaController extends Controller
         return Inertia::render('system/Billing/Proformas/Show', [
             'proforma' => $proforma,
             'statuses' => BillingDocument::$proformaStatuses,
+            'company'  => CompanySetting::first(),
         ]);
     }
 
@@ -115,6 +120,29 @@ class ProformaController extends Controller
     {
         $proforma->delete();
         return redirect()->route('system.billing.proformas.index')->with('success', "Proforma deleted.");
+    }
+
+    public function send(Request $request, BillingDocument $proforma)
+    {
+        $data = $request->validate([
+            'to'      => 'required|email',
+            'subject' => 'required|string|max:255',
+            'message' => 'nullable|string|max:5000',
+        ]);
+
+        $proforma->load(['client', 'trip', 'items']);
+        $proforma->append(['amount_paid', 'balance_due']);
+
+        Mail::to($data['to'])->send(
+            new BillingDocumentMail(
+                document:      $proforma,
+                company:       CompanySetting::first(),
+                customMessage: $data['message'] ?? '',
+                emailSubject:  $data['subject'],
+            )
+        );
+
+        return back()->with('success', "Proforma {$proforma->document_number} sent to {$data['to']}.");
     }
 
     public function convertToInvoice(BillingDocument $proforma)
@@ -196,6 +224,18 @@ class ProformaController extends Controller
                 'sort_order'  => $i,
             ]);
         }
+    }
+
+    public function download(BillingDocument $proforma)
+    {
+        $proforma->load('client', 'trip', 'items');
+        $company  = CompanySetting::get();
+        $statuses = BillingDocument::$proformaStatuses;
+
+        $pdf = Pdf::loadView('pdf.billing-document', ['doc' => $proforma, 'company' => $company, 'statuses' => $statuses])
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download("{$proforma->document_number}.pdf");
     }
 
     private function recalculate(BillingDocument $doc): void

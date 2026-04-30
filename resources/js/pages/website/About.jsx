@@ -196,7 +196,8 @@ export default function About() {
                                     <HoverCard style={{ height: '100%' }}>
                                         <Box style={{ ...glass.brand, borderRadius: 20, padding: 28, textAlign: 'center', height: '100%' }}>
                                             <Text size="3rem" mb="md">{t.icon}</Text>
-                                            <Text fw={800} size="lg" c="brand.8" mb={10}>{t.role}</Text>
+                                            <Text fw={800} size="lg" c="brand.8" mb={4}>{t.name || t.role}</Text>
+                                            <Text fw={600} size="xs" c="brand.5" mb={10} tt="uppercase" style={{ letterSpacing: 1 }}>{t.name ? t.role : ''}</Text>
                                             <Text c="dimmed" size="sm" lh={1.7}>{t.desc}</Text>
                                         </Box>
                                     </HoverCard>

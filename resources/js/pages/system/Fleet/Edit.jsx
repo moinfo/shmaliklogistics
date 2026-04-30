@@ -6,14 +6,14 @@ import VehicleForm from './VehicleForm';
 
 function fmt(d) { return d ? d.slice(0, 10) : ''; }
 
-export default function EditVehicle({ vehicle, statuses, types }) {
+export default function EditVehicle({ vehicle, statuses, types, drivers }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const textPri = isDark ? '#E2E8F0' : '#1E293B';
     const textSec = isDark ? '#94A3B8' : '#64748B';
 
     const { data, setData, put, processing, errors } = useForm({
-        plate: vehicle.plate, status: vehicle.status,
+        plate: vehicle.plate, status: vehicle.status, driver_id: vehicle.driver_id ?? null,
         make: vehicle.make, model_name: vehicle.model_name,
         year: vehicle.year, type: vehicle.type, color: vehicle.color ?? '',
         payload_tons: vehicle.payload_tons ?? '', mileage_km: vehicle.mileage_km,
@@ -33,7 +33,7 @@ export default function EditVehicle({ vehicle, statuses, types }) {
                 <Text fw={800} size="xl" style={{ color: textPri }}>Edit Vehicle</Text>
                 <Text size="sm" style={{ color: textSec }}>{vehicle.plate} — {vehicle.make} {vehicle.model_name}</Text>
             </Stack>
-            <VehicleForm data={data} setData={setData} errors={errors} statuses={statuses} types={types} processing={processing} onSubmit={submit} backHref={`/system/fleet/${vehicle.id}`} submitLabel="Update Vehicle" />
+            <VehicleForm data={data} setData={setData} errors={errors} statuses={statuses} types={types} drivers={drivers} processing={processing} onSubmit={submit} backHref={`/system/fleet/${vehicle.id}`} submitLabel="Update Vehicle" />
         </DashboardLayout>
     );
 }

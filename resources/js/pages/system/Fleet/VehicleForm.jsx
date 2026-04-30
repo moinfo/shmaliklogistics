@@ -20,7 +20,7 @@ function Section({ title, children, isDark }) {
     );
 }
 
-export default function VehicleForm({ data, setData, errors, statuses, types, processing, onSubmit, backHref, submitLabel = 'Save Vehicle' }) {
+export default function VehicleForm({ data, setData, errors, statuses, types, drivers = [], processing, onSubmit, backHref, submitLabel = 'Save Vehicle' }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
 
@@ -50,6 +50,17 @@ export default function VehicleForm({ data, setData, errors, statuses, types, pr
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <TextInput label="Plate Number" placeholder="TZA-221-A" required value={data.plate} onChange={e => setData('plate', e.target.value.toUpperCase())} error={errors.plate} styles={inputStyles} />
                     <Select label="Status" required value={data.status} onChange={v => setData('status', v)} data={Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))} error={errors.status} styles={{ ...inputStyles, dropdown: dropdownStyle }} />
+                    <Select
+                        label="Assigned Driver"
+                        placeholder="Select driver (optional)"
+                        value={data.driver_id ? String(data.driver_id) : null}
+                        onChange={v => setData('driver_id', v ? Number(v) : null)}
+                        clearable
+                        data={drivers.map(d => ({ value: String(d.id), label: `${d.name}  ·  ${d.phone}` }))}
+                        error={errors.driver_id}
+                        styles={{ ...inputStyles, dropdown: dropdownStyle }}
+                        searchable
+                    />
                     <TextInput label="Make (Brand)" placeholder="Mercedes-Benz" required value={data.make} onChange={e => setData('make', e.target.value)} error={errors.make} styles={inputStyles} />
                     <TextInput label="Model" placeholder="Actros 2645" required value={data.model_name} onChange={e => setData('model_name', e.target.value)} error={errors.model_name} styles={inputStyles} />
                     <Select label="Vehicle Type" required value={data.type} onChange={v => setData('type', v)} data={types.map(t => ({ value: t, label: t }))} error={errors.type} styles={{ ...inputStyles, dropdown: dropdownStyle }} />

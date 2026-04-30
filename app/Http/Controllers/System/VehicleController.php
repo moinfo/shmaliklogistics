@@ -4,6 +4,7 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
+use App\Models\Driver;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -26,7 +27,7 @@ class VehicleController extends Controller
             });
         }
 
-        $vehicles = $query->paginate(15)->withQueryString();
+        $vehicles = $query->with('driver')->paginate(15)->withQueryString();
 
         $stats = [
             'total'       => Vehicle::count(),
@@ -54,6 +55,7 @@ class VehicleController extends Controller
         return Inertia::render('system/Fleet/Create', [
             'statuses' => Vehicle::$statuses,
             'types'    => Vehicle::$types,
+            'drivers'  => Driver::whereIn('status', ['active', 'idle'])->orderBy('name')->get(['id', 'name', 'phone']),
         ]);
     }
 
@@ -62,6 +64,7 @@ class VehicleController extends Controller
         $data = $request->validate([
             'plate'               => 'required|string|max:20|unique:vehicles,plate',
             'status'              => 'required|in:' . implode(',', array_keys(Vehicle::$statuses)),
+            'driver_id'           => 'nullable|exists:drivers,id',
             'make'                => 'required|string|max:60',
             'model_name'          => 'required|string|max:60',
             'year'                => 'required|integer|min:1990|max:' . (now()->year + 1),
@@ -88,6 +91,8 @@ class VehicleController extends Controller
 
     public function show(Vehicle $vehicle)
     {
+        $vehicle->load('driver');
+
         $trips = \App\Models\Trip::where('vehicle_plate', $vehicle->plate)
             ->latest('departure_date')
             ->limit(10)
@@ -106,6 +111,7 @@ class VehicleController extends Controller
             'vehicle'  => $vehicle,
             'statuses' => Vehicle::$statuses,
             'types'    => Vehicle::$types,
+            'drivers'  => Driver::orderBy('name')->get(['id', 'name', 'phone']),
         ]);
     }
 
@@ -114,6 +120,7 @@ class VehicleController extends Controller
         $data = $request->validate([
             'plate'               => 'required|string|max:20|unique:vehicles,plate,' . $vehicle->id,
             'status'              => 'required|in:' . implode(',', array_keys(Vehicle::$statuses)),
+            'driver_id'           => 'nullable|exists:drivers,id',
             'make'                => 'required|string|max:60',
             'model_name'          => 'required|string|max:60',
             'year'                => 'required|integer|min:1990|max:' . (now()->year + 1),

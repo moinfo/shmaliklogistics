@@ -11,7 +11,7 @@ class Vehicle extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'plate', 'status', 'make', 'model_name', 'year', 'type', 'color',
+        'plate', 'status', 'driver_id', 'make', 'model_name', 'year', 'type', 'color',
         'payload_tons', 'mileage_km',
         'insurance_expiry', 'road_licence_expiry', 'fitness_expiry', 'next_service_date',
         'owner_name', 'notes', 'created_by',
@@ -24,6 +24,11 @@ class Vehicle extends Model
         'next_service_date'   => 'date',
         'payload_tons'        => 'decimal:2',
     ];
+
+    public function driver()
+    {
+        return $this->belongsTo(Driver::class);
+    }
 
     public function creator()
     {

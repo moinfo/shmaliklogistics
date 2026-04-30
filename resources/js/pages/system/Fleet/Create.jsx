@@ -4,14 +4,14 @@ import { useMantineColorScheme } from '@mantine/core';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import VehicleForm from './VehicleForm';
 
-export default function CreateVehicle({ statuses, types }) {
+export default function CreateVehicle({ statuses, types, drivers }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const textPri = isDark ? '#E2E8F0' : '#1E293B';
     const textSec = isDark ? '#94A3B8' : '#64748B';
 
     const { data, setData, post, processing, errors } = useForm({
-        plate: '', status: 'active', make: '', model_name: '', year: new Date().getFullYear(),
+        plate: '', status: 'active', driver_id: null, make: '', model_name: '', year: new Date().getFullYear(),
         type: '', color: '', payload_tons: '', mileage_km: 0,
         insurance_expiry: '', road_licence_expiry: '', fitness_expiry: '', next_service_date: '',
         owner_name: '', notes: '',
@@ -26,7 +26,7 @@ export default function CreateVehicle({ statuses, types }) {
                 <Text fw={800} size="xl" style={{ color: textPri }}>Add Vehicle</Text>
                 <Text size="sm" style={{ color: textSec }}>Register a new vehicle in the fleet</Text>
             </Stack>
-            <VehicleForm data={data} setData={setData} errors={errors} statuses={statuses} types={types} processing={processing} onSubmit={submit} backHref="/system/fleet" submitLabel="Register Vehicle" />
+            <VehicleForm data={data} setData={setData} errors={errors} statuses={statuses} types={types} drivers={drivers} processing={processing} onSubmit={submit} backHref="/system/fleet" submitLabel="Register Vehicle" />
         </DashboardLayout>
     );
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { AppShell, Group, Text, Box, Stack, Anchor, Tooltip, ActionIcon, Burger } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useMantineColorScheme } from '@mantine/core';
@@ -6,14 +7,57 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const navItems = [
     { icon: '📊', label: 'Dashboard', href: '/system/dashboard' },
-    { icon: '🚛', label: 'Trips', href: '/system/trips' },
-    { icon: '🚗', label: 'Fleet', href: '/system/fleet' },
-    { icon: '👤', label: 'Drivers', href: '/system/drivers' },
-    { icon: '🛂', label: 'Permits', href: '/system/permits', soon: true },
+    { icon: '🚛', label: 'Trips',     href: '/system/trips' },
+    { icon: '🚗', label: 'Fleet',     href: '/system/fleet' },
+    { icon: '👤', label: 'Drivers',   href: '/system/drivers' },
+    { icon: '🛂', label: 'Permits',   href: '/system/permits' },
+    { icon: '👥', label: 'Clients',   href: '/system/clients' },
+    {
+        icon: '🧾', label: 'Billing', href: '/system/billing',
+        children: [
+            { icon: '💬', label: 'Quotes',    href: '/system/billing/quotes' },
+            { icon: '📋', label: 'Proforma',  href: '/system/billing/proformas' },
+            { icon: '📄', label: 'Invoices',  href: '/system/billing/invoices' },
+            { icon: '💳', label: 'Payments',  href: '/system/billing/payments' },
+        ],
+    },
+    { icon: '💸', label: 'Expenses',    href: '/system/expenses' },
+    { icon: '🔧', label: 'Maintenance', href: '/system/maintenance' },
+    { icon: '📁', label: 'Documents',   href: '/system/documents' },
+    {
+        icon: '👥', label: 'HR', href: '/system/hr',
+        children: [
+            { icon: '🧑‍💼', label: 'Employees',  href: '/system/hr/employees' },
+            { icon: '🏖️',  label: 'Leave',      href: '/system/hr/leave' },
+            { icon: '💰',  label: 'Payroll',    href: '/system/hr/payroll' },
+            { icon: '💵',  label: 'Advances',   href: '/system/hr/advances' },
+            { icon: '🏦',  label: 'Loans',      href: '/system/hr/loans' },
+            { icon: '🎁',  label: 'Allowances',  href: '/system/hr/allowances' },
+            { icon: '🕐',  label: 'Attendance',  href: '/system/hr/attendance' },
+            { icon: '📑',  label: 'Salary Slip', href: '/system/hr/salary-slips' },
+        ],
+    },
+    {
+        icon: '📈', label: 'Reports', href: '/system/reports',
+        children: [
+            { icon: '📊', label: 'Route Profitability', href: '/system/reports/route-profitability' },
+            { icon: '💹', label: 'Financial Summary',   href: '/system/reports/financial-summary' },
+            { icon: '🚛', label: 'Fleet Utilization',   href: '/system/reports/fleet-utilization' },
+        ],
+    },
     { icon: '📦', label: 'Cargo', href: '/system/cargo', soon: true },
-    { icon: '👥', label: 'Clients', href: '/system/clients', soon: true },
-    { icon: '📈', label: 'Reports', href: '/system/reports', soon: true },
-    { icon: '⚙️', label: 'Settings', href: '/system/settings', soon: true },
+    {
+        icon: '⚙️', label: 'Settings', href: '/system/settings',
+        children: [
+            { icon: '🏢', label: 'Company Settings',        href: '/system/settings/company' },
+            { icon: '🪪', label: 'Licence Classes',         href: '/system/settings/license-classes' },
+            { icon: '📄', label: 'Document Types',          href: '/system/settings/document-types' },
+            { icon: '💰', label: 'Payroll Settings',        href: '/system/settings/payroll' },
+            { icon: '📋', label: 'Deductions',              href: '/system/settings/deductions' },
+            { icon: '🔗', label: 'Deduction Subscriptions', href: '/system/settings/deduction-subscriptions' },
+            { icon: '🏛️', label: 'Staff Bank Details',      href: '/system/settings/bank-details' },
+        ],
+    },
 ];
 
 // Dark layer system: sidebar < header < main < card < hover
@@ -45,6 +89,19 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
     const { colorScheme, setColorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const user = props.auth?.user;
+
+    // Auto-expand any group whose href matches the current URL
+    const [expandedGroups, setExpandedGroups] = useState(() =>
+        navItems
+            .filter(item => item.children && url.startsWith(item.href))
+            .map(item => item.href)
+    );
+
+    const toggleGroup = (href) => {
+        setExpandedGroups(prev =>
+            prev.includes(href) ? prev.filter(h => h !== href) : [...prev, href]
+        );
+    };
 
     const logout = () => router.post('/logout');
 
@@ -137,43 +194,94 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
                     <Box style={{ flex: 1, padding: '0 8px', overflowY: 'auto' }}>
                         <Stack gap={2}>
                             {navItems.map((item) => {
-                                const active = url.startsWith(item.href);
-                                const hoverBg = isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9';
-                                const activeBg = isDark ? 'rgba(33,150,243,0.15)' : 'rgba(21,101,192,0.08)';
-                                const activeText = isDark ? '#60A5FA' : '#1565C0';
+                                const isGroup    = !!item.children;
+                                const expanded   = expandedGroups.includes(item.href);
+                                const active     = !isGroup && url.startsWith(item.href);
+                                const groupActive = isGroup && url.startsWith(item.href);
+
+                                const hoverBg      = isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9';
+                                const activeBg     = isDark ? 'rgba(33,150,243,0.15)' : 'rgba(21,101,192,0.08)';
+                                const activeText   = isDark ? '#60A5FA' : '#1565C0';
                                 const inactiveText = isDark ? dk.textSec : lk.textSec;
-                                const soonBg = isDark ? 'rgba(255,255,255,0.07)' : '#F1F5F9';
-                                const soonText = isDark ? dk.textMut : lk.textMut;
+                                const soonBg       = isDark ? 'rgba(255,255,255,0.07)' : '#F1F5F9';
+                                const soonText     = isDark ? dk.textMut : lk.textMut;
 
                                 return (
-                                    <motion.div key={item.href} whileHover={!item.soon ? { x: 3 } : {}} transition={{ type: 'spring', stiffness: 400 }}>
-                                        <Box
-                                            component={item.soon ? 'div' : Link}
-                                            href={item.soon ? undefined : item.href}
-                                            style={{
-                                                display: 'flex', alignItems: 'center', gap: 10,
-                                                padding: '9px 12px', borderRadius: 8,
-                                                cursor: item.soon ? 'default' : 'pointer',
-                                                background: active ? activeBg : 'transparent',
-                                                borderLeft: active ? '3px solid #2196F3' : '3px solid transparent',
-                                                textDecoration: 'none', transition: 'all 0.15s',
-                                                opacity: item.soon ? 0.45 : 1,
-                                            }}
-                                            onMouseEnter={e => { if (!active && !item.soon) e.currentTarget.style.background = hoverBg; }}
-                                            onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
-                                        >
-                                            <Text style={{ fontSize: '1rem', lineHeight: 1, width: 20, textAlign: 'center' }}>{item.icon}</Text>
-                                            <Text fw={active ? 700 : 500} size="sm" style={{ color: active ? activeText : inactiveText, flex: 1 }}>{item.label}</Text>
-                                            {item.soon && (
-                                                <Box style={{ background: soonBg, borderRadius: 4, padding: '1px 6px' }}>
-                                                    <Text style={{ fontSize: 9, color: soonText, fontWeight: 700, letterSpacing: 0.5 }}>SOON</Text>
-                                                </Box>
-                                            )}
-                                            {active && (
-                                                <motion.div layoutId="activeIndicator" style={{ width: 6, height: 6, borderRadius: '50%', background: '#2196F3', flexShrink: 0 }} />
-                                            )}
-                                        </Box>
-                                    </motion.div>
+                                    <div key={item.href}>
+                                        <motion.div whileHover={!item.soon ? { x: 3 } : {}} transition={{ type: 'spring', stiffness: 400 }}>
+                                            <Box
+                                                component={isGroup || item.soon ? 'div' : Link}
+                                                href={isGroup || item.soon ? undefined : item.href}
+                                                onClick={isGroup ? () => toggleGroup(item.href) : undefined}
+                                                style={{
+                                                    display: 'flex', alignItems: 'center', gap: 10,
+                                                    padding: '9px 12px', borderRadius: 8,
+                                                    cursor: item.soon ? 'default' : 'pointer',
+                                                    background: (active || (groupActive && expanded)) ? activeBg : 'transparent',
+                                                    borderLeft: (active || groupActive) ? '3px solid #2196F3' : '3px solid transparent',
+                                                    textDecoration: 'none', transition: 'all 0.15s',
+                                                    opacity: item.soon ? 0.45 : 1,
+                                                }}
+                                                onMouseEnter={e => { if (!active && !item.soon) e.currentTarget.style.background = hoverBg; }}
+                                                onMouseLeave={e => { if (!active && !(groupActive && expanded)) e.currentTarget.style.background = 'transparent'; }}
+                                            >
+                                                <Text style={{ fontSize: '1rem', lineHeight: 1, width: 20, textAlign: 'center' }}>{item.icon}</Text>
+                                                <Text fw={(active || groupActive) ? 700 : 500} size="sm" style={{ color: (active || groupActive) ? activeText : inactiveText, flex: 1 }}>{item.label}</Text>
+                                                {item.soon && (
+                                                    <Box style={{ background: soonBg, borderRadius: 4, padding: '1px 6px' }}>
+                                                        <Text style={{ fontSize: 9, color: soonText, fontWeight: 700, letterSpacing: 0.5 }}>SOON</Text>
+                                                    </Box>
+                                                )}
+                                                {isGroup && (
+                                                    <Text style={{ fontSize: 10, color: inactiveText, transition: 'transform 0.2s', transform: expanded ? 'rotate(90deg)' : 'none' }}>▶</Text>
+                                                )}
+                                                {active && (
+                                                    <motion.div layoutId="activeIndicator" style={{ width: 6, height: 6, borderRadius: '50%', background: '#2196F3', flexShrink: 0 }} />
+                                                )}
+                                            </Box>
+                                        </motion.div>
+
+                                        {/* Children (accordion) */}
+                                        {isGroup && expanded && (
+                                            <AnimatePresence>
+                                                <motion.div
+                                                    initial={{ opacity: 0, height: 0 }}
+                                                    animate={{ opacity: 1, height: 'auto' }}
+                                                    exit={{ opacity: 0, height: 0 }}
+                                                    transition={{ duration: 0.18 }}
+                                                    style={{ overflow: 'hidden' }}
+                                                >
+                                                    <Stack gap={1} style={{ paddingLeft: 8, marginTop: 2 }}>
+                                                        {item.children.map((child) => {
+                                                            const childActive = url.startsWith(child.href);
+                                                            return (
+                                                                <Box
+                                                                    key={child.href}
+                                                                    component={Link}
+                                                                    href={child.href}
+                                                                    style={{
+                                                                        display: 'flex', alignItems: 'center', gap: 8,
+                                                                        padding: '7px 10px 7px 14px', borderRadius: 8,
+                                                                        background: childActive ? activeBg : 'transparent',
+                                                                        borderLeft: childActive ? '2px solid #2196F3' : '2px solid rgba(33,150,243,0.15)',
+                                                                        textDecoration: 'none', transition: 'all 0.15s',
+                                                                    }}
+                                                                    onMouseEnter={e => { if (!childActive) e.currentTarget.style.background = hoverBg; }}
+                                                                    onMouseLeave={e => { if (!childActive) e.currentTarget.style.background = 'transparent'; }}
+                                                                >
+                                                                    <Text style={{ fontSize: '0.85rem', lineHeight: 1, width: 16, textAlign: 'center', opacity: 0.8 }}>{child.icon}</Text>
+                                                                    <Text fw={childActive ? 700 : 500} size="xs" style={{ color: childActive ? activeText : inactiveText }}>{child.label}</Text>
+                                                                    {childActive && (
+                                                                        <Box style={{ width: 5, height: 5, borderRadius: '50%', background: '#2196F3', marginLeft: 'auto', flexShrink: 0 }} />
+                                                                    )}
+                                                                </Box>
+                                                            );
+                                                        })}
+                                                    </Stack>
+                                                </motion.div>
+                                            </AnimatePresence>
+                                        )}
+                                    </div>
                                 );
                             })}
                         </Stack>

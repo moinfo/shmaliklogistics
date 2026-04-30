@@ -56,6 +56,8 @@ const navItems = [
             { icon: '📋', label: 'Deductions',              href: '/system/settings/deductions' },
             { icon: '🔗', label: 'Deduction Subscriptions', href: '/system/settings/deduction-subscriptions' },
             { icon: '🏛️', label: 'Staff Bank Details',      href: '/system/settings/bank-details' },
+            { icon: '🏢', label: 'Departments',              href: '/system/settings/departments' },
+            { icon: '🔑', label: 'Roles & Permissions',      href: '/system/settings/roles' },
         ],
     },
 ];

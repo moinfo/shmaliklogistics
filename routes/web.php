@@ -29,6 +29,8 @@ use App\Http\Controllers\Settings\VehicleDocumentTypeController;
 use App\Http\Controllers\Settings\DeductionTypeController;
 use App\Http\Controllers\Settings\EmployeeDeductionController;
 use App\Http\Controllers\Settings\BankDetailController;
+use App\Http\Controllers\Settings\DepartmentController;
+use App\Http\Controllers\Settings\RoleController;
 use App\Http\Controllers\System\HR\AllowanceController;
 use App\Http\Controllers\System\HR\AttendanceController;
 use App\Http\Controllers\System\HR\AttendanceDeviceController;
@@ -163,6 +165,8 @@ Route::middleware('auth')->prefix('system')->name('system.')->group(function () 
         Route::resource('deductions', DeductionTypeController::class)->only(['index', 'store', 'update', 'destroy'])->parameters(['deductions' => 'deduction']);
         Route::resource('deduction-subscriptions', EmployeeDeductionController::class)->only(['index', 'store', 'update', 'destroy'])->parameters(['deduction-subscriptions' => 'deductionSubscription']);
         Route::resource('bank-details', BankDetailController::class)->only(['index', 'store', 'update', 'destroy'])->parameters(['bank-details' => 'bankDetail']);
+        Route::resource('departments', DepartmentController::class)->only(['index', 'store', 'update', 'destroy'])->parameters(['departments' => 'department']);
+        Route::resource('roles', RoleController::class)->only(['index', 'store', 'update', 'destroy'])->parameters(['roles' => 'role']);
     });
 });
 

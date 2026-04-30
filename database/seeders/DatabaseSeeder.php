@@ -15,13 +15,23 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // ── Clear transactional tables (keep lookup tables seeded in migrations) ──
-        DB::statement('PRAGMA foreign_keys = OFF');
+        $isMySQL = DB::getDriverName() === 'mysql';
+        if ($isMySQL) {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        } else {
+            DB::statement('PRAGMA foreign_keys = OFF');
+        }
+
         foreach ([
             'appraisals',
             'job_applications','job_vacancies',
             'inventory_movements','purchase_order_items','purchase_orders',
             'inventory_items','inventory_categories',
             'suppliers',
+            'fuel_logs',
+            'cargo_status_logs',
+            'portal_quote_requests',
+            'leave_requests',
             'attendance_logs','attendance_devices',
             'payroll_slips','payroll_runs',
             'employee_advances','employee_loans',
@@ -39,10 +49,14 @@ class DatabaseSeeder extends Seeder
             'vehicles',
             'users',
         ] as $t) {
-            DB::table($t)->delete();
-            DB::statement("DELETE FROM sqlite_sequence WHERE name='{$t}'");
+            DB::table($t)->truncate();
         }
-        DB::statement('PRAGMA foreign_keys = ON');
+
+        if ($isMySQL) {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        } else {
+            DB::statement('PRAGMA foreign_keys = ON');
+        }
 
         $now = now()->toDateTimeString();
 
@@ -372,6 +386,29 @@ class DatabaseSeeder extends Seeder
                     'created_by'          => $adminId,
                     'created_at'          => $now,
                     'updated_at'          => $now,
+                ]);
+            }
+        }
+
+        // ── GPS positions for on-road vehicles ────────────────────────────
+        $gpsSpots = [
+            [-8.9333,  33.4667, 'Mbeya Weighbridge'],
+            [-9.3667,  32.8833, 'Tunduma Border, Tanzania'],
+            [-9.4000,  32.9000, 'Nakonde Border, Zambia'],
+            [-11.8067, 28.6483, 'Kitwe, Zambia'],
+            [-4.0435,  39.6682, 'Mombasa Port, Kenya'],
+            [-3.3869,  36.6830, 'Arusha Bypass'],
+            [-6.7924,  39.2083, 'Dar es Salaam Port'],
+        ];
+        $gpsIdx = 0;
+        foreach ($vData as $vi => [, , , , $vstatus]) {
+            if (in_array($vstatus, ['on_road','at_border']) && $gpsIdx < count($gpsSpots)) {
+                [$lat, $lng, $locName] = $gpsSpots[$gpsIdx++];
+                DB::table('vehicles')->where('id', $vehicleIds[$vi])->update([
+                    'gps_lat'           => $lat,
+                    'gps_lng'           => $lng,
+                    'gps_location_name' => $locName,
+                    'gps_last_seen'     => Carbon::create(2026,4,30,rand(6,22),rand(0,59))->toDateTimeString(),
                 ]);
             }
         }
@@ -1048,6 +1085,126 @@ class DatabaseSeeder extends Seeder
                 'manager_notes'      => "Performance review {$pFrom} – {$pTo}. Employee demonstrates commitment to company values.",
                 'status'             => $aprStatus,
                 'created_by'         => $adminId,
+                'created_at'         => $now,
+                'updated_at'         => $now,
+            ]);
+        }
+
+        // ── Leave Requests ─────────────────────────────────────────────────
+        $leaveData = [
+            // [emp_idx, type, start, days, status, approved_by_admin]
+            [4,  'annual',    '2026-01-06', 7,  'approved', true],
+            [7,  'sick',      '2026-02-10', 3,  'approved', true],
+            [2,  'maternity', '2026-03-01', 84, 'approved', true],
+            [10, 'annual',    '2026-03-17', 5,  'approved', true],
+            [5,  'emergency', '2026-04-02', 2,  'approved', true],
+            [11, 'annual',    '2026-04-14', 5,  'pending',  false],
+            [8,  'sick',      '2026-04-22', 2,  'pending',  false],
+            [0,  'annual',    '2026-05-05', 10, 'pending',  false],
+            [6,  'annual',    '2026-05-12', 7,  'rejected', false],
+            [9,  'unpaid',    '2026-04-28', 3,  'pending',  false],
+        ];
+        foreach ($leaveData as [$empIdx, $lType, $lStart, $lDays, $lStatus, $approved]) {
+            $startDate = Carbon::createFromFormat('Y-m-d', $lStart);
+            DB::table('leave_requests')->insert([
+                'employee_id'    => $employeeIds[$empIdx],
+                'type'           => $lType,
+                'start_date'     => $lStart,
+                'end_date'       => $startDate->copy()->addDays($lDays - 1)->toDateString(),
+                'days'           => $lDays,
+                'reason'         => match($lType) {
+                    'annual'    => 'Annual rest leave as per contract.',
+                    'sick'      => 'Medical condition — doctor\'s certificate attached.',
+                    'maternity' => 'Maternity leave as per Tanzania Employment Act.',
+                    'emergency' => 'Family emergency — bereavement.',
+                    'unpaid'    => 'Personal matters requiring extended absence.',
+                    default     => 'Leave request.',
+                },
+                'status'         => $lStatus,
+                'approved_by'    => $approved ? $adminId : null,
+                'approval_notes' => $approved ? 'Approved. Cover arrangements made.' : null,
+                'created_by'     => $adminId,
+                'created_at'     => $now,
+                'updated_at'     => $now,
+            ]);
+        }
+
+        // ── Cargo Status Logs ──────────────────────────────────────────────
+        $cargoIds = DB::table('cargos')->pluck('id')->all();
+        $statusProgression = [
+            ['registered', 'Dar es Salaam Warehouse', 'Cargo received and registered'],
+            ['loading',     'Dar es Salaam Port',      'Loading onto vehicle commenced'],
+            ['in_transit',  'Morogoro Checkpoint',     'Departed Dar. Transit underway'],
+            ['at_border',   'Tunduma Border',          'Vehicle at border — customs clearance'],
+        ];
+        foreach (array_slice($cargoIds, 0, 15) as $cgIdx => $cgId) {
+            $currentStatus = DB::table('cargos')->where('id', $cgId)->value('status');
+            $statusOrder   = ['registered','loading','in_transit','at_border','cleared','delivered'];
+            $currentPos    = array_search($currentStatus, $statusOrder);
+            if ($currentPos === false) continue;
+
+            for ($si = 0; $si <= min($currentPos, count($statusProgression) - 1); $si++) {
+                [$sStatus, $sLocation, $sNotes] = $statusProgression[$si];
+                DB::table('cargo_status_logs')->insert([
+                    'cargo_id'   => $cgId,
+                    'status'     => $sStatus,
+                    'location'   => $sLocation,
+                    'notes'      => $sNotes,
+                    'user_id'    => $adminId,
+                    'created_at' => Carbon::create(2026, rand(1,4), rand(1,28), rand(8,17))->toDateTimeString(),
+                    'updated_at' => $now,
+                ]);
+            }
+        }
+
+        // ── Fuel Logs ──────────────────────────────────────────────────────
+        $stations = ['Total Kariakoo','Shell Morogoro','TotalEnergies Mbeya','PUMA Tunduma','Total Ubungo','Oryx Changanyikeni','GAPCO Mwananyamala'];
+        for ($fl = 0; $fl < 40; $fl++) {
+            $fVehicleId = $vehicleIds[array_rand($vehicleIds)];
+            $fDriverId  = $driverIds[array_rand($driverIds)];
+            $fLiters    = rand(200, 600);
+            $fCostL     = rand(2600, 3200);
+            $fDate      = Carbon::create(2026, rand(1,4), rand(1,28))->toDateString();
+            DB::table('fuel_logs')->insert([
+                'vehicle_id'     => $fVehicleId,
+                'driver_id'      => $fDriverId,
+                'trip_id'        => null,
+                'log_date'       => $fDate,
+                'liters'         => $fLiters,
+                'cost_per_liter' => $fCostL,
+                'odometer_km'    => rand(50000, 300000),
+                'station_name'   => $stations[array_rand($stations)],
+                'fuel_type'      => 'diesel',
+                'currency'       => 'TZS',
+                'notes'          => null,
+                'created_by'     => $adminId,
+                'created_at'     => $fDate . ' 08:00:00',
+                'updated_at'     => $fDate . ' 08:00:00',
+            ]);
+        }
+
+        // ── Portal Quote Requests ──────────────────────────────────────────
+        $portalClients = DB::table('clients')->whereNotNull('email')->take(4)->pluck('id')->all();
+        $pqData = [
+            ['Dar es Salaam', 'Lusaka, Zambia',      'Cement bags — 40 tons',         40.0,  80,  '2026-05-15', 'pending',  null],
+            ['Dar es Salaam', 'Lubumbashi, DRC',     'Construction steel & rebar',    22.5,  45,  '2026-05-20', 'quoted',   'We can accommodate this shipment. Quote sent via email.'],
+            ['Mombasa, Kenya','Dar es Salaam',       'Electronics & appliances',      8.0,   20,  '2026-06-01', 'reviewed', 'Under review. Will provide quote within 24h.'],
+            ['Dar es Salaam', 'Lilongwe, Malawi',    'FMCG goods — beverages',        15.0,  30,  '2026-06-10', 'pending',  null],
+            ['Dar es Salaam', 'Nairobi, Kenya',      'Pharmaceutical cold chain',     3.5,   10,  '2026-06-05', 'cancelled','Client withdrew the request.'],
+        ];
+        foreach ($pqData as $pqi => [$pqFrom, $pqTo, $pqCargo, $pqWeight, $pqVol, $pqDate, $pqStatus, $pqNotes]) {
+            $clientId = count($portalClients) ? $portalClients[$pqi % count($portalClients)] : $clientIds[0];
+            DB::table('portal_quote_requests')->insert([
+                'client_id'          => $clientId,
+                'route_from'         => $pqFrom,
+                'route_to'           => $pqTo,
+                'cargo_description'  => $pqCargo,
+                'cargo_weight_kg'    => $pqWeight * 1000,
+                'cargo_volume_m3'    => $pqVol,
+                'preferred_date'     => $pqDate,
+                'status'             => $pqStatus,
+                'reviewed_by'        => in_array($pqStatus, ['reviewed','quoted','cancelled']) ? $adminId : null,
+                'staff_notes'        => $pqNotes,
                 'created_at'         => $now,
                 'updated_at'         => $now,
             ]);

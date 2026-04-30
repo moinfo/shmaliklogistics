@@ -54,14 +54,14 @@ const en = {
         },
         routes: {
             badge: 'Where We Operate', title: 'Our', highlight: 'Active Routes',
-            desc: 'Regular departures on all major corridors from Dar es Salaam.',
+            desc: 'Regular departures on all major corridors from Handeni, Tanzania.',
             hub: '🇹🇿 Handeni, Tanzania Hub', hubSub: '· Origin of all routes',
             from: 'From', to: 'To', distance: 'Distance', transit: 'Transit',
             items: [
-                { from: 'Dar es Salaam', to: 'Lubumbashi', country: 'DRC', flag: '🇨🇩', distance: '~2,100 km', time: '5–7 days' },
-                { from: 'Dar es Salaam', to: 'Lusaka', country: 'Zambia', flag: '🇿🇲', distance: '~1,900 km', time: '4–6 days' },
-                { from: 'Dar es Salaam', to: 'Lilongwe', country: 'Malawi', flag: '🇲🇼', distance: '~1,400 km', time: '3–5 days' },
-                { from: 'Dar es Salaam', to: 'Maputo', country: 'Mozambique', flag: '🇲🇿', distance: '~2,200 km', time: '5–7 days' },
+                { from: 'Handeni, Tanzania', to: 'Lubumbashi', country: 'DRC', flag: '🇨🇩', distance: '~2,100 km', time: '5–7 days' },
+                { from: 'Handeni, Tanzania', to: 'Lusaka', country: 'Zambia', flag: '🇿🇲', distance: '~1,900 km', time: '4–6 days' },
+                { from: 'Handeni, Tanzania', to: 'Lilongwe', country: 'Malawi', flag: '🇲🇼', distance: '~1,400 km', time: '3–5 days' },
+                { from: 'Handeni, Tanzania', to: 'Maputo', country: 'Mozambique', flag: '🇲🇿', distance: '~2,200 km', time: '5–7 days' },
             ],
         },
         howItWorks: {
@@ -136,7 +136,7 @@ const en = {
         milestones: {
             badge: 'Our Journey', title: 'Company Milestones',
             items: [
-                { year: '2020', title: 'Company Founded', desc: 'SH Malik Logistics established in Dar es Salaam with a focus on DRC corridor freight.' },
+                { year: '2020', title: 'Company Founded', desc: 'SH Malik Logistics Company Limited established in Handeni, Tanzania, with a focus on road freight to Zambia and DRC.' },
                 { year: '2021', title: 'Fleet Expanded', desc: 'Fleet grew to 20+ vehicles. Added Zambia and Malawi routes to regular operations.' },
                 { year: '2023', title: 'Technology Integrated', desc: 'GPS tracking, fuel sensors, and digital operations management rolled out across the fleet.' },
                 { year: '2025', title: 'Digital Platform', desc: 'Customer portal and route profitability system launched — giving clients full shipment visibility.' },
@@ -235,14 +235,14 @@ const sw = {
         },
         routes: {
             badge: 'Tunakohudumia', title: 'Njia Zetu', highlight: 'Zinazofanya Kazi',
-            desc: 'Kuondoka mara kwa mara kwenye njia kuu zote kutoka Dar es Salaam.',
+            desc: 'Kuondoka mara kwa mara kwenye njia kuu zote kutoka Handeni, Tanzania.',
             hub: '🇹🇿 Kitovu cha Handeni, Tanzania', hubSub: '· Chanzo cha njia zote',
             from: 'Kutoka', to: 'Kwenda', distance: 'Umbali', transit: 'Wakati wa Usafiri',
             items: [
-                { from: 'Dar es Salaam', to: 'Lubumbashi', country: 'DRC', flag: '🇨🇩', distance: '~2,100 km', time: 'Siku 5–7' },
-                { from: 'Dar es Salaam', to: 'Lusaka', country: 'Zambia', flag: '🇿🇲', distance: '~1,900 km', time: 'Siku 4–6' },
-                { from: 'Dar es Salaam', to: 'Lilongwe', country: 'Malawi', flag: '🇲🇼', distance: '~1,400 km', time: 'Siku 3–5' },
-                { from: 'Dar es Salaam', to: 'Maputo', country: 'Mozambique', flag: '🇲🇿', distance: '~2,200 km', time: 'Siku 5–7' },
+                { from: 'Handeni, Tanzania', to: 'Lubumbashi', country: 'DRC', flag: '🇨🇩', distance: '~2,100 km', time: 'Siku 5–7' },
+                { from: 'Handeni, Tanzania', to: 'Lusaka', country: 'Zambia', flag: '🇿🇲', distance: '~1,900 km', time: 'Siku 4–6' },
+                { from: 'Handeni, Tanzania', to: 'Lilongwe', country: 'Malawi', flag: '🇲🇼', distance: '~1,400 km', time: 'Siku 3–5' },
+                { from: 'Handeni, Tanzania', to: 'Maputo', country: 'Mozambique', flag: '🇲🇿', distance: '~2,200 km', time: 'Siku 5–7' },
             ],
         },
         howItWorks: {
@@ -274,7 +274,7 @@ const sw = {
             { value: '24/7', label: 'Msaada Unapatikana', icon: '📞' },
         ],
         items: [
-            { icon: '🚛', title: 'Usafirishaji wa Masafa Marefu', desc: 'Usafirishaji wa mzigo kamili na sehemu kwenye njia kuu — Dar es Salaam hadi DRC, Zambia, Malawi na Mozambique.', features: ['Mzigo Kamili wa Lori (FTL)', 'Mzigo wa Sehemu (LTL)', 'Mizigo ya baridi', 'Mizigo mizito na kubwa', 'Vifaa hatari'] },
+            { icon: '🚛', title: 'Usafirishaji wa Barabara', desc: 'Usafirishaji wa mzigo kamili na sehemu kwenye njia kuu — Handeni, Tanzania hadi DRC, Zambia na zaidi.', features: ['Mzigo Kamili wa Lori (FTL)', 'Mzigo wa Sehemu (LTL)', 'Mizigo ya baridi', 'Mizigo mizito na kubwa', 'Vifaa hatari'] },
             { icon: '📍', title: 'Ufuatiliaji wa GPS wa Gari', desc: 'Mahali pa wakati halisi pa kila gari barabarani, linalopatikana kutoka kifaa chochote.', features: ['Mtazamo wa ramani ya moja kwa moja', 'Historia ya safari na mchezaji', 'Ushirikiano wa sensaa ya mafuta', 'Arifa za Geofence', 'Ufuatiliaji wa tabia ya dereva'] },
             { icon: '🛂', title: 'Mpakani na Forodha', desc: 'Usimamizi kamili wa vibali na nyaraka za forodha kwa vituo vyote vya kuvuka mpaka.', features: ['Vibali vya usafiri', 'Uzingatifu wa COMESA/SADC', 'Nyaraka za forodha', 'Ufuatiliaji wa tarehe ya kuisha', 'Upangaji wa kuvuka mpaka'] },
             { icon: '📊', title: 'Faida ya Njia', desc: 'Ona faida halisi ya kila safari — mapato dhidi ya gharama zote (mafuta, posho, ada za mpakani, matengenezo).', features: ['Uchambuzi wa gharama kwa km', 'KPIs za utendaji wa dereva', 'Ripoti za ufanisi wa mafuta', 'P&L ya kila mwezi kwa njia', 'Ufuatiliaji wa ROI ya gari'] },
@@ -317,7 +317,7 @@ const sw = {
         milestones: {
             badge: 'Safari Yetu', title: 'Hatua Muhimu za Kampuni',
             items: [
-                { year: '2020', title: 'Kampuni Ilianzishwa', desc: 'SH Malik Logistics ilianzishwa Dar es Salaam ikiwa na lengo la usafirishaji wa njia ya DRC.' },
+                { year: '2020', title: 'Kampuni Ilianzishwa', desc: 'SH Malik Logistics Company Limited ilianzishwa Handeni, Tanzania, ikiwa na lengo la usafirishaji wa barabara hadi Zambia na DRC.' },
                 { year: '2021', title: 'Gari Lipanuliwa', desc: 'Gari lilikua hadi magari 20+. Njia za Zambia na Malawi ziliongezwa kwenye shughuli za kawaida.' },
                 { year: '2023', title: 'Teknolojia Iliunganishwa', desc: 'Ufuatiliaji wa GPS, sensaa za mafuta, na usimamizi wa shughuli za kidijitali vilienezwa kwa gari zote.' },
                 { year: '2025', title: 'Jukwaa la Kidijitali', desc: 'Lango la mteja na mfumo wa faida ya njia vilizinduliwa — kuwapa wateja uonekani kamili wa mizigo.' },

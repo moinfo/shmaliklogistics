@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\System\TripController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -22,6 +23,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 // ── System (protected) ──────────────────────────────────────────────────────
 Route::middleware('auth')->prefix('system')->name('system.')->group(function () {
     Route::get('/dashboard', fn () => Inertia::render('system/Dashboard'))->name('dashboard');
+
+    // Trips
+    Route::resource('trips', TripController::class);
+    Route::patch('trips/{trip}/status', [TripController::class, 'updateStatus'])->name('trips.update-status');
 });
 
 // Redirect /dashboard → /system/dashboard for convenience

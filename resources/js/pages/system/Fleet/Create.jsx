@@ -4,7 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import VehicleForm from './VehicleForm';
 
-export default function CreateVehicle({ statuses, types, fuelTypes, typeIcons, drivers }) {
+export default function CreateVehicle({ statuses, types, fuelTypes, typeIcons, drivers, customDocumentTypes = [] }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const textPri = isDark ? '#E2E8F0' : '#1E293B';
@@ -19,7 +19,7 @@ export default function CreateVehicle({ statuses, types, fuelTypes, typeIcons, d
         fuel_type: 'diesel', fuel_tank_capacity_l: '',
         insurance_expiry: '', road_licence_expiry: '', fitness_expiry: '',
         tra_sticker_expiry: '', goods_vehicle_licence_expiry: '', next_service_date: '',
-        owner_name: '', notes: '',
+        owner_name: '', notes: '', extra_documents: {},
     });
 
     const submit = (e) => { e.preventDefault(); post('/system/fleet'); };
@@ -35,6 +35,7 @@ export default function CreateVehicle({ statuses, types, fuelTypes, typeIcons, d
                 data={data} setData={setData} errors={errors}
                 statuses={statuses} types={types} fuelTypes={fuelTypes}
                 typeIcons={typeIcons} drivers={drivers}
+                customDocumentTypes={customDocumentTypes}
                 processing={processing} onSubmit={submit}
                 backHref="/system/fleet" submitLabel="Register Vehicle"
             />

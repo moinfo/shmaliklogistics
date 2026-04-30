@@ -18,7 +18,7 @@ class Vehicle extends Model
         'fuel_type', 'fuel_tank_capacity_l',
         'insurance_expiry', 'road_licence_expiry', 'fitness_expiry',
         'tra_sticker_expiry', 'goods_vehicle_licence_expiry', 'next_service_date',
-        'owner_name', 'notes', 'created_by',
+        'owner_name', 'notes', 'extra_documents', 'created_by',
     ];
 
     protected $casts = [
@@ -29,6 +29,7 @@ class Vehicle extends Model
         'goods_vehicle_licence_expiry' => 'date',
         'next_service_date'            => 'date',
         'payload_tons'                 => 'decimal:2',
+        'extra_documents'              => 'array',
     ];
 
     public function driver()
@@ -39,6 +40,16 @@ class Vehicle extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function serviceRecords()
+    {
+        return $this->hasMany(ServiceRecord::class)->latest('service_date');
+    }
+
+    public function documents()
+    {
+        return $this->morphMany(Document::class, 'documentable');
     }
 
     public static array $statuses = [

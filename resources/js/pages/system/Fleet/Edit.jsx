@@ -6,7 +6,7 @@ import VehicleForm from './VehicleForm';
 
 function fmt(d) { return d ? String(d).slice(0, 10) : ''; }
 
-export default function EditVehicle({ vehicle, statuses, types, fuelTypes, typeIcons, drivers }) {
+export default function EditVehicle({ vehicle, statuses, types, fuelTypes, typeIcons, drivers, customDocumentTypes = [] }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const textPri = isDark ? '#E2E8F0' : '#1E293B';
@@ -33,8 +33,9 @@ export default function EditVehicle({ vehicle, statuses, types, fuelTypes, typeI
         tra_sticker_expiry:           fmt(vehicle.tra_sticker_expiry),
         goods_vehicle_licence_expiry: fmt(vehicle.goods_vehicle_licence_expiry),
         next_service_date:            fmt(vehicle.next_service_date),
-        owner_name: vehicle.owner_name ?? '',
-        notes:      vehicle.notes ?? '',
+        owner_name:      vehicle.owner_name ?? '',
+        notes:           vehicle.notes ?? '',
+        extra_documents: vehicle.extra_documents ?? {},
     });
 
     const submit = (e) => { e.preventDefault(); put(`/system/fleet/${vehicle.id}`); };
@@ -50,6 +51,7 @@ export default function EditVehicle({ vehicle, statuses, types, fuelTypes, typeI
                 data={data} setData={setData} errors={errors}
                 statuses={statuses} types={types} fuelTypes={fuelTypes}
                 typeIcons={typeIcons} drivers={drivers}
+                customDocumentTypes={customDocumentTypes}
                 processing={processing} onSubmit={submit}
                 backHref={`/system/fleet/${vehicle.id}`} submitLabel="Update Vehicle"
             />

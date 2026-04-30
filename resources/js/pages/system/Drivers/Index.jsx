@@ -153,9 +153,19 @@ export default function DriversIndex({ drivers, stats, statuses, filters }) {
                                 onClick={() => router.visit(`/system/drivers/${d.id}`)}
                             >
                                 <Box style={{ display: 'flex', alignItems: 'center' }}><Avatar name={d.name} size={30} /></Box>
-                                <Stack gap={1}>
+                                <Stack gap={2}>
                                     <Text size="sm" fw={600} style={{ color: textPri }}>{d.name}</Text>
-                                    <Text size="xs" style={{ color: textMut }}>{d.email || d.address || '—'}</Text>
+                                    {(d.license_classes ?? []).length > 0 ? (
+                                        <Group gap={4} wrap="nowrap">
+                                            {(d.license_classes ?? []).map(code => (
+                                                <Box key={code} style={{ background: 'rgba(33,150,243,0.10)', border: '1px solid rgba(33,150,243,0.22)', borderRadius: 4, padding: '1px 6px', color: '#60A5FA', fontWeight: 700, fontSize: 10 }}>
+                                                    {code}
+                                                </Box>
+                                            ))}
+                                        </Group>
+                                    ) : (
+                                        <Text size="xs" style={{ color: textMut }}>{d.email || d.address || '—'}</Text>
+                                    )}
                                 </Stack>
                                 <Text size="sm" style={{ color: textSec }}>{d.phone}</Text>
                                 <Text size="sm" style={{ color: textSec }}>{d.license_number || '—'}</Text>

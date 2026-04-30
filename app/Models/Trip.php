@@ -35,6 +35,16 @@ class Trip extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function documents()
+    {
+        return $this->morphMany(Document::class, 'documentable');
+    }
+
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
+    }
+
     public function getTotalCostsAttribute(): float
     {
         return (float) $this->fuel_cost

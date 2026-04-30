@@ -1,11 +1,12 @@
 import { Link } from '@inertiajs/react';
-import { Box, Text, Group, Stack, SimpleGrid, TextInput, Textarea, Select } from '@mantine/core';
+import { Box, Text, Group, Stack, SimpleGrid, TextInput, Textarea, Select, Tooltip } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
+import DatePicker from '../../../components/DatePicker';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
 
-function Section({ title, children, isDark }) {
+function Section({ icon, title, children, isDark }) {
     const cardBg     = isDark ? dk.card : '#ffffff';
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const textPri    = isDark ? dk.textPri : '#1E293B';
@@ -13,9 +14,71 @@ function Section({ title, children, isDark }) {
     return (
         <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden', marginBottom: 16 }}>
             <Box style={{ padding: '14px 20px', borderBottom: `1px solid ${divider}` }}>
-                <Text fw={700} size="sm" style={{ color: textPri }}>{title}</Text>
+                <Group gap={8}>
+                    {icon && <Text style={{ fontSize: 16 }}>{icon}</Text>}
+                    <Text fw={700} size="sm" style={{ color: textPri }}>{title}</Text>
+                </Group>
             </Box>
             <Box style={{ padding: '20px' }}>{children}</Box>
+        </Box>
+    );
+}
+
+// Visual toggle grid for licence classes
+function LicenceClassToggle({ classes, selected, onToggle, isDark }) {
+    const cardBorder = isDark ? dk.border : '#E2E8F0';
+    const textMut    = isDark ? dk.textMut : '#94A3B8';
+
+    return (
+        <Box>
+            <Text size="xs" fw={700} style={{ color: textMut, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 10 }}>
+                Held Licence Classes — click to toggle
+            </Text>
+            <Group gap={8} wrap="wrap">
+                {Object.entries(classes).map(([code, desc]) => {
+                    const active = (selected ?? []).includes(code);
+                    return (
+                        <Tooltip key={code} label={desc} position="top" withArrow>
+                            <motion.div whileTap={{ scale: 0.94 }}>
+                                <Box
+                                    onClick={() => onToggle(code)}
+                                    style={{
+                                        padding: '7px 16px',
+                                        borderRadius: 8,
+                                        cursor: 'pointer',
+                                        userSelect: 'none',
+                                        background: active
+                                            ? 'rgba(33,150,243,0.15)'
+                                            : isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC',
+                                        border: active
+                                            ? '1.5px solid rgba(33,150,243,0.5)'
+                                            : `1px solid ${cardBorder}`,
+                                        color: active ? '#60A5FA' : textMut,
+                                        fontWeight: active ? 800 : 500,
+                                        fontSize: 14,
+                                        letterSpacing: 0.5,
+                                        transition: 'all 0.15s',
+                                    }}
+                                >
+                                    {code}
+                                </Box>
+                            </motion.div>
+                        </Tooltip>
+                    );
+                })}
+            </Group>
+            {(selected ?? []).length > 0 && (
+                <Group gap={6} mt={10} wrap="wrap">
+                    {(selected ?? []).map(code => (
+                        <Box key={code} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                            <Box style={{ width: 6, height: 6, borderRadius: '50%', background: '#3B82F6' }} />
+                            <Text size="xs" style={{ color: isDark ? dk.textSec : '#64748B' }}>
+                                <b>{code}</b> — {classes[code]}
+                            </Text>
+                        </Box>
+                    ))}
+                </Group>
+            )}
         </Box>
     );
 }
@@ -35,6 +98,14 @@ export default function DriverForm({ data, setData, errors, statuses, licenseCla
     };
     const dropdownStyle = { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` };
 
+    const toggleClass = (code) => {
+        const current = data.license_classes ?? [];
+        const next = current.includes(code)
+            ? current.filter(c => c !== code)
+            : [...current, code];
+        setData('license_classes', next);
+    };
+
     const licenceWarning = () => {
         if (!data.license_expiry) return null;
         const days = Math.floor((new Date(data.license_expiry) - new Date()) / 86400000);
@@ -45,7 +116,7 @@ export default function DriverForm({ data, setData, errors, statuses, licenseCla
 
     return (
         <form onSubmit={onSubmit}>
-            <Section title="Personal Information" isDark={isDark}>
+            <Section icon="👤" title="Personal Information" isDark={isDark}>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <TextInput label="Full Name" placeholder="Juma Mwangi" required value={data.name} onChange={e => setData('name', e.target.value)} error={errors.name} styles={inputStyles} />
                     <Select label="Status" required value={data.status} onChange={v => setData('status', v)} data={Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))} error={errors.status} styles={{ ...inputStyles, dropdown: dropdownStyle }} />
@@ -57,25 +128,45 @@ export default function DriverForm({ data, setData, errors, statuses, licenseCla
                 </SimpleGrid>
             </Section>
 
-            <Section title="Driving Licence" isDark={isDark}>
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                    <TextInput label="Licence Number" placeholder="TZ-DL-XXXXXX" value={data.license_number ?? ''} onChange={e => setData('license_number', e.target.value)} error={errors.license_number} styles={inputStyles} />
-                    <Select label="Licence Class" value={data.license_class ?? ''} onChange={v => setData('license_class', v ?? '')} clearable data={licenseClasses.map(c => ({ value: c, label: c }))} error={errors.license_class} styles={{ ...inputStyles, dropdown: dropdownStyle }} />
+            <Section icon="🪪" title="Driving Licence" isDark={isDark}>
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" mb="lg">
+                    <TextInput
+                        label="Licence Number" placeholder="TZ-DL-XXXXXX"
+                        value={data.license_number ?? ''}
+                        onChange={e => setData('license_number', e.target.value)}
+                        error={errors.license_number} styles={inputStyles}
+                    />
                     <Stack gap={2}>
-                        <TextInput label="Licence Expiry" type="date" value={data.license_expiry ?? ''} onChange={e => setData('license_expiry', e.target.value)} error={errors.license_expiry} styles={inputStyles} />
+                        <DatePicker
+                            label="Licence Expiry"
+                            value={data.license_expiry ?? ''}
+                            onChange={v => setData('license_expiry', v)}
+                            error={errors.license_expiry} styles={inputStyles}
+                        />
                         {licenceWarning()}
                     </Stack>
                 </SimpleGrid>
+
+                {/* Licence class toggle grid */}
+                <LicenceClassToggle
+                    classes={licenseClasses}
+                    selected={data.license_classes}
+                    onToggle={toggleClass}
+                    isDark={isDark}
+                />
+                {errors.license_classes && (
+                    <Text size="xs" style={{ color: '#EF4444', marginTop: 6 }}>{errors.license_classes}</Text>
+                )}
             </Section>
 
-            <Section title="Emergency Contact" isDark={isDark}>
+            <Section icon="🚨" title="Emergency Contact" isDark={isDark}>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <TextInput label="Contact Name" placeholder="Mary Mwangi" value={data.emergency_contact_name ?? ''} onChange={e => setData('emergency_contact_name', e.target.value)} error={errors.emergency_contact_name} styles={inputStyles} />
                     <TextInput label="Contact Phone" placeholder="+255 700 000 000" value={data.emergency_contact_phone ?? ''} onChange={e => setData('emergency_contact_phone', e.target.value)} error={errors.emergency_contact_phone} styles={inputStyles} />
                 </SimpleGrid>
             </Section>
 
-            <Section title="Notes" isDark={isDark}>
+            <Section icon="📝" title="Notes" isDark={isDark}>
                 <Textarea placeholder="Additional notes…" minRows={3} value={data.notes ?? ''} onChange={e => setData('notes', e.target.value)} error={errors.notes} styles={{ label: inputStyles.label, input: { ...inputStyles.input, resize: 'vertical' } }} />
             </Section>
 

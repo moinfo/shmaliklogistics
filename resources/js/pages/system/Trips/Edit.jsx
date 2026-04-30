@@ -6,7 +6,7 @@ import TripForm from './TripForm';
 
 const dk = { textPri: '#E2E8F0', textSec: '#94A3B8' };
 
-export default function EditTrip({ trip, statuses }) {
+export default function EditTrip({ trip, statuses, drivers = [], vehicles = [] }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const textPri = isDark ? dk.textPri : '#1E293B';
@@ -49,6 +49,8 @@ export default function EditTrip({ trip, statuses }) {
                 setData={setData}
                 errors={errors}
                 statuses={statuses}
+                drivers={drivers}
+                vehicles={vehicles}
                 processing={processing}
                 onSubmit={submit}
                 backHref={`/system/trips/${trip.id}`}

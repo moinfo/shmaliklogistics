@@ -14,18 +14,29 @@ class Driver extends Model
         'name', 'status',
         'phone', 'phone_alt', 'email',
         'national_id', 'address',
-        'license_number', 'license_class', 'license_expiry',
+        'license_number', 'license_class', 'license_classes', 'license_expiry',
         'emergency_contact_name', 'emergency_contact_phone',
         'notes', 'created_by',
     ];
 
     protected $casts = [
-        'license_expiry' => 'date',
+        'license_expiry'  => 'date',
+        'license_classes' => 'array',
     ];
+
+    public function vehicle()
+    {
+        return $this->hasOne(Vehicle::class);
+    }
 
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function documents()
+    {
+        return $this->morphMany(Document::class, 'documentable');
     }
 
     public function getLicenseDaysAttribute(): ?int
@@ -43,5 +54,14 @@ class Driver extends Model
         'inactive'  => ['label' => 'Inactive',  'color' => '#475569'],
     ];
 
-    public static array $licenseClasses = ['B', 'C', 'CE', 'D', 'DE', 'Other'];
+    // Tanzania driving licence classes with descriptions
+    public static array $licenseClasses = [
+        'B'  => 'Light vehicles (up to 3,500 kg)',
+        'C1' => 'Medium goods (3,500 – 7,500 kg)',
+        'C'  => 'Heavy goods vehicles (over 7,500 kg)',
+        'CE' => 'Articulated trucks (C + trailer)',
+        'D1' => 'Minibus (up to 16 passengers)',
+        'D'  => 'Large bus (over 8 passengers)',
+        'DE' => 'Articulated bus (D + trailer)',
+    ];
 }

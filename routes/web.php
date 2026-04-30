@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\System\DashboardController;
 use App\Http\Controllers\System\TripController;
 use App\Http\Controllers\System\VehicleController;
 use App\Http\Controllers\System\DriverController;
@@ -51,7 +52,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 // ── System (protected) ──────────────────────────────────────────────────────
 Route::middleware('auth')->prefix('system')->name('system.')->group(function () {
-    Route::get('/dashboard', fn () => Inertia::render('system/Dashboard'))->name('dashboard');
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
     // Trips
     Route::resource('trips', TripController::class);

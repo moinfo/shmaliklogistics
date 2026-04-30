@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Models\Driver;
 use App\Models\Trip;
+use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -59,7 +61,25 @@ class TripController extends Controller
         return Inertia::render('system/Trips/Create', [
             'statuses'   => Trip::$statuses,
             'nextNumber' => Trip::nextNumber(),
+            'drivers'    => self::driverOptions(),
+            'vehicles'   => self::vehicleOptions(),
         ]);
+    }
+
+    private static function driverOptions()
+    {
+        return Driver::whereIn('status', ['active', 'on_trip'])
+            ->with('vehicle:id,plate,make,model_name')
+            ->orderBy('name')
+            ->get(['id', 'name', 'phone', 'status']);
+    }
+
+    private static function vehicleOptions()
+    {
+        return Vehicle::whereNotIn('status', ['maintenance', 'retired'])
+            ->with('driver:id,name,phone')
+            ->orderBy('plate')
+            ->get(['id', 'plate', 'make', 'model_name', 'type', 'driver_id']);
     }
 
     public function store(Request $request)
@@ -106,6 +126,8 @@ class TripController extends Controller
         return Inertia::render('system/Trips/Edit', [
             'trip'     => $trip,
             'statuses' => Trip::$statuses,
+            'drivers'  => self::driverOptions(),
+            'vehicles' => self::vehicleOptions(),
         ]);
     }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AppShell, Group, Text, Box, Stack, Anchor, Tooltip, ActionIcon, Burger } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useMantineColorScheme } from '@mantine/core';
@@ -89,6 +89,19 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
     const { colorScheme, setColorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const user = props.auth?.user;
+
+    const flash = props.flash ?? {};
+    const [toast, setToast] = useState(null);
+    useEffect(() => {
+        const msg = flash.success ? { type: 'success', text: flash.success }
+                  : flash.error   ? { type: 'error',   text: flash.error }
+                  : null;
+        if (msg) {
+            setToast(msg);
+            const t = setTimeout(() => setToast(null), 4000);
+            return () => clearTimeout(t);
+        }
+    }, [flash.success, flash.error]);
 
     // Auto-expand any group whose href matches the current URL
     const [expandedGroups, setExpandedGroups] = useState(() =>
@@ -307,6 +320,36 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
             </AppShell.Navbar>
 
             <AppShell.Main>
+                {/* Flash toast */}
+                <AnimatePresence>
+                    {toast && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -16 }}
+                            transition={{ duration: 0.25 }}
+                            style={{ position: 'fixed', top: 74, right: 24, zIndex: 9999 }}
+                        >
+                            <Box style={{
+                                padding: '12px 20px',
+                                borderRadius: 10,
+                                background: toast.type === 'success' ? '#065F46' : '#7F1D1D',
+                                border: `1px solid ${toast.type === 'success' ? '#10B981' : '#EF4444'}`,
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
+                                display: 'flex', alignItems: 'center', gap: 10, maxWidth: 380,
+                            }}>
+                                <Text style={{ fontSize: '1.1rem' }}>{toast.type === 'success' ? '✅' : '❌'}</Text>
+                                <Text size="sm" fw={600} c="white">{toast.text}</Text>
+                                <Box
+                                    component="button"
+                                    onClick={() => setToast(null)}
+                                    style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: 16, padding: '0 0 0 8px', lineHeight: 1 }}
+                                >×</Box>
+                            </Box>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 <Box style={{ padding: '28px 32px', maxWidth: 1440, margin: '0 auto' }}>
                     {children}
                 </Box>

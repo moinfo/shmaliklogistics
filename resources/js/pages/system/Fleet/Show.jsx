@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Box, Text, Group, Stack, SimpleGrid, Select, Tooltip, ActionIcon } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
@@ -26,9 +27,9 @@ function DocRow({ label, date, isDark }) {
     if (date) {
         const days = Math.floor((new Date(date) - new Date()) / 86400000);
         display = new Date(date).toLocaleDateString('en-TZ', { day: '2-digit', month: 'short', year: 'numeric' });
-        if (days < 0)   { display += ' (EXPIRED)'; color = '#EF4444'; }
+        if (days < 0)        { display += ' (EXPIRED)';       color = '#EF4444'; }
         else if (days <= 30) { display += ` (${days}d left)`; color = '#F59E0B'; }
-        else { color = '#22C55E'; }
+        else                 { color = '#22C55E'; }
     }
     return (
         <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: `1px solid ${divider}` }}>
@@ -39,10 +40,10 @@ function DocRow({ label, date, isDark }) {
 }
 
 function Card({ title, children, isDark, accent }) {
-    const cardBg = isDark ? dk.card : '#ffffff';
+    const cardBg     = isDark ? dk.card : '#ffffff';
     const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const textPri = isDark ? dk.textPri : '#1E293B';
-    const divider = isDark ? dk.divider : '#E2E8F0';
+    const textPri    = isDark ? dk.textPri : '#1E293B';
+    const divider    = isDark ? dk.divider : '#E2E8F0';
     return (
         <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden' }}>
             {accent && <Box style={{ height: 3, background: `linear-gradient(90deg, ${accent[0]}, ${accent[1]})` }} />}
@@ -54,10 +55,11 @@ function Card({ title, children, isDark, accent }) {
     );
 }
 
-export default function ShowVehicle({ vehicle, trips, statuses, typeIcons }) {
+export default function ShowVehicle({ vehicle, trips, statuses, typeIcons, availableDrivers, driverStatuses, licenseClasses, customDocumentTypes = [] }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const { props } = usePage();
+    const [assignDriverId, setAssignDriverId] = useState(vehicle.driver?.id ? String(vehicle.driver.id) : null);
 
     const cardBg     = isDark ? dk.card : '#ffffff';
     const cardBorder = isDark ? dk.border : '#E2E8F0';
@@ -70,10 +72,18 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons }) {
     const typeIcon = typeIcons?.[vehicle.type] ?? '🚗';
     const flash    = props.flash ?? {};
 
+    const driver  = vehicle.driver;
+    const dMeta   = driver ? (driverStatuses?.[driver.status] ?? { label: driver.status, color: '#94A3B8' }) : null;
+    const dInitials = driver ? driver.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() : '';
+
     const confirmDelete = () => {
         if (window.confirm(`Remove ${vehicle.plate} from fleet?`)) {
             router.delete(`/system/fleet/${vehicle.id}`);
         }
+    };
+
+    const doAssignDriver = () => {
+        router.patch(`/system/fleet/${vehicle.id}/driver`, { driver_id: assignDriverId ?? null });
     };
 
     return (
@@ -122,10 +132,10 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons }) {
             {/* Quick specs bar */}
             <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="md">
                 {[
-                    { icon: '⚖️', label: 'Payload',   value: vehicle.payload_tons ? `${vehicle.payload_tons} tons` : '—' },
-                    { icon: '🔢', label: 'Mileage',   value: vehicle.mileage_km ? `${Number(vehicle.mileage_km).toLocaleString()} km` : '—' },
-                    { icon: '⛽', label: 'Fuel',      value: vehicle.fuel_type ? vehicle.fuel_type.charAt(0).toUpperCase() + vehicle.fuel_type.slice(1) + (vehicle.fuel_tank_capacity_l ? ` · ${vehicle.fuel_tank_capacity_l}L` : '') : '—' },
-                    { icon: '👤', label: 'Driver',    value: vehicle.driver?.name ?? 'Unassigned' },
+                    { icon: '⚖️', label: 'Payload', value: vehicle.payload_tons ? `${vehicle.payload_tons} tons` : '—' },
+                    { icon: '🔢', label: 'Mileage', value: vehicle.mileage_km ? `${Number(vehicle.mileage_km).toLocaleString()} km` : '—' },
+                    { icon: '⛽', label: 'Fuel',    value: vehicle.fuel_type ? vehicle.fuel_type.charAt(0).toUpperCase() + vehicle.fuel_type.slice(1) + (vehicle.fuel_tank_capacity_l ? ` · ${vehicle.fuel_tank_capacity_l}L` : '') : '—' },
+                    { icon: '👤', label: 'Driver',  value: driver?.name ?? 'Unassigned' },
                 ].map(s => (
                     <Box key={s.label} style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 12, padding: '14px 16px' }}>
                         <Group gap={6} mb={4}>
@@ -136,6 +146,70 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons }) {
                     </Box>
                 ))}
             </SimpleGrid>
+
+            {/* Assigned Driver */}
+            <Box mb="md">
+                <Card title="Assigned Driver" isDark={isDark} accent={['#1565C0', '#2196F3']}>
+                    {driver ? (
+                        <Group gap="md" align="center" style={{ padding: '10px 0 14px', borderBottom: `1px solid ${divider}` }}>
+                            {/* Avatar */}
+                            <Box style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #1565C0, #2196F3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 3px 10px rgba(33,150,243,0.35)' }}>
+                                <Text c="white" fw={900} size="sm">{dInitials}</Text>
+                            </Box>
+
+                            <Stack gap={3} style={{ flex: 1 }}>
+                                <Group gap="sm" wrap="wrap">
+                                    <Text fw={800} size="sm" style={{ color: textPri }}>{driver.name}</Text>
+                                    <Box style={{ background: dMeta.color + '1A', border: `1px solid ${dMeta.color}40`, borderRadius: 20, padding: '3px 10px' }}>
+                                        <Text size="xs" fw={700} style={{ color: dMeta.color }}>{dMeta.label}</Text>
+                                    </Box>
+                                </Group>
+                                <Text size="xs" style={{ color: textSec }}>{driver.phone}</Text>
+                                {(driver.license_classes ?? []).length > 0 && (
+                                    <Group gap={5} mt={2}>
+                                        {(driver.license_classes ?? []).map(code => (
+                                            <Tooltip key={code} label={licenseClasses?.[code] ?? code} withArrow position="top">
+                                                <Box style={{ background: 'rgba(33,150,243,0.12)', border: '1px solid rgba(33,150,243,0.3)', borderRadius: 5, padding: '2px 8px', color: '#60A5FA', fontWeight: 800, fontSize: 12, cursor: 'default' }}>
+                                                    {code}
+                                                </Box>
+                                            </Tooltip>
+                                        ))}
+                                    </Group>
+                                )}
+                            </Stack>
+
+                            <Box component={Link} href={`/system/drivers/${driver.id}`} style={{ padding: '7px 14px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                View →
+                            </Box>
+                        </Group>
+                    ) : (
+                        <Text size="sm" style={{ color: textMut, paddingTop: 10, paddingBottom: 4 }}>No driver currently assigned.</Text>
+                    )}
+
+                    <Group align="flex-end" gap="sm" mt="md">
+                        <Box style={{ flex: 1 }}>
+                            <Select
+                                label={driver ? 'Change Driver' : 'Assign Driver'}
+                                placeholder="Select a driver…"
+                                value={assignDriverId}
+                                onChange={v => setAssignDriverId(v)}
+                                clearable
+                                data={availableDrivers.map(d => ({ value: String(d.id), label: `${d.name} — ${d.phone}` }))}
+                                styles={{
+                                    label:    { color: textSec, fontSize: 13, marginBottom: 4 },
+                                    input:    { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 },
+                                    dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` },
+                                }}
+                            />
+                        </Box>
+                        <motion.div whileTap={{ scale: 0.97 }}>
+                            <Box component="button" type="button" onClick={doAssignDriver} style={{ padding: '10px 22px', borderRadius: 8, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 12px rgba(33,150,243,0.25)', marginBottom: 1 }}>
+                                {driver ? 'Reassign' : 'Assign'}
+                            </Box>
+                        </motion.div>
+                    </Group>
+                </Card>
+            </Box>
 
             <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md" mb="md">
                 {/* Identity */}
@@ -159,6 +233,14 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons }) {
                     <DocRow label="TRA Sticker"           date={vehicle.tra_sticker_expiry}           isDark={isDark} />
                     <DocRow label="Goods Vehicle Licence" date={vehicle.goods_vehicle_licence_expiry} isDark={isDark} />
                     <DocRow label="Next Service"          date={vehicle.next_service_date}            isDark={isDark} />
+                    {customDocumentTypes.map(dt => (
+                        <DocRow
+                            key={dt.id}
+                            label={dt.name}
+                            date={(vehicle.extra_documents ?? {})[String(dt.id)] ?? null}
+                            isDark={isDark}
+                        />
+                    ))}
                 </Card>
             </SimpleGrid>
 
@@ -174,11 +256,7 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons }) {
                             ))}
                         </Box>
                         {trips.map(t => (
-                            <Box
-                                key={t.id}
-                                style={{ display: 'grid', gridTemplateColumns: '120px 1fr 120px 140px', padding: '10px 0', borderBottom: `1px solid ${divider}`, cursor: 'pointer', transition: 'background 0.15s' }}
-                                onClick={() => router.visit(`/system/trips/${t.id}`)}
-                            >
+                            <Box key={t.id} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 120px 140px', padding: '10px 0', borderBottom: `1px solid ${divider}`, cursor: 'pointer', transition: 'background 0.15s' }} onClick={() => router.visit(`/system/trips/${t.id}`)}>
                                 <Text size="sm" fw={700} style={{ color: '#3B82F6' }}>{t.trip_number}</Text>
                                 <Text size="sm" style={{ color: textPri }}>{t.route_from} → {t.route_to}</Text>
                                 <Text size="sm" style={{ color: textSec }}>{t.departure_date}</Text>

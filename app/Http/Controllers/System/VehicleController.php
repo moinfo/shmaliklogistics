@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Models\LicenseClass;
 use App\Models\Vehicle;
 use App\Models\Driver;
+use App\Models\VehicleDocumentType;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -56,11 +58,12 @@ class VehicleController extends Controller
     public function create()
     {
         return Inertia::render('system/Fleet/Create', [
-            'statuses'   => Vehicle::$statuses,
-            'types'      => Vehicle::$types,
-            'fuelTypes'  => Vehicle::$fuelTypes,
-            'typeIcons'  => Vehicle::$typeIcons,
-            'drivers'    => Driver::whereIn('status', ['active', 'idle'])->orderBy('name')->get(['id', 'name', 'phone']),
+            'statuses'            => Vehicle::$statuses,
+            'types'               => Vehicle::$types,
+            'fuelTypes'           => Vehicle::$fuelTypes,
+            'typeIcons'           => Vehicle::$typeIcons,
+            'drivers'             => Driver::whereIn('status', ['active', 'idle'])->orderBy('name')->get(['id', 'name', 'phone']),
+            'customDocumentTypes' => VehicleDocumentType::active()->custom()->orderBy('sort_order')->get(['id', 'name']),
         ]);
     }
 
@@ -89,6 +92,8 @@ class VehicleController extends Controller
             'next_service_date'            => 'nullable|date',
             'owner_name'                   => 'nullable|string|max:100',
             'notes'                        => 'nullable|string',
+            'extra_documents'              => 'nullable|array',
+            'extra_documents.*'            => 'nullable|date',
         ]);
 
         $data['plate']          = strtoupper($data['plate']);
@@ -110,23 +115,35 @@ class VehicleController extends Controller
             ->limit(10)
             ->get();
 
+        // Available drivers for quick-assign (active or already on this vehicle)
+        $availableDrivers = Driver::where(function ($q) use ($vehicle) {
+            $q->whereIn('status', ['active', 'idle'])
+              ->orWhere('id', $vehicle->driver_id);
+        })->orderBy('name')->get(['id', 'name', 'phone', 'status', 'license_classes']);
+
         return Inertia::render('system/Fleet/Show', [
-            'vehicle'   => $vehicle,
-            'trips'     => $trips,
-            'statuses'  => Vehicle::$statuses,
-            'typeIcons' => Vehicle::$typeIcons,
+            'vehicle'             => $vehicle,
+            'trips'               => $trips,
+            'statuses'            => Vehicle::$statuses,
+            'driverStatuses'      => Driver::$statuses,
+            'licenseClasses'      => LicenseClass::active()->orderBy('sort_order')->get()
+                ->mapWithKeys(fn($c) => [$c->code => "{$c->name} ({$c->description})"])->toArray(),
+            'typeIcons'           => Vehicle::$typeIcons,
+            'availableDrivers'    => $availableDrivers,
+            'customDocumentTypes' => VehicleDocumentType::active()->custom()->orderBy('sort_order')->get(['id', 'name']),
         ]);
     }
 
     public function edit(Vehicle $vehicle)
     {
         return Inertia::render('system/Fleet/Edit', [
-            'vehicle'   => $vehicle,
-            'statuses'  => Vehicle::$statuses,
-            'types'     => Vehicle::$types,
-            'fuelTypes' => Vehicle::$fuelTypes,
-            'typeIcons' => Vehicle::$typeIcons,
-            'drivers'   => Driver::orderBy('name')->get(['id', 'name', 'phone']),
+            'vehicle'             => $vehicle,
+            'statuses'            => Vehicle::$statuses,
+            'types'               => Vehicle::$types,
+            'fuelTypes'           => Vehicle::$fuelTypes,
+            'typeIcons'           => Vehicle::$typeIcons,
+            'drivers'             => Driver::orderBy('name')->get(['id', 'name', 'phone']),
+            'customDocumentTypes' => VehicleDocumentType::active()->custom()->orderBy('sort_order')->get(['id', 'name']),
         ]);
     }
 
@@ -155,6 +172,8 @@ class VehicleController extends Controller
             'next_service_date'            => 'nullable|date',
             'owner_name'                   => 'nullable|string|max:100',
             'notes'                        => 'nullable|string',
+            'extra_documents'              => 'nullable|array',
+            'extra_documents.*'            => 'nullable|date',
         ]);
 
         $data['plate']          = strtoupper($data['plate']);
@@ -171,6 +190,27 @@ class VehicleController extends Controller
 
         return redirect()->route('system.fleet.index')
             ->with('success', "Vehicle {$vehicle->plate} removed from fleet.");
+    }
+
+    public function assignDriver(Request $request, Vehicle $vehicle)
+    {
+        $request->validate(['driver_id' => 'nullable|exists:drivers,id']);
+
+        // Unassign the new driver from any other vehicle first
+        if ($request->driver_id) {
+            Vehicle::where('driver_id', $request->driver_id)
+                ->where('id', '!=', $vehicle->id)
+                ->update(['driver_id' => null]);
+        }
+
+        $vehicle->update(['driver_id' => $request->driver_id]);
+
+        $driver = $request->driver_id ? Driver::find($request->driver_id) : null;
+        $msg = $driver
+            ? "{$driver->name} assigned to {$vehicle->plate}."
+            : "Driver removed from {$vehicle->plate}.";
+
+        return back()->with('success', $msg);
     }
 
     public function updateStatus(Request $request, Vehicle $vehicle)

@@ -16,7 +16,7 @@ export default function EditDriver({ driver, statuses, licenseClasses }) {
         name: driver.name, status: driver.status,
         phone: driver.phone, phone_alt: driver.phone_alt ?? '', email: driver.email ?? '',
         national_id: driver.national_id ?? '', address: driver.address ?? '',
-        license_number: driver.license_number ?? '', license_class: driver.license_class ?? '',
+        license_number: driver.license_number ?? '', license_classes: driver.license_classes ?? [],
         license_expiry: fmt(driver.license_expiry),
         emergency_contact_name: driver.emergency_contact_name ?? '',
         emergency_contact_phone: driver.emergency_contact_phone ?? '',

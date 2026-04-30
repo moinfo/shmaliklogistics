@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import { Box, Text, Group, Stack, SimpleGrid, TextInput, Textarea, Select, NumberInput } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
+import DatePicker from '../../../components/DatePicker';
 
 const dk = {
     card:    '#0F1E32',
@@ -188,7 +189,7 @@ function VehiclePreview({ data, drivers, typeIcons, isDark }) {
 
 // ─── Main form ───────────────────────────────────────────────────────────────
 
-export default function VehicleForm({ data, setData, errors, statuses, types, fuelTypes = ['diesel', 'petrol', 'cng'], typeIcons = {}, drivers = [], processing, onSubmit, backHref, submitLabel = 'Save Vehicle' }) {
+export default function VehicleForm({ data, setData, errors, statuses, types, fuelTypes = ['diesel', 'petrol', 'cng'], typeIcons = {}, drivers = [], customDocumentTypes = [], processing, onSubmit, backHref, submitLabel = 'Save Vehicle' }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
 
@@ -341,15 +342,34 @@ export default function VehicleForm({ data, setData, errors, statuses, types, fu
                                 { key: 'next_service_date',            label: 'Next Service Date' },
                             ].map(({ key, label }) => (
                                 <Stack key={key} gap={2}>
-                                    <TextInput
-                                        label={label} type="date"
+                                    <DatePicker
+                                        label={label}
                                         value={data[key] ?? ''}
-                                        onChange={e => setData(key, e.target.value)}
+                                        onChange={v => setData(key, v)}
                                         error={errors[key]} styles={inputStyles}
                                     />
                                     {docWarning(data[key])}
                                 </Stack>
                             ))}
+
+                            {/* Custom document types from settings */}
+                            {customDocumentTypes.map((docType) => {
+                                const val = (data.extra_documents ?? {})[String(docType.id)] ?? '';
+                                return (
+                                    <Stack key={docType.id} gap={2}>
+                                        <DatePicker
+                                            label={docType.name}
+                                            value={val}
+                                            onChange={v => setData('extra_documents', {
+                                                ...(data.extra_documents ?? {}),
+                                                [String(docType.id)]: v,
+                                            })}
+                                            styles={inputStyles}
+                                        />
+                                        {docWarning(val)}
+                                    </Stack>
+                                );
+                            })}
                         </SimpleGrid>
                     </Section>
 

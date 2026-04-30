@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Box, Text, Group, Stack, SimpleGrid, Select, Tooltip, ActionIcon } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
@@ -22,9 +23,9 @@ function DocRow({ label, date, isDark }) {
     if (date) {
         const days = Math.floor((new Date(date) - new Date()) / 86400000);
         display = new Date(date).toLocaleDateString('en-TZ', { day: '2-digit', month: 'short', year: 'numeric' });
-        if (days < 0) { display += ' (EXPIRED)'; color = '#EF4444'; }
+        if (days < 0)        { display += ' (EXPIRED)';       color = '#EF4444'; }
         else if (days <= 30) { display += ` (${days}d left)`; color = '#F59E0B'; }
-        else color = '#22C55E';
+        else                 { color = '#22C55E'; }
     }
     return (
         <Box style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: `1px solid ${d.divider}` }}>
@@ -35,10 +36,10 @@ function DocRow({ label, date, isDark }) {
 }
 
 function Card({ title, children, isDark, accent }) {
-    const cardBg = isDark ? dk.card : '#ffffff';
+    const cardBg     = isDark ? dk.card : '#ffffff';
     const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const textPri = isDark ? dk.textPri : '#1E293B';
-    const divider = isDark ? dk.divider : '#E2E8F0';
+    const textPri    = isDark ? dk.textPri : '#1E293B';
+    const divider    = isDark ? dk.divider : '#E2E8F0';
     return (
         <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden' }}>
             {accent && <Box style={{ height: 3, background: `linear-gradient(90deg, ${accent[0]}, ${accent[1]})` }} />}
@@ -59,10 +60,11 @@ function Avatar({ name, size = 56 }) {
     );
 }
 
-export default function ShowDriver({ driver, trips, statuses }) {
+export default function ShowDriver({ driver, trips, statuses, licenseClasses, availableVehicles, vehicleStatuses, vehicleTypeIcons }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const { props } = usePage();
+    const [assignVehicleId, setAssignVehicleId] = useState(driver.vehicle?.id ? String(driver.vehicle.id) : null);
 
     const cardBg     = isDark ? dk.card : '#ffffff';
     const cardBorder = isDark ? dk.border : '#E2E8F0';
@@ -71,13 +73,21 @@ export default function ShowDriver({ driver, trips, statuses }) {
     const textMut    = isDark ? dk.textMut : '#94A3B8';
     const divider    = isDark ? dk.divider : '#E2E8F0';
 
-    const meta = statuses[driver.status] ?? { label: driver.status, color: '#94A3B8' };
+    const meta  = statuses[driver.status] ?? { label: driver.status, color: '#94A3B8' };
     const flash = props.flash ?? {};
+
+    const vehicle = driver.vehicle;
+    const vMeta   = vehicle ? (vehicleStatuses?.[vehicle.status] ?? { label: vehicle.status, color: '#94A3B8' }) : null;
+    const vIcon   = vehicle ? (vehicleTypeIcons?.[vehicle.type] ?? '🚗') : null;
 
     const confirmDelete = () => {
         if (window.confirm(`Remove ${driver.name} from the system?`)) {
             router.delete(`/system/drivers/${driver.id}`);
         }
+    };
+
+    const doAssignVehicle = () => {
+        router.patch(`/system/drivers/${driver.id}/vehicle`, { vehicle_id: assignVehicleId ?? null });
     };
 
     return (
@@ -91,7 +101,7 @@ export default function ShowDriver({ driver, trips, statuses }) {
             )}
 
             {/* Header */}
-            <Group justify="space-between" mb="xl" align="flex-start">
+            <Group justify="space-between" mb="xl" align="flex-start" wrap="wrap" gap="md">
                 <Group gap="md">
                     <Avatar name={driver.name} />
                     <Stack gap={4}>
@@ -101,10 +111,10 @@ export default function ShowDriver({ driver, trips, statuses }) {
                                 <Text size="xs" fw={700} style={{ color: meta.color }}>{meta.label}</Text>
                             </Box>
                         </Group>
-                        <Text size="sm" style={{ color: textSec }}>{driver.phone}{driver.license_class ? ` · Class ${driver.license_class}` : ''}</Text>
+                        <Text size="sm" style={{ color: textSec }}>{driver.phone}</Text>
                     </Stack>
                 </Group>
-                <Group gap="sm">
+                <Group gap="sm" wrap="wrap">
                     <Select
                         value={driver.status}
                         onChange={s => router.patch(`/system/drivers/${driver.id}/status`, { status: s })}
@@ -123,22 +133,88 @@ export default function ShowDriver({ driver, trips, statuses }) {
 
             <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md" mb="md">
                 <Card title="Personal Details" isDark={isDark} accent={['#1565C0', '#2196F3']}>
-                    <DataRow label="Full Name"   value={driver.name}       isDark={isDark} />
-                    <DataRow label="Phone"       value={driver.phone}      isDark={isDark} />
-                    <DataRow label="Alt. Phone"  value={driver.phone_alt}  isDark={isDark} />
-                    <DataRow label="Email"       value={driver.email}      isDark={isDark} />
+                    <DataRow label="Full Name"   value={driver.name}        isDark={isDark} />
+                    <DataRow label="Phone"       value={driver.phone}       isDark={isDark} />
+                    <DataRow label="Alt. Phone"  value={driver.phone_alt}   isDark={isDark} />
+                    <DataRow label="Email"       value={driver.email}       isDark={isDark} />
                     <DataRow label="National ID" value={driver.national_id} isDark={isDark} />
-                    <DataRow label="Address"     value={driver.address}    isDark={isDark} />
+                    <DataRow label="Address"     value={driver.address}     isDark={isDark} />
                 </Card>
 
                 <Card title="Licence & Emergency" isDark={isDark} accent={['#065F46', '#059669']}>
-                    <DataRow label="Licence #"       value={driver.license_number}  isDark={isDark} />
-                    <DataRow label="Licence Class"   value={driver.license_class}   isDark={isDark} />
-                    <DocRow  label="Licence Expiry"  date={driver.license_expiry}   isDark={isDark} />
+                    <DataRow label="Licence #"      value={driver.license_number}         isDark={isDark} />
+                    <DocRow  label="Licence Expiry" date={driver.license_expiry}          isDark={isDark} />
+
+                    {/* Licence class badges */}
+                    <Box style={{ padding: '10px 0', borderBottom: `1px solid ${divider}` }}>
+                        <Text size="sm" style={{ color: textSec, marginBottom: (driver.license_classes ?? []).length > 0 ? 6 : 0 }}>Licence Classes</Text>
+                        {(driver.license_classes ?? []).length === 0 ? (
+                            <Text size="sm" fw={600} style={{ color: textPri }}>—</Text>
+                        ) : (
+                            <Group gap={6} wrap="wrap">
+                                {(driver.license_classes ?? []).map(code => (
+                                    <Tooltip key={code} label={licenseClasses?.[code] ?? code} withArrow position="top">
+                                        <Box style={{ background: 'rgba(33,150,243,0.12)', border: '1px solid rgba(33,150,243,0.3)', borderRadius: 6, padding: '3px 10px', color: '#60A5FA', fontWeight: 800, fontSize: 13, cursor: 'default' }}>
+                                            {code}
+                                        </Box>
+                                    </Tooltip>
+                                ))}
+                            </Group>
+                        )}
+                    </Box>
+
                     <DataRow label="Emergency Name"  value={driver.emergency_contact_name}  isDark={isDark} />
                     <DataRow label="Emergency Phone" value={driver.emergency_contact_phone} isDark={isDark} />
                 </Card>
             </SimpleGrid>
+
+            {/* Assigned Vehicle */}
+            <Box mb="md">
+                <Card title="Assigned Vehicle" isDark={isDark} accent={['#0E4FA0', '#3B82F6']}>
+                    {vehicle ? (
+                        <Group gap="md" align="center" style={{ padding: '10px 0 14px', borderBottom: `1px solid ${divider}` }}>
+                            <Box style={{ fontSize: '1.8rem', lineHeight: 1 }}>{vIcon}</Box>
+                            <Stack gap={3} style={{ flex: 1 }}>
+                                <Group gap="sm">
+                                    <Text fw={900} style={{ color: textPri, fontFamily: 'monospace', letterSpacing: 2, fontSize: 15 }}>{vehicle.plate}</Text>
+                                    <Box style={{ background: vMeta.color + '1A', border: `1px solid ${vMeta.color}40`, borderRadius: 20, padding: '3px 10px' }}>
+                                        <Text size="xs" fw={700} style={{ color: vMeta.color }}>{vMeta.label}</Text>
+                                    </Box>
+                                </Group>
+                                <Text size="sm" style={{ color: textSec }}>{vehicle.make} {vehicle.model_name} · {vehicle.type}</Text>
+                            </Stack>
+                            <Box component={Link} href={`/system/fleet/${vehicle.id}`} style={{ padding: '7px 14px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                View →
+                            </Box>
+                        </Group>
+                    ) : (
+                        <Text size="sm" style={{ color: textMut, paddingTop: 10, paddingBottom: 4 }}>No vehicle currently assigned.</Text>
+                    )}
+
+                    <Group align="flex-end" gap="sm" mt="md">
+                        <Box style={{ flex: 1 }}>
+                            <Select
+                                label={vehicle ? 'Change Vehicle' : 'Assign Vehicle'}
+                                placeholder="Select a vehicle…"
+                                value={assignVehicleId}
+                                onChange={v => setAssignVehicleId(v)}
+                                clearable
+                                data={availableVehicles.map(v => ({ value: String(v.id), label: `${v.plate} — ${v.make} ${v.model_name}` }))}
+                                styles={{
+                                    label:    { color: textSec, fontSize: 13, marginBottom: 4 },
+                                    input:    { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 },
+                                    dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` },
+                                }}
+                            />
+                        </Box>
+                        <motion.div whileTap={{ scale: 0.97 }}>
+                            <Box component="button" type="button" onClick={doAssignVehicle} style={{ padding: '10px 22px', borderRadius: 8, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 12px rgba(33,150,243,0.25)', marginBottom: 1 }}>
+                                {vehicle ? 'Reassign' : 'Assign'}
+                            </Box>
+                        </motion.div>
+                    </Group>
+                </Card>
+            </Box>
 
             {/* Trip history */}
             <Card title={`Recent Trips by ${driver.name}`} isDark={isDark} accent={['#0E4FA0', '#3B82F6']}>

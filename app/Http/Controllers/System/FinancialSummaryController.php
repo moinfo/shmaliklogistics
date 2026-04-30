@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\System;
 
+use App\Http\Controllers\Concerns\UsesDateExtract;
 use App\Http\Controllers\Controller;
 use App\Models\BillingDocument;
 use App\Models\Expense;
@@ -12,6 +13,7 @@ use Inertia\Inertia;
 
 class FinancialSummaryController extends Controller
 {
+    use UsesDateExtract;
     public function index(Request $request)
     {
         $year  = $request->get('year', now()->year);
@@ -22,7 +24,7 @@ class FinancialSummaryController extends Controller
         if ($month) $revenueQuery->whereMonth('payment_date', $month);
 
         $monthlyRevenue = (clone $revenueQuery)
-            ->selectRaw('MONTH(payment_date) as month, SUM(amount) as total')
+            ->selectRaw("{$this->monthExpr('payment_date')} as month, SUM(amount) as total")
             ->groupBy('month')
             ->orderBy('month')
             ->get()
@@ -33,7 +35,7 @@ class FinancialSummaryController extends Controller
         if ($month) $expenseQuery->whereMonth('expense_date', $month);
 
         $monthlyExpenses = (clone $expenseQuery)
-            ->selectRaw('MONTH(expense_date) as month, SUM(amount) as total')
+            ->selectRaw("{$this->monthExpr('expense_date')} as month, SUM(amount) as total")
             ->groupBy('month')
             ->orderBy('month')
             ->get()
@@ -44,7 +46,7 @@ class FinancialSummaryController extends Controller
             ->where('currency', 'TZS')
             ->whereYear('service_date', $year)
             ->when($month, fn ($q) => $q->whereMonth('service_date', $month))
-            ->selectRaw('MONTH(service_date) as month, SUM(cost) as total')
+            ->selectRaw("{$this->monthExpr('service_date')} as month, SUM(cost) as total")
             ->groupBy('month')
             ->get()
             ->keyBy('month');
@@ -81,12 +83,16 @@ class FinancialSummaryController extends Controller
             ->get();
 
         // Outstanding invoices
-        $outstanding = BillingDocument::where('type', 'invoice')
+        $outstandingIds = BillingDocument::where('type', 'invoice')
             ->whereIn('status', ['sent', 'partial'])
-            ->selectRaw('SUM(total_amount) as billed, SUM(amount_paid) as received')
-            ->first();
+            ->pluck('id');
 
-        $availableYears = Payment::selectRaw('YEAR(payment_date) as year')
+        $outstanding = (object) [
+            'billed'   => BillingDocument::whereIn('id', $outstandingIds)->sum('total'),
+            'received' => Payment::whereIn('billing_document_id', $outstandingIds)->sum('amount'),
+        ];
+
+        $availableYears = Payment::selectRaw("{$this->yearExpr('payment_date')} as year")
             ->groupBy('year')
             ->orderByDesc('year')
             ->pluck('year');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\System;
 
+use App\Http\Controllers\Concerns\UsesDateExtract;
 use App\Http\Controllers\Controller;
 use App\Models\Trip;
 use App\Models\Vehicle;
@@ -10,6 +11,7 @@ use Inertia\Inertia;
 
 class FleetUtilizationController extends Controller
 {
+    use UsesDateExtract;
     public function index(Request $request)
     {
         $year  = $request->get('year', now()->year);
@@ -45,12 +47,12 @@ class FleetUtilizationController extends Controller
         // Monthly breakdown (trips + revenue)
         $monthly = Trip::whereIn('status', ['delivered', 'completed'])
             ->whereYear('departure_date', $year)
-            ->selectRaw('MONTH(departure_date) as month, COUNT(*) as trips, SUM(freight_amount) as revenue')
+            ->selectRaw("{$this->monthExpr('departure_date')} as month, COUNT(*) as trips, SUM(freight_amount) as revenue")
             ->groupBy('month')
             ->orderBy('month')
             ->get();
 
-        $availableYears = Trip::selectRaw('YEAR(departure_date) as year')
+        $availableYears = Trip::selectRaw("{$this->yearExpr('departure_date')} as year")
             ->groupBy('year')
             ->orderByDesc('year')
             ->pluck('year');

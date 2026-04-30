@@ -11,18 +11,24 @@ class Vehicle extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'plate', 'status', 'driver_id', 'make', 'model_name', 'year', 'type', 'color',
+        'plate', 'chassis_number', 'engine_number',
+        'status', 'driver_id',
+        'make', 'model_name', 'year', 'type', 'color',
         'payload_tons', 'mileage_km',
-        'insurance_expiry', 'road_licence_expiry', 'fitness_expiry', 'next_service_date',
+        'fuel_type', 'fuel_tank_capacity_l',
+        'insurance_expiry', 'road_licence_expiry', 'fitness_expiry',
+        'tra_sticker_expiry', 'goods_vehicle_licence_expiry', 'next_service_date',
         'owner_name', 'notes', 'created_by',
     ];
 
     protected $casts = [
-        'insurance_expiry'    => 'date',
-        'road_licence_expiry' => 'date',
-        'fitness_expiry'      => 'date',
-        'next_service_date'   => 'date',
-        'payload_tons'        => 'decimal:2',
+        'insurance_expiry'             => 'date',
+        'road_licence_expiry'          => 'date',
+        'fitness_expiry'               => 'date',
+        'tra_sticker_expiry'           => 'date',
+        'goods_vehicle_licence_expiry' => 'date',
+        'next_service_date'            => 'date',
+        'payload_tons'                 => 'decimal:2',
     ];
 
     public function driver()
@@ -33,12 +39,6 @@ class Vehicle extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
-    }
-
-    // How many days until a document expires (negative = already expired)
-    public function daysUntil(string $field): ?int
-    {
-        return $this->$field ? (int) now()->startOfDay()->diffInDays($this->$field->startOfDay(), false) : null;
     }
 
     public static array $statuses = [
@@ -53,5 +53,18 @@ class Vehicle extends Model
 
     public static array $types = [
         'Flatbed', 'Container', 'Lowboy', 'Reefer', 'Tipper', 'Tanker', 'Box Body', 'Other',
+    ];
+
+    public static array $fuelTypes = ['diesel', 'petrol', 'cng'];
+
+    public static array $typeIcons = [
+        'Flatbed'   => '🚛',
+        'Container' => '📦',
+        'Lowboy'    => '🏗️',
+        'Reefer'    => '❄️',
+        'Tipper'    => '🏔️',
+        'Tanker'    => '🛢️',
+        'Box Body'  => '📫',
+        'Other'     => '🚗',
     ];
 }

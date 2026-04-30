@@ -6,28 +6,29 @@ import DashboardLayout from '../../../layouts/DashboardLayout';
 
 const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
 
-function DataRow({ label, value, isDark }) {
+function DataRow({ label, value, isDark, mono }) {
     const textSec = isDark ? dk.textSec : '#64748B';
     const textPri = isDark ? dk.textPri : '#1E293B';
     const divider = isDark ? dk.divider : '#E2E8F0';
     return (
         <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: `1px solid ${divider}` }}>
             <Text size="sm" style={{ color: textSec }}>{label}</Text>
-            <Text size="sm" fw={600} style={{ color: textPri }}>{value ?? '—'}</Text>
+            <Text size="sm" fw={600} style={{ color: textPri, fontFamily: mono ? 'monospace' : undefined }}>{value ?? '—'}</Text>
         </Box>
     );
 }
 
 function DocRow({ label, date, isDark }) {
     const textSec = isDark ? dk.textSec : '#64748B';
+    const textPri = isDark ? dk.textPri : '#1E293B';
     const divider = isDark ? dk.divider : '#E2E8F0';
-    let display = '—'; let color = isDark ? dk.textPri : '#1E293B';
+    let display = '—'; let color = textPri;
     if (date) {
         const days = Math.floor((new Date(date) - new Date()) / 86400000);
         display = new Date(date).toLocaleDateString('en-TZ', { day: '2-digit', month: 'short', year: 'numeric' });
-        if (days < 0) { display += ' (EXPIRED)'; color = '#EF4444'; }
+        if (days < 0)   { display += ' (EXPIRED)'; color = '#EF4444'; }
         else if (days <= 30) { display += ` (${days}d left)`; color = '#F59E0B'; }
-        else color = '#22C55E';
+        else { color = '#22C55E'; }
     }
     return (
         <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: `1px solid ${divider}` }}>
@@ -53,7 +54,7 @@ function Card({ title, children, isDark, accent }) {
     );
 }
 
-export default function ShowVehicle({ vehicle, trips, statuses }) {
+export default function ShowVehicle({ vehicle, trips, statuses, typeIcons }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const { props } = usePage();
@@ -65,8 +66,9 @@ export default function ShowVehicle({ vehicle, trips, statuses }) {
     const textMut    = isDark ? dk.textMut : '#94A3B8';
     const divider    = isDark ? dk.divider : '#E2E8F0';
 
-    const meta = statuses[vehicle.status] ?? { label: vehicle.status, color: '#94A3B8' };
-    const flash = props.flash ?? {};
+    const meta     = statuses[vehicle.status] ?? { label: vehicle.status, color: '#94A3B8' };
+    const typeIcon = typeIcons?.[vehicle.type] ?? '🚗';
+    const flash    = props.flash ?? {};
 
     const confirmDelete = () => {
         if (window.confirm(`Remove ${vehicle.plate} from fleet?`)) {
@@ -84,17 +86,23 @@ export default function ShowVehicle({ vehicle, trips, statuses }) {
                 </motion.div>
             )}
 
-            <Group justify="space-between" mb="xl">
-                <Stack gap={4}>
-                    <Group gap="md">
-                        <Text fw={800} size="xl" style={{ color: textPri }}>{vehicle.plate}</Text>
-                        <Box style={{ background: meta.color + '1A', border: `1px solid ${meta.color}40`, borderRadius: 20, padding: '4px 12px' }}>
-                            <Text size="xs" fw={700} style={{ color: meta.color }}>{meta.label}</Text>
-                        </Box>
-                    </Group>
-                    <Text size="sm" style={{ color: textSec }}>{vehicle.make} {vehicle.model_name} · {vehicle.year} · {vehicle.type}</Text>
-                </Stack>
-                <Group gap="sm">
+            {/* Header */}
+            <Group justify="space-between" mb="xl" align="flex-start" wrap="wrap" gap="md">
+                <Group gap="md" align="center">
+                    <Box style={{ width: 56, height: 56, borderRadius: 14, background: isDark ? 'rgba(33,150,243,0.12)' : '#EFF6FF', border: `1px solid ${cardBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', flexShrink: 0 }}>
+                        {typeIcon}
+                    </Box>
+                    <Stack gap={4}>
+                        <Group gap="md">
+                            <Text fw={900} size="xl" style={{ color: textPri, fontFamily: 'monospace', letterSpacing: 2 }}>{vehicle.plate}</Text>
+                            <Box style={{ background: meta.color + '1A', border: `1px solid ${meta.color}40`, borderRadius: 20, padding: '4px 12px' }}>
+                                <Text size="xs" fw={700} style={{ color: meta.color }}>{meta.label}</Text>
+                            </Box>
+                        </Group>
+                        <Text size="sm" style={{ color: textSec }}>{vehicle.make} {vehicle.model_name} · {vehicle.year} · {vehicle.type}</Text>
+                    </Stack>
+                </Group>
+                <Group gap="sm" wrap="wrap">
                     <Select
                         value={vehicle.status}
                         onChange={s => router.patch(`/system/fleet/${vehicle.id}/status`, { status: s })}
@@ -111,41 +119,66 @@ export default function ShowVehicle({ vehicle, trips, statuses }) {
                 </Group>
             </Group>
 
+            {/* Quick specs bar */}
+            <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="md">
+                {[
+                    { icon: '⚖️', label: 'Payload',   value: vehicle.payload_tons ? `${vehicle.payload_tons} tons` : '—' },
+                    { icon: '🔢', label: 'Mileage',   value: vehicle.mileage_km ? `${Number(vehicle.mileage_km).toLocaleString()} km` : '—' },
+                    { icon: '⛽', label: 'Fuel',      value: vehicle.fuel_type ? vehicle.fuel_type.charAt(0).toUpperCase() + vehicle.fuel_type.slice(1) + (vehicle.fuel_tank_capacity_l ? ` · ${vehicle.fuel_tank_capacity_l}L` : '') : '—' },
+                    { icon: '👤', label: 'Driver',    value: vehicle.driver?.name ?? 'Unassigned' },
+                ].map(s => (
+                    <Box key={s.label} style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 12, padding: '14px 16px' }}>
+                        <Group gap={6} mb={4}>
+                            <Text style={{ fontSize: '1rem' }}>{s.icon}</Text>
+                            <Text size="xs" style={{ color: textMut, textTransform: 'uppercase', letterSpacing: 0.8, fontWeight: 700 }}>{s.label}</Text>
+                        </Group>
+                        <Text size="sm" fw={700} style={{ color: textPri }}>{s.value}</Text>
+                    </Box>
+                ))}
+            </SimpleGrid>
+
             <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md" mb="md">
+                {/* Identity */}
                 <Card title="Vehicle Details" isDark={isDark} accent={['#1565C0', '#2196F3']}>
-                    <DataRow label="Plate"       value={vehicle.plate}         isDark={isDark} />
-                    <DataRow label="Make"        value={vehicle.make}          isDark={isDark} />
-                    <DataRow label="Model"       value={vehicle.model_name}    isDark={isDark} />
-                    <DataRow label="Year"        value={vehicle.year}          isDark={isDark} />
-                    <DataRow label="Type"        value={vehicle.type}          isDark={isDark} />
-                    <DataRow label="Color"       value={vehicle.color}         isDark={isDark} />
-                    <DataRow label="Payload"     value={vehicle.payload_tons ? `${vehicle.payload_tons} tons` : null} isDark={isDark} />
-                    <DataRow label="Mileage"     value={vehicle.mileage_km ? `${Number(vehicle.mileage_km).toLocaleString()} km` : null} isDark={isDark} />
-                    <DataRow label="Owner"           value={vehicle.owner_name}          isDark={isDark} />
-                    <DataRow label="Assigned Driver" value={vehicle.driver?.name ?? '—'}  isDark={isDark} />
+                    <DataRow label="Plate"          value={vehicle.plate}          isDark={isDark} mono />
+                    <DataRow label="Chassis No."    value={vehicle.chassis_number} isDark={isDark} mono />
+                    <DataRow label="Engine No."     value={vehicle.engine_number}  isDark={isDark} mono />
+                    <DataRow label="Make"           value={vehicle.make}           isDark={isDark} />
+                    <DataRow label="Model"          value={vehicle.model_name}     isDark={isDark} />
+                    <DataRow label="Year"           value={vehicle.year}           isDark={isDark} />
+                    <DataRow label="Type"           value={`${typeIcon} ${vehicle.type}`} isDark={isDark} />
+                    <DataRow label="Color"          value={vehicle.color}          isDark={isDark} />
+                    <DataRow label="Owner"          value={vehicle.owner_name}     isDark={isDark} />
                 </Card>
 
+                {/* Documents */}
                 <Card title="Documents" isDark={isDark} accent={['#065F46', '#059669']}>
-                    <DocRow label="Insurance"       date={vehicle.insurance_expiry}    isDark={isDark} />
-                    <DocRow label="Road Licence"    date={vehicle.road_licence_expiry} isDark={isDark} />
-                    <DocRow label="Fitness Cert."   date={vehicle.fitness_expiry}      isDark={isDark} />
-                    <DocRow label="Next Service"    date={vehicle.next_service_date}   isDark={isDark} />
+                    <DocRow label="Insurance"             date={vehicle.insurance_expiry}             isDark={isDark} />
+                    <DocRow label="Road Licence"          date={vehicle.road_licence_expiry}          isDark={isDark} />
+                    <DocRow label="Fitness Certificate"   date={vehicle.fitness_expiry}               isDark={isDark} />
+                    <DocRow label="TRA Sticker"           date={vehicle.tra_sticker_expiry}           isDark={isDark} />
+                    <DocRow label="Goods Vehicle Licence" date={vehicle.goods_vehicle_licence_expiry} isDark={isDark} />
+                    <DocRow label="Next Service"          date={vehicle.next_service_date}            isDark={isDark} />
                 </Card>
             </SimpleGrid>
 
             {/* Recent Trips */}
-            <Card title={`Recent Trips using ${vehicle.plate}`} isDark={isDark} accent={['#0E4FA0', '#3B82F6']}>
+            <Card title={`Recent Trips — ${vehicle.plate}`} isDark={isDark} accent={['#0E4FA0', '#3B82F6']}>
                 {trips.length === 0 ? (
                     <Text size="sm" style={{ color: textMut, padding: '16px 0' }}>No trips recorded for this vehicle yet.</Text>
                 ) : (
                     <Box>
-                        <Box style={{ display: 'grid', gridTemplateColumns: '120px 1fr 120px 120px', borderBottom: `1px solid ${divider}`, padding: '8px 0' }}>
+                        <Box style={{ display: 'grid', gridTemplateColumns: '120px 1fr 120px 140px', borderBottom: `1px solid ${divider}`, padding: '8px 0' }}>
                             {['Trip #', 'Route', 'Date', 'Status'].map(h => (
                                 <Text key={h} size="10px" fw={700} style={{ color: textMut, textTransform: 'uppercase', letterSpacing: 1 }}>{h}</Text>
                             ))}
                         </Box>
                         {trips.map(t => (
-                            <Box key={t.id} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 120px 120px', padding: '10px 0', borderBottom: `1px solid ${divider}`, cursor: 'pointer' }} onClick={() => router.visit(`/system/trips/${t.id}`)}>
+                            <Box
+                                key={t.id}
+                                style={{ display: 'grid', gridTemplateColumns: '120px 1fr 120px 140px', padding: '10px 0', borderBottom: `1px solid ${divider}`, cursor: 'pointer', transition: 'background 0.15s' }}
+                                onClick={() => router.visit(`/system/trips/${t.id}`)}
+                            >
                                 <Text size="sm" fw={700} style={{ color: '#3B82F6' }}>{t.trip_number}</Text>
                                 <Text size="sm" style={{ color: textPri }}>{t.route_from} → {t.route_to}</Text>
                                 <Text size="sm" style={{ color: textSec }}>{t.departure_date}</Text>

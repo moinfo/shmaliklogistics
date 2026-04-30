@@ -23,6 +23,7 @@ class VehicleController extends Controller
                 $q->where('plate', 'like', "%{$s}%")
                   ->orWhere('make', 'like', "%{$s}%")
                   ->orWhere('model_name', 'like', "%{$s}%")
+                  ->orWhere('chassis_number', 'like', "%{$s}%")
                   ->orWhere('type', 'like', "%{$s}%");
             });
         }
@@ -37,51 +38,62 @@ class VehicleController extends Controller
                 $soon = now()->addDays(30);
                 $q->where('insurance_expiry', '<=', $soon)
                   ->orWhere('road_licence_expiry', '<=', $soon)
-                  ->orWhere('fitness_expiry', '<=', $soon);
+                  ->orWhere('fitness_expiry', '<=', $soon)
+                  ->orWhere('tra_sticker_expiry', '<=', $soon)
+                  ->orWhere('goods_vehicle_licence_expiry', '<=', $soon);
             })->count(),
         ];
 
         return Inertia::render('system/Fleet/Index', [
-            'vehicles' => $vehicles,
-            'stats'    => $stats,
-            'statuses' => Vehicle::$statuses,
-            'types'    => Vehicle::$types,
-            'filters'  => $request->only(['status', 'search']),
+            'vehicles'  => $vehicles,
+            'stats'     => $stats,
+            'statuses'  => Vehicle::$statuses,
+            'typeIcons' => Vehicle::$typeIcons,
+            'filters'   => $request->only(['status', 'search']),
         ]);
     }
 
     public function create()
     {
         return Inertia::render('system/Fleet/Create', [
-            'statuses' => Vehicle::$statuses,
-            'types'    => Vehicle::$types,
-            'drivers'  => Driver::whereIn('status', ['active', 'idle'])->orderBy('name')->get(['id', 'name', 'phone']),
+            'statuses'   => Vehicle::$statuses,
+            'types'      => Vehicle::$types,
+            'fuelTypes'  => Vehicle::$fuelTypes,
+            'typeIcons'  => Vehicle::$typeIcons,
+            'drivers'    => Driver::whereIn('status', ['active', 'idle'])->orderBy('name')->get(['id', 'name', 'phone']),
         ]);
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'plate'               => 'required|string|max:20|unique:vehicles,plate',
-            'status'              => 'required|in:' . implode(',', array_keys(Vehicle::$statuses)),
-            'driver_id'           => 'nullable|exists:drivers,id',
-            'make'                => 'required|string|max:60',
-            'model_name'          => 'required|string|max:60',
-            'year'                => 'required|integer|min:1990|max:' . (now()->year + 1),
-            'type'                => 'required|string|max:40',
-            'color'               => 'nullable|string|max:40',
-            'payload_tons'        => 'nullable|numeric|min:0',
-            'mileage_km'          => 'required|integer|min:0',
-            'insurance_expiry'    => 'nullable|date',
-            'road_licence_expiry' => 'nullable|date',
-            'fitness_expiry'      => 'nullable|date',
-            'next_service_date'   => 'nullable|date',
-            'owner_name'          => 'nullable|string|max:100',
-            'notes'               => 'nullable|string',
+            'plate'                        => 'required|string|max:20|unique:vehicles,plate',
+            'chassis_number'               => 'nullable|string|max:50|unique:vehicles,chassis_number',
+            'engine_number'                => 'nullable|string|max:50',
+            'status'                       => 'required|in:' . implode(',', array_keys(Vehicle::$statuses)),
+            'driver_id'                    => 'nullable|exists:drivers,id',
+            'make'                         => 'required|string|max:60',
+            'model_name'                   => 'required|string|max:60',
+            'year'                         => 'required|integer|min:1990|max:' . (now()->year + 1),
+            'type'                         => 'required|string|max:40',
+            'color'                        => 'nullable|string|max:40',
+            'payload_tons'                 => 'nullable|numeric|min:0',
+            'mileage_km'                   => 'required|integer|min:0',
+            'fuel_type'                    => 'required|in:diesel,petrol,cng',
+            'fuel_tank_capacity_l'         => 'nullable|integer|min:0',
+            'insurance_expiry'             => 'nullable|date',
+            'road_licence_expiry'          => 'nullable|date',
+            'fitness_expiry'               => 'nullable|date',
+            'tra_sticker_expiry'           => 'nullable|date',
+            'goods_vehicle_licence_expiry' => 'nullable|date',
+            'next_service_date'            => 'nullable|date',
+            'owner_name'                   => 'nullable|string|max:100',
+            'notes'                        => 'nullable|string',
         ]);
 
-        $data['plate']      = strtoupper($data['plate']);
-        $data['created_by'] = $request->user()->id;
+        $data['plate']          = strtoupper($data['plate']);
+        $data['chassis_number'] = $data['chassis_number'] ? strtoupper($data['chassis_number']) : null;
+        $data['created_by']     = $request->user()->id;
 
         $vehicle = Vehicle::create($data);
 
@@ -99,44 +111,54 @@ class VehicleController extends Controller
             ->get();
 
         return Inertia::render('system/Fleet/Show', [
-            'vehicle'  => $vehicle,
-            'trips'    => $trips,
-            'statuses' => Vehicle::$statuses,
+            'vehicle'   => $vehicle,
+            'trips'     => $trips,
+            'statuses'  => Vehicle::$statuses,
+            'typeIcons' => Vehicle::$typeIcons,
         ]);
     }
 
     public function edit(Vehicle $vehicle)
     {
         return Inertia::render('system/Fleet/Edit', [
-            'vehicle'  => $vehicle,
-            'statuses' => Vehicle::$statuses,
-            'types'    => Vehicle::$types,
-            'drivers'  => Driver::orderBy('name')->get(['id', 'name', 'phone']),
+            'vehicle'   => $vehicle,
+            'statuses'  => Vehicle::$statuses,
+            'types'     => Vehicle::$types,
+            'fuelTypes' => Vehicle::$fuelTypes,
+            'typeIcons' => Vehicle::$typeIcons,
+            'drivers'   => Driver::orderBy('name')->get(['id', 'name', 'phone']),
         ]);
     }
 
     public function update(Request $request, Vehicle $vehicle)
     {
         $data = $request->validate([
-            'plate'               => 'required|string|max:20|unique:vehicles,plate,' . $vehicle->id,
-            'status'              => 'required|in:' . implode(',', array_keys(Vehicle::$statuses)),
-            'driver_id'           => 'nullable|exists:drivers,id',
-            'make'                => 'required|string|max:60',
-            'model_name'          => 'required|string|max:60',
-            'year'                => 'required|integer|min:1990|max:' . (now()->year + 1),
-            'type'                => 'required|string|max:40',
-            'color'               => 'nullable|string|max:40',
-            'payload_tons'        => 'nullable|numeric|min:0',
-            'mileage_km'          => 'required|integer|min:0',
-            'insurance_expiry'    => 'nullable|date',
-            'road_licence_expiry' => 'nullable|date',
-            'fitness_expiry'      => 'nullable|date',
-            'next_service_date'   => 'nullable|date',
-            'owner_name'          => 'nullable|string|max:100',
-            'notes'               => 'nullable|string',
+            'plate'                        => 'required|string|max:20|unique:vehicles,plate,' . $vehicle->id,
+            'chassis_number'               => 'nullable|string|max:50|unique:vehicles,chassis_number,' . $vehicle->id,
+            'engine_number'                => 'nullable|string|max:50',
+            'status'                       => 'required|in:' . implode(',', array_keys(Vehicle::$statuses)),
+            'driver_id'                    => 'nullable|exists:drivers,id',
+            'make'                         => 'required|string|max:60',
+            'model_name'                   => 'required|string|max:60',
+            'year'                         => 'required|integer|min:1990|max:' . (now()->year + 1),
+            'type'                         => 'required|string|max:40',
+            'color'                        => 'nullable|string|max:40',
+            'payload_tons'                 => 'nullable|numeric|min:0',
+            'mileage_km'                   => 'required|integer|min:0',
+            'fuel_type'                    => 'required|in:diesel,petrol,cng',
+            'fuel_tank_capacity_l'         => 'nullable|integer|min:0',
+            'insurance_expiry'             => 'nullable|date',
+            'road_licence_expiry'          => 'nullable|date',
+            'fitness_expiry'               => 'nullable|date',
+            'tra_sticker_expiry'           => 'nullable|date',
+            'goods_vehicle_licence_expiry' => 'nullable|date',
+            'next_service_date'            => 'nullable|date',
+            'owner_name'                   => 'nullable|string|max:100',
+            'notes'                        => 'nullable|string',
         ]);
 
-        $data['plate'] = strtoupper($data['plate']);
+        $data['plate']          = strtoupper($data['plate']);
+        $data['chassis_number'] = $data['chassis_number'] ? strtoupper($data['chassis_number']) : null;
         $vehicle->update($data);
 
         return redirect()->route('system.fleet.show', $vehicle)

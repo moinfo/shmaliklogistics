@@ -18,10 +18,10 @@ const en = {
     home: {
         quickStats: 'Quick Stats',
         slides: [
-            { badge: "Tanzania's Trusted Logistics Partner", title: 'Moving Your Cargo', highlight: 'Across Africa', desc: 'Reliable, transparent freight from Dar es Salaam to DRC, Zambia, Malawi and beyond — with real-time tracking and full cost visibility on every trip.', features: ['GPS Fleet Tracking', 'Border Permit Management', 'Real-Time Cost Reporting'] },
+            { badge: "Tanzania's Trusted Logistics Partner", title: 'Moving Your Cargo', highlight: 'Across Africa', desc: 'Reliable, efficient, and cost-effective transportation from Handeni, Tanzania to Zambia, DRC and beyond — with real-time tracking and full cost visibility on every trip.', features: ['GPS Fleet Tracking', 'Border Permit Management', 'Real-Time Cost Reporting'] },
             { badge: 'Real-Time Cargo Visibility', title: 'Track Every Shipment', highlight: 'From Loading to Delivery', desc: 'Full cargo visibility with GPS tracking and live status updates. Your clients know exactly where their goods are — without calling the office.', features: ['Live GPS Location', 'Customer Self-Service Portal', 'Automated SMS Alerts'] },
-            { badge: 'Cross-Border Expertise', title: 'Border Crossings', highlight: 'Made Simple', desc: 'We handle all transit permits, customs documentation and border logistics for DRC, Zambia and Malawi — so your cargo keeps moving.', features: ['Transit Permits Handled', 'COMESA/SADC Compliance', 'Expiry Date Alerts'] },
-            { badge: 'Modern Fleet Management', title: 'A Fleet You Can', highlight: 'Rely On', desc: 'Well-maintained vehicles, experienced drivers and scheduled servicing — every trip planned and tracked for on-time, safe delivery.', features: ['Scheduled Maintenance Alerts', 'Driver Performance Tracking', 'Fuel Cost Monitoring'] },
+            { badge: 'Cross-Border Expertise', title: 'Border Crossings', highlight: 'Made Simple', desc: 'We handle all transit permits, customs documentation and border logistics for Zambia and the DRC — professionally managed without third-party reliance.', features: ['Transit Permits Handled', 'COMESA/SADC Compliance', 'Expiry Date Alerts'] },
+            { badge: 'Professional Fleet', title: 'A Fleet You Can', highlight: 'Rely On', desc: 'Well-maintained Scania trucks, experienced and trained drivers — ensuring safe and timely delivery across all routes with regular maintenance and safety checks.', features: ['Scheduled Maintenance Alerts', 'Experienced Drivers', 'Fuel Cost Monitoring'] },
         ],
         stats: [
             { icon: '🚛', value: '550K+', label: 'Shipments Completed' },
@@ -199,10 +199,10 @@ const sw = {
     home: {
         quickStats: 'Takwimu za Haraka',
         slides: [
-            { badge: 'Mshirika Wako wa Usafirishaji Tanzania', title: 'Kusafirisha Mizigo Yako', highlight: 'Kote Afrika', desc: 'Usafirishaji wa kuaminika na uwazi kutoka Dar es Salaam hadi DRC, Zambia, Malawi na zaidi — na ufuatiliaji wa wakati halisi na uonekani kamili wa gharama kwa kila safari.', features: ['Ufuatiliaji wa GPS', 'Usimamizi wa Vibali vya Mpakani', 'Ripoti ya Gharama ya Wakati Halisi'] },
+            { badge: 'Mshirika Wako wa Usafirishaji Tanzania', title: 'Kusafirisha Mizigo Yako', highlight: 'Kote Afrika', desc: 'Usafirishaji wa kuaminika, bora na wa bei nafuu kutoka Handeni, Tanzania hadi Zambia, DRC na zaidi — na ufuatiliaji wa wakati halisi na uonekani kamili wa gharama kwa kila safari.', features: ['Ufuatiliaji wa GPS', 'Usimamizi wa Vibali vya Mpakani', 'Ripoti ya Gharama ya Wakati Halisi'] },
             { badge: 'Uonekani wa Mizigo kwa Wakati Halisi', title: 'Fuatilia Kila Usafirishaji', highlight: 'Kutoka Kupakia Hadi Kutoa', desc: 'Uonekani kamili wa mizigo na ufuatiliaji wa GPS. Wateja wako wanajua hasa wapi bidhaa zao zipo — bila kupiga simu ofisini.', features: ['Mahali pa GPS kwa Wakati Halisi', 'Lango la Mteja la Kujisaidia', 'Arifa za SMS za Kiotomatiki'] },
-            { badge: 'Uzoefu wa Mpakani', title: 'Kuvuka Mipaka', highlight: 'Imefanywa Rahisi', desc: 'Tunashughulikia vibali vyote vya usafiri, nyaraka za forodha na usimamizi wa mipaka kwa DRC, Zambia na Malawi — ili mizigo yako iendelee kusonga.', features: ['Vibali vya Usafiri Vimeshughulikiwa', 'Uzingatifu wa COMESA/SADC', 'Arifa za Tarehe ya Kuisha'] },
-            { badge: 'Usimamizi wa Kisasa wa Gari', title: 'Gari Unaloweza', highlight: 'Kuitegemea', desc: 'Magari yaliyodumishwa vizuri, madereva wenye uzoefu na huduma zilizopangwa — kila safari imepangwa na kufuatiliwa kwa utoaji salama na wa wakati.', features: ['Arifa za Matengenezo Yaliyopangwa', 'Ufuatiliaji wa Utendaji wa Dereva', 'Ufuatiliaji wa Gharama za Mafuta'] },
+            { badge: 'Uzoefu wa Mpakani', title: 'Kuvuka Mipaka', highlight: 'Imefanywa Rahisi', desc: 'Tunashughulikia vibali vyote vya usafiri, nyaraka za forodha na usimamizi wa mipaka kwa Zambia na DRC — inayosimamiwa kitaalamu bila kutegemea washirika wa nje.', features: ['Vibali vya Usafiri Vimeshughulikiwa', 'Uzingatifu wa COMESA/SADC', 'Arifa za Tarehe ya Kuisha'] },
+            { badge: 'Gari la Kitaalamu', title: 'Gari Unaloweza', highlight: 'Kuitegemea', desc: 'Malori ya Scania yaliyodumishwa vizuri, madereva wenye uzoefu na mafunzo — kuhakikisha utoaji salama na wa wakati kwenye njia zote na ukaguzi wa matengenezo mara kwa mara.', features: ['Arifa za Matengenezo Yaliyopangwa', 'Madereva Wenye Uzoefu', 'Ufuatiliaji wa Gharama za Mafuta'] },
         ],
         stats: [
             { icon: '🚛', value: '550K+', label: 'Usafirishaji Uliokamilika' },
@@ -236,7 +236,7 @@ const sw = {
         routes: {
             badge: 'Tunakohudumia', title: 'Njia Zetu', highlight: 'Zinazofanya Kazi',
             desc: 'Kuondoka mara kwa mara kwenye njia kuu zote kutoka Dar es Salaam.',
-            hub: '🇹🇿 Kitovu cha Dar es Salaam', hubSub: '· Chanzo cha njia zote',
+            hub: '🇹🇿 Kitovu cha Handeni, Tanzania', hubSub: '· Chanzo cha njia zote',
             from: 'Kutoka', to: 'Kwenda', distance: 'Umbali', transit: 'Wakati wa Usafiri',
             items: [
                 { from: 'Dar es Salaam', to: 'Lubumbashi', country: 'DRC', flag: '🇨🇩', distance: '~2,100 km', time: 'Siku 5–7' },

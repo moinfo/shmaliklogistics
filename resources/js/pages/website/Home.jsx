@@ -116,7 +116,7 @@ export default function Home() {
                                                             </Group>
                                                         </motion.div>
                                                     ))}
-                                                    <Text c="gray.6" size="xs">Buza, Dar es Salaam, TZ</Text>
+                                                    <Text c="gray.6" size="xs">Handeni, Tanzania</Text>
                                                 </Stack>
                                             </Paper>
                                         </motion.div>

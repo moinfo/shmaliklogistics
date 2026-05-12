@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
-import { Box, Container, Title, Text, Stack, SimpleGrid, Badge } from '@mantine/core';
+import { Box, Container, Title, Text, Stack, SimpleGrid, Badge, TextInput } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import WebsiteLayout from '../../layouts/WebsiteLayout';
 
@@ -9,6 +10,15 @@ const block = (e) => e.preventDefault();
 export default function Team({ employees }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
+    const [query, setQuery] = useState('');
+
+    const filtered = useMemo(() => {
+        const q = query.trim().toLowerCase();
+        if (!q) return employees;
+        return employees.filter(
+            (e) => e.name.toLowerCase().includes(q) || e.roles.some((r) => r.toLowerCase().includes(q))
+        );
+    }, [query, employees]);
 
     return (
         <WebsiteLayout>
@@ -39,11 +49,38 @@ export default function Team({ employees }) {
                 </Container>
             </Box>
 
+            {/* ── Search ── */}
+            <Box style={{ background: isDark ? '#080f1e' : '#f0f4f8' }} pt={40} pb={0}>
+                <Container size="lg">
+                    <TextInput
+                        placeholder="Search by name or role…"
+                        value={query}
+                        onChange={(e) => setQuery(e.currentTarget.value)}
+                        size="md"
+                        radius="xl"
+                        styles={{
+                            input: {
+                                background: isDark ? '#0d1f3c' : '#fff',
+                                border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
+                                color: isDark ? '#fff' : '#111',
+                                paddingLeft: 20,
+                            },
+                        }}
+                        leftSection={<span style={{ paddingLeft: 4, color: '#888' }}>🔍</span>}
+                    />
+                    {query && (
+                        <Text size="sm" c="dimmed" mt={8} pl={4}>
+                            {filtered.length} result{filtered.length !== 1 ? 's' : ''} for "{query}"
+                        </Text>
+                    )}
+                </Container>
+            </Box>
+
             {/* ── Grid ── */}
-            <Box py={72} style={{ background: isDark ? '#080f1e' : '#f0f4f8' }}>
+            <Box py={40} style={{ background: isDark ? '#080f1e' : '#f0f4f8' }}>
                 <Container size="lg">
                     <SimpleGrid cols={{ base: 2, sm: 3, md: 4, lg: 5 }} spacing="lg">
-                        {employees.map((emp, i) => (
+                        {filtered.map((emp, i) => (
                             <motion.div
                                 key={emp.slug}
                                 initial={{ opacity: 0, y: 28 }}

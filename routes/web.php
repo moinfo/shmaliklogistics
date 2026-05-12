@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\System\CargoController;
 use App\Http\Controllers\System\DashboardController;
 use App\Http\Controllers\System\TripController;
@@ -94,6 +95,11 @@ Route::prefix('portal')->name('portal.')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/account/password',   [ProfileController::class, 'showChangePassword'])->name('account.password');
+    Route::patch('/account/password', [ProfileController::class, 'changePassword'])->name('account.password.update');
+});
 
 // ── System (protected) ──────────────────────────────────────────────────────
 //

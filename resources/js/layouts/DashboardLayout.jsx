@@ -372,6 +372,10 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
                             <Text size="xs" style={{ color: isDark ? dk.textMut : lk.textMut }} mb={2}>Logged in as</Text>
                             <Text size="sm" fw={600} style={{ color: isDark ? dk.textSec : lk.textPri }}>{user?.name || 'Admin'}</Text>
                         </Box>
+                        <Anchor component={Link} href="/account/password" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                            <Text size="sm">🔑</Text>
+                            <Text size="xs" style={{ color: isDark ? dk.textMut : lk.textSec }}>Change Password</Text>
+                        </Anchor>
                         <Anchor component={Link} href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
                             <Text size="sm">🌐</Text>
                             <Text size="xs" style={{ color: isDark ? dk.textMut : lk.textSec }}>Back to website</Text>

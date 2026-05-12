@@ -51,6 +51,7 @@ use App\Http\Controllers\Portal\PortalInvoiceController;
 use App\Http\Controllers\Portal\PortalQuoteController;
 use App\Http\Controllers\Portal\PortalCargoController;
 use App\Http\Controllers\Settings\CompanySettingController;
+use App\Http\Controllers\NfcController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -59,6 +60,10 @@ Route::get('/', fn () => Inertia::render('website/Home'))->name('home');
 Route::get('/services', fn () => Inertia::render('website/Services'))->name('services');
 Route::get('/about', fn () => Inertia::render('website/About'))->name('about');
 Route::get('/contact', fn () => Inertia::render('website/Contact'))->name('contact');
+
+// ── NFC Staff Cards ─────────────────────────────────────────────────────────
+Route::get('/team', [NfcController::class, 'index'])->name('team');
+Route::get('/team/{slug}', [NfcController::class, 'show'])->name('team.show');
 
 // ── Auth ────────────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {

@@ -5,6 +5,7 @@ export function checkPermission(permissions, permission) {
     if (!Array.isArray(permissions) || permissions.length === 0) return false;
     if (permissions.includes('*')) return true;
     if (permissions.includes(permission)) return true;
+    // module.* wildcard: "trips.*" grants "trips.view", "trips.edit", etc.
     const dot = permission.indexOf('.');
     if (dot > -1) {
         const moduleKey = permission.slice(0, dot);

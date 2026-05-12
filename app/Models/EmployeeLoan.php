@@ -33,7 +33,7 @@ class EmployeeLoan extends Model
 
     public static function nextNumber(): string
     {
-        $last = static::withTrashed()->max('id') ?? 0;
+        $last = static::max('id') ?? 0;
         return 'LN-' . date('Y') . '-' . str_pad($last + 1, 4, '0', STR_PAD_LEFT);
     }
 

@@ -4,11 +4,12 @@ import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useCan } from '../../../lib/can';
 
 const dk = {
     card: '#0F1E32', cardHov: '#132436',
     border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)',
-    textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569',
+    textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)',
 };
 
 function StatusPill({ status, statuses }) {
@@ -22,7 +23,7 @@ function StatusPill({ status, statuses }) {
 }
 
 function LicenceBadge({ expiry, isDark }) {
-    if (!expiry) return <Text size="xs" style={{ color: isDark ? dk.textMut : '#94A3B8' }}>—</Text>;
+    if (!expiry) return <Text size="xs" style={{ color: isDark ? dk.textMut : 'var(--c-text-secondary)' }}>—</Text>;
     const days = Math.floor((new Date(expiry) - new Date()) / 86400000);
     const color = days < 0 ? '#EF4444' : days <= 30 ? '#F59E0B' : '#22C55E';
     const label = days < 0 ? 'EXPIRED' : days <= 30 ? `${days}d` : new Date(expiry).toLocaleDateString('en-TZ', { day: '2-digit', month: 'short', year: '2-digit' });
@@ -50,12 +51,13 @@ export default function DriversIndex({ drivers, stats, statuses, filters }) {
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const textPri    = isDark ? dk.textPri : '#1E293B';
     const textSec    = isDark ? dk.textSec : '#64748B';
-    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
     const rowHov     = isDark ? dk.cardHov : '#F8FAFC';
     const divider    = isDark ? dk.divider : '#E2E8F0';
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
+    const can = useCan();
 
     const applyFilters = (s, st) => {
         router.get('/system/drivers', { search: s, status: st }, { preserveState: true, replace: true });
@@ -77,14 +79,16 @@ export default function DriversIndex({ drivers, stats, statuses, filters }) {
                     <Text fw={800} size="xl" style={{ color: textPri }}>Drivers</Text>
                     <Text size="sm" style={{ color: textSec }}>Register and manage your driver roster</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box
-                        component={Link} href="/system/drivers/create"
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, padding: '10px 20px', borderRadius: 10, textDecoration: 'none', boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}
-                    >
-                        <Text size="sm">＋</Text> Add Driver
-                    </Box>
-                </motion.div>
+                {can('drivers.create') && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box
+                            component={Link} href="/system/drivers/create"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, padding: '10px 20px', borderRadius: 10, textDecoration: 'none', boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}
+                        >
+                            <Text size="sm">＋</Text> Add Driver
+                        </Box>
+                    </motion.div>
+                )}
             </Group>
 
             {/* Stats */}
@@ -172,9 +176,11 @@ export default function DriversIndex({ drivers, stats, statuses, filters }) {
                                 <LicenceBadge expiry={d.license_expiry} isDark={isDark} />
                                 <StatusPill status={d.status} statuses={statuses} />
                                 <Group gap={4} onClick={e => e.stopPropagation()}>
-                                    <Tooltip label="Edit">
-                                        <ActionIcon component={Link} href={`/system/drivers/${d.id}/edit`} variant="subtle" size="sm" style={{ color: textMut }}>✏️</ActionIcon>
-                                    </Tooltip>
+                                    {can('drivers.edit') && (
+                                        <Tooltip label="Edit">
+                                            <ActionIcon component={Link} href={`/system/drivers/${d.id}/edit`} variant="subtle" size="sm" style={{ color: textMut }}>✏️</ActionIcon>
+                                        </Tooltip>
+                                    )}
                                 </Group>
                             </Box>
                         </motion.div>

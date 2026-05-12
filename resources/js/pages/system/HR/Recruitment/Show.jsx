@@ -2,8 +2,9 @@ import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { Box, Grid, Text, Group, Button, Modal, Stack, TextInput, Textarea, Select, NumberInput, FileInput } from '@mantine/core';
 import { router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import { useCan } from '../../../../lib/can';
 
-const inp = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: '#94A3B8', marginBottom: 4 } };
+const inp = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: 'var(--c-text-secondary)', marginBottom: 4 } };
 
 function ApplicationForm({ onSubmit, processing }) {
     const { data, setData } = useForm({ full_name: '', phone: '', email: '', notes: '', cv: null });
@@ -77,6 +78,7 @@ export default function RecruitmentShow({ vacancy, applications, pipeline, stage
     const [applyOpen, setApplyOpen] = useState(false);
     const [stageTarget, setStageTarget] = useState(null);
     const [submitting, setSubmitting] = useState(false);
+    const can = useCan();
 
     const fmt = (n) => new Intl.NumberFormat().format(Math.round(n ?? 0));
     const st = statuses[vacancy.status] || { label: vacancy.status, color: '#94A3B8' };
@@ -112,9 +114,11 @@ export default function RecruitmentShow({ vacancy, applications, pipeline, stage
                         <Text size="sm" fw={700} style={{ color: st.color }}>{st.label}</Text>
                     </Box>
                 </Group>
-                <Button onClick={() => setApplyOpen(true)} style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 10, fontWeight: 700 }}>
-                    + Add Application
-                </Button>
+                {can('hr_recruitment.create') && (
+                    <Button onClick={() => setApplyOpen(true)} style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 10, fontWeight: 700 }}>
+                        + Add Application
+                    </Button>
+                )}
             </Group>
 
             {/* Pipeline summary */}
@@ -136,7 +140,7 @@ export default function RecruitmentShow({ vacancy, applications, pipeline, stage
                         <Grid.Col span={{ base: 12, md: 6 }}>
                             <Box style={{ background: 'var(--c-card)', border: '1px solid var(--c-border-color)', borderRadius: 12, padding: '20px 24px' }}>
                                 <Text fw={700} size="sm" style={{ color: '#60A5FA', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.8 }}>Description</Text>
-                                <Text size="sm" style={{ color: '#94A3B8', whiteSpace: 'pre-line' }}>{vacancy.description}</Text>
+                                <Text size="sm" style={{ color: 'var(--c-text-secondary)', whiteSpace: 'pre-line' }}>{vacancy.description}</Text>
                             </Box>
                         </Grid.Col>
                     )}
@@ -144,7 +148,7 @@ export default function RecruitmentShow({ vacancy, applications, pipeline, stage
                         <Grid.Col span={{ base: 12, md: 6 }}>
                             <Box style={{ background: 'var(--c-card)', border: '1px solid var(--c-border-color)', borderRadius: 12, padding: '20px 24px' }}>
                                 <Text fw={700} size="sm" style={{ color: '#60A5FA', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.8 }}>Requirements</Text>
-                                <Text size="sm" style={{ color: '#94A3B8', whiteSpace: 'pre-line' }}>{vacancy.requirements}</Text>
+                                <Text size="sm" style={{ color: 'var(--c-text-secondary)', whiteSpace: 'pre-line' }}>{vacancy.requirements}</Text>
                             </Box>
                         </Grid.Col>
                     )}
@@ -178,8 +182,8 @@ export default function RecruitmentShow({ vacancy, applications, pipeline, stage
                                             <Text fw={700} size="sm" style={{ color: 'var(--c-text)' }}>{app.full_name}</Text>
                                         </td>
                                         <td style={{ padding: '12px 16px' }}>
-                                            <Text size="sm" style={{ color: '#94A3B8' }}>{app.phone || '—'}</Text>
-                                            <Text size="xs" style={{ color: '#475569' }}>{app.email || ''}</Text>
+                                            <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{app.phone || '—'}</Text>
+                                            <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>{app.email || ''}</Text>
                                         </td>
                                         <td style={{ padding: '12px 16px' }}>
                                             <Box style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 8, background: `${sg.color}22`, border: `1px solid ${sg.color}44` }}>
@@ -192,7 +196,7 @@ export default function RecruitmentShow({ vacancy, applications, pipeline, stage
                                             </Text>
                                         </td>
                                         <td style={{ padding: '12px 16px' }}>
-                                            <Text size="sm" style={{ color: app.offer_amount ? '#22C55E' : '#475569' }}>
+                                            <Text size="sm" style={{ color: app.offer_amount ? '#22C55E' : 'var(--c-text-muted)' }}>
                                                 {app.offer_amount ? `TZS ${fmt(app.offer_amount)}` : '—'}
                                             </Text>
                                         </td>
@@ -200,14 +204,18 @@ export default function RecruitmentShow({ vacancy, applications, pipeline, stage
                                             {app.cv_path
                                                 ? <Box component="a" href={`/storage/${app.cv_path}`} target="_blank" rel="noreferrer"
                                                     style={{ color: '#60A5FA', fontSize: 12, textDecoration: 'none' }}>↓ CV</Box>
-                                                : <Text size="xs" style={{ color: '#475569' }}>—</Text>}
+                                                : <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>—</Text>}
                                         </td>
                                         <td style={{ padding: '12px 16px' }}>
                                             <Group gap="sm">
-                                                <Box component="button" onClick={() => setStageTarget(app)}
-                                                    style={{ background: 'none', border: 'none', color: '#60A5FA', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Move</Box>
-                                                <Box component="button" onClick={() => delApp(app)}
-                                                    style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: 12 }}>Del</Box>
+                                                {can('hr_recruitment.edit') && (
+                                                    <Box component="button" onClick={() => setStageTarget(app)}
+                                                        style={{ background: 'none', border: 'none', color: '#60A5FA', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Move</Box>
+                                                )}
+                                                {can('hr_recruitment.delete') && (
+                                                    <Box component="button" onClick={() => delApp(app)}
+                                                        style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: 12 }}>Del</Box>
+                                                )}
                                             </Group>
                                         </td>
                                     </tr>

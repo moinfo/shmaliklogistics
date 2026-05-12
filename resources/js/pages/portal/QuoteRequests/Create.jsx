@@ -24,7 +24,7 @@ export default function PortalQuoteRequestCreate({ client }) {
         borderRadius: 8, color: '#E2E8F0', fontSize: 14, outline: 'none',
         boxSizing: 'border-box',
     };
-    const labelStyle = { color: '#94A3B8', fontSize: 13, fontWeight: 600, marginBottom: 6, display: 'block' };
+    const labelStyle = { color: 'var(--c-text-secondary)', fontSize: 13, fontWeight: 600, marginBottom: 6, display: 'block' };
     const errorStyle = { color: '#EF4444', fontSize: 12, marginTop: 4 };
 
     return (
@@ -34,7 +34,7 @@ export default function PortalQuoteRequestCreate({ client }) {
             <Box style={{ maxWidth: 680, margin: '0 auto' }}>
                 <Stack gap={4} mb="xl">
                     <Text fw={800} size="xl" style={{ color: '#E2E8F0' }}>Request a Quote</Text>
-                    <Text size="sm" style={{ color: '#94A3B8' }}>Tell us about your shipment and we'll get back to you with pricing.</Text>
+                    <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>Tell us about your shipment and we'll get back to you with pricing.</Text>
                 </Stack>
 
                 <form onSubmit={submit}>
@@ -104,7 +104,7 @@ export default function PortalQuoteRequestCreate({ client }) {
 
                     <Group justify="flex-end" gap="md">
                         <Box component="a" href="/portal/quote-requests"
-                            style={{ padding: '10px 22px', borderRadius: 10, border: '1px solid rgba(33,150,243,0.2)', color: '#94A3B8', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
+                            style={{ padding: '10px 22px', borderRadius: 10, border: '1px solid rgba(33,150,243,0.2)', color: 'var(--c-text-secondary)', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
                             Cancel
                         </Box>
                         <Box component="button" type="submit" disabled={processing}

@@ -3,8 +3,10 @@ import { Box, Text, Group, Stack, Badge } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { motion } from 'framer-motion';
+import { useCan } from '../../../lib/can';
+import { formatDate } from '../../../lib/date';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 function Field({ label, value, isDark }) {
     const textSec = isDark ? dk.textSec : '#64748B';
@@ -30,6 +32,7 @@ export default function ShowMaintenance({ record }) {
         if (!confirm('Delete this service record?')) return;
         router.delete(`/system/maintenance/${record.id}`);
     };
+    const can = useCan();
 
     return (
         <DashboardLayout title="Service Record">
@@ -39,21 +42,25 @@ export default function ShowMaintenance({ record }) {
                 <Stack gap={2}>
                     <Text fw={800} size="xl" style={{ color: textPri }}>Service Record</Text>
                     <Text size="sm" style={{ color: textSec }}>
-                        {record.vehicle?.plate} — {record.service_type} on {record.service_date}
+                        {record.vehicle?.plate} — {record.service_type} on {formatDate(record.service_date)}
                     </Text>
                 </Stack>
                 <Group gap="sm">
                     <Box component={Link} href="/system/maintenance" style={{ padding: '9px 18px', borderRadius: 9, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
                         ← Back
                     </Box>
-                    <Box component={Link} href={`/system/maintenance/${record.id}/edit`} style={{ padding: '9px 18px', borderRadius: 9, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textPri, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
-                        ✏️ Edit
-                    </Box>
-                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                        <Box component="button" onClick={handleDelete} style={{ padding: '9px 18px', borderRadius: 9, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
-                            🗑️ Delete
+                    {can('maintenance.edit') && (
+                        <Box component={Link} href={`/system/maintenance/${record.id}/edit`} style={{ padding: '9px 18px', borderRadius: 9, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textPri, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
+                            ✏️ Edit
                         </Box>
-                    </motion.div>
+                    )}
+                    {can('maintenance.delete') && (
+                        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                            <Box component="button" onClick={handleDelete} style={{ padding: '9px 18px', borderRadius: 9, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+                                🗑️ Delete
+                            </Box>
+                        </motion.div>
+                    )}
                 </Group>
             </Group>
 
@@ -63,7 +70,7 @@ export default function ShowMaintenance({ record }) {
                 <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 20, marginBottom: 28 }}>
                     <Field label="Vehicle" value={`${record.vehicle?.plate} — ${record.vehicle?.make} ${record.vehicle?.model_name}`} isDark={isDark} />
                     <Field label="Service Type" value={record.service_type} isDark={isDark} />
-                    <Field label="Service Date" value={record.service_date} isDark={isDark} />
+                    <Field label="Service Date" value={formatDate(record.service_date)} isDark={isDark} />
                     <Field label="Mileage" value={record.mileage_km ? `${fmt(record.mileage_km)} km` : null} isDark={isDark} />
                     <Field label="Workshop" value={record.workshop_name} isDark={isDark} />
                     <Field label="Cost" value={record.cost ? `${record.currency} ${fmt(record.cost)}` : null} isDark={isDark} />
@@ -81,7 +88,7 @@ export default function ShowMaintenance({ record }) {
                         <Box style={{ height: 1, background: isDark ? dk.divider : '#E2E8F0', margin: '20px 0' }} />
                         <Text fw={700} size="sm" style={{ color: textSec, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>Next Service</Text>
                         <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 20 }}>
-                            <Field label="Next Service Date" value={record.next_service_date} isDark={isDark} />
+                            <Field label="Next Service Date" value={formatDate(record.next_service_date)} isDark={isDark} />
                             <Field label="Next Service Mileage" value={record.next_service_mileage ? `${fmt(record.next_service_mileage)} km` : null} isDark={isDark} />
                         </Box>
                     </>

@@ -4,8 +4,10 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useCan } from '../../../lib/can';
+import { formatDate } from '../../../lib/date';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
 function StatCard({ label, value, icon, color, isDark }) {
     return (
@@ -33,6 +35,7 @@ export default function MaintenanceIndex({ records, stats, vehicles, types, filt
 
     const [search, setSearch]       = useState(filters.search ?? '');
     const [vehicleId, setVehicleId] = useState(filters.vehicle_id ?? '');
+    const can = useCan();
 
     const applyFilters = (overrides = {}) => {
         router.get('/system/maintenance', { search, vehicle_id: vehicleId, ...overrides }, { preserveState: true, replace: true });
@@ -54,11 +57,13 @@ export default function MaintenanceIndex({ records, stats, vehicles, types, filt
                     <Text fw={800} size="xl" style={{ color: textPri }}>Maintenance</Text>
                     <Text size="sm" style={{ color: textSec }}>Service records and scheduling</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box component={Link} href="/system/maintenance/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                        + Add Service Record
-                    </Box>
-                </motion.div>
+                {can('maintenance.create') && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box component={Link} href="/system/maintenance/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
+                            + Add Service Record
+                        </Box>
+                    </motion.div>
+                )}
             </Group>
 
             <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="xl">
@@ -119,8 +124,8 @@ export default function MaintenanceIndex({ records, stats, vehicles, types, filt
                                         <Text size="sm" style={{ color: textPri }}>{rec.service_type}</Text>
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
-                                        <Text size="sm" style={{ color: textSec, whiteSpace: 'nowrap' }}>{rec.service_date}</Text>
-                                        {rec.mileage_km && <Text size="xs" style={{ color: isDark ? dk.textMut : '#94A3B8' }}>{Number(rec.mileage_km).toLocaleString()} km</Text>}
+                                        <Text size="sm" style={{ color: textSec, whiteSpace: 'nowrap' }}>{formatDate(rec.service_date)}</Text>
+                                        {rec.mileage_km && <Text size="xs" style={{ color: isDark ? dk.textMut : 'var(--c-text-secondary)' }}>{Number(rec.mileage_km).toLocaleString()} km</Text>}
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         <Text size="sm" style={{ color: textSec }}>{rec.workshop_name ?? '—'}</Text>
@@ -130,14 +135,20 @@ export default function MaintenanceIndex({ records, stats, vehicles, types, filt
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         {rec.next_service_date ? (
-                                            <Text size="sm" style={{ color: textSec, whiteSpace: 'nowrap' }}>{rec.next_service_date}</Text>
-                                        ) : <Text size="xs" style={{ color: isDark ? dk.textMut : '#94A3B8' }}>—</Text>}
+                                            <Text size="sm" style={{ color: textSec, whiteSpace: 'nowrap' }}>{formatDate(rec.next_service_date)}</Text>
+                                        ) : <Text size="xs" style={{ color: isDark ? dk.textMut : 'var(--c-text-secondary)' }}>—</Text>}
                                     </td>
                                     <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                                         <Group gap={6} justify="flex-end">
-                                            <ActionIcon component={Link} href={`/system/maintenance/${rec.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
-                                            <ActionIcon component={Link} href={`/system/maintenance/${rec.id}/edit`} variant="subtle" size="sm" style={{ color: textSec }}>✏️</ActionIcon>
-                                            <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(rec.id)}>🗑️</ActionIcon>
+                                            {can('maintenance.view') && (
+                                                <ActionIcon component={Link} href={`/system/maintenance/${rec.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
+                                            )}
+                                            {can('maintenance.edit') && (
+                                                <ActionIcon component={Link} href={`/system/maintenance/${rec.id}/edit`} variant="subtle" size="sm" style={{ color: textSec }}>✏️</ActionIcon>
+                                            )}
+                                            {can('maintenance.delete') && (
+                                                <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(rec.id)}>🗑️</ActionIcon>
+                                            )}
                                         </Group>
                                     </td>
                                 </tr>

@@ -4,8 +4,10 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useCan } from '../../../lib/can';
+import { formatDate } from '../../../lib/date';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
 const MIME_ICONS = {
     'application/pdf': '📄',
@@ -59,6 +61,7 @@ export default function DocumentsIndex({ documents, stats, filters }) {
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [type, setType]     = useState(filters.type ?? '');
+    const can = useCan();
 
     const applyFilters = (overrides = {}) => {
         router.get('/system/documents', { search, type, ...overrides }, { preserveState: true, replace: true });
@@ -78,11 +81,13 @@ export default function DocumentsIndex({ documents, stats, filters }) {
                     <Text fw={800} size="xl" style={{ color: textPri }}>Documents</Text>
                     <Text size="sm" style={{ color: textSec }}>Files attached to trips, vehicles and drivers</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box component={Link} href="/system/documents/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                        + Upload Document
-                    </Box>
-                </motion.div>
+                {can('documents.create') && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box component={Link} href="/system/documents/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
+                            + Upload Document
+                        </Box>
+                    </motion.div>
+                )}
             </Group>
 
             <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="xl">
@@ -143,18 +148,22 @@ export default function DocumentsIndex({ documents, stats, filters }) {
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         <Text size="sm" style={{ color: textSec }}>{resolveType(doc)}</Text>
-                                        {doc.notes && <Text size="xs" style={{ color: isDark ? dk.textMut : '#94A3B8' }}>{doc.notes}</Text>}
+                                        {doc.notes && <Text size="xs" style={{ color: isDark ? dk.textMut : 'var(--c-text-secondary)' }}>{doc.notes}</Text>}
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         <Text size="xs" style={{ color: textSec }}>{fileSize(doc.file_size)}</Text>
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
-                                        <Text size="xs" style={{ color: textSec, whiteSpace: 'nowrap' }}>{doc.created_at?.split('T')[0] ?? '—'}</Text>
+                                        <Text size="xs" style={{ color: textSec, whiteSpace: 'nowrap' }}>{formatDate(doc.created_at)}</Text>
                                     </td>
                                     <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                                         <Group gap={6} justify="flex-end">
-                                            <ActionIcon component="a" href={`/system/documents/${doc.id}/download`} variant="subtle" size="sm" style={{ color: '#3B82F6' }} title="Download">⬇️</ActionIcon>
-                                            <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(doc.id)} title="Delete">🗑️</ActionIcon>
+                                            {can('documents.view') && (
+                                                <ActionIcon component="a" href={`/system/documents/${doc.id}/download`} variant="subtle" size="sm" style={{ color: '#3B82F6' }} title="Download">⬇️</ActionIcon>
+                                            )}
+                                            {can('documents.delete') && (
+                                                <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(doc.id)} title="Delete">🗑️</ActionIcon>
+                                            )}
                                         </Group>
                                     </td>
                                 </tr>

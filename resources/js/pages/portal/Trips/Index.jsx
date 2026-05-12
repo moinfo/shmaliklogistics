@@ -6,7 +6,7 @@ import { useState } from 'react';
 const statusColor = {
     loading: '#F59E0B', in_transit: '#2196F3', at_border: '#A855F7',
     delivered: '#22C55E', completed: '#22C55E', cancelled: '#EF4444',
-    planned: '#94A3B8',
+    planned: 'var(--c-text-secondary)',
 };
 
 export default function PortalTripsIndex({ client, trips, statuses, filters }) {
@@ -49,33 +49,33 @@ export default function PortalTripsIndex({ client, trips, statuses, filters }) {
                         <Group justify="space-between" mb={8}>
                             <Group gap="sm">
                                 <Text fw={800} size="sm" style={{ color: 'var(--c-text)' }}>{trip.trip_number}</Text>
-                                <Box style={{ padding: '2px 10px', borderRadius: 12, background: `${statusColor[trip.status] || '#94A3B8'}22`, border: `1px solid ${statusColor[trip.status] || '#94A3B8'}55` }}>
-                                    <Text size="xs" fw={700} style={{ color: statusColor[trip.status] || '#94A3B8', textTransform: 'capitalize' }}>{trip.status?.replace('_', ' ')}</Text>
+                                <Box style={{ padding: '2px 10px', borderRadius: 12, background: `${statusColor[trip.status] || 'var(--c-text-secondary)'}22`, border: `1px solid ${statusColor[trip.status] || 'var(--c-text-secondary)'}55` }}>
+                                    <Text size="xs" fw={700} style={{ color: statusColor[trip.status] || 'var(--c-text-secondary)', textTransform: 'capitalize' }}>{trip.status?.replace('_', ' ')}</Text>
                                 </Box>
                             </Group>
-                            <Text size="xs" style={{ color: '#475569' }}>{trip.departure_date ? new Date(trip.departure_date).toLocaleDateString() : '—'}</Text>
+                            <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>{trip.departure_date ? new Date(trip.departure_date).toLocaleDateString() : '—'}</Text>
                         </Group>
                         <Group gap="xl">
                             <Box>
-                                <Text size="xs" style={{ color: '#475569', marginBottom: 2 }}>Route</Text>
-                                <Text size="sm" fw={600} style={{ color: '#94A3B8' }}>{trip.origin} → {trip.destination}</Text>
+                                <Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 2 }}>Route</Text>
+                                <Text size="sm" fw={600} style={{ color: 'var(--c-text-secondary)' }}>{trip.origin} → {trip.destination}</Text>
                             </Box>
                             {trip.driver && (
                                 <Box>
-                                    <Text size="xs" style={{ color: '#475569', marginBottom: 2 }}>Driver</Text>
-                                    <Text size="sm" style={{ color: '#94A3B8' }}>{trip.driver.name}</Text>
+                                    <Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 2 }}>Driver</Text>
+                                    <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{trip.driver.name}</Text>
                                 </Box>
                             )}
                             {trip.vehicle && (
                                 <Box>
-                                    <Text size="xs" style={{ color: '#475569', marginBottom: 2 }}>Vehicle</Text>
-                                    <Text size="sm" style={{ color: '#94A3B8' }}>{trip.vehicle.registration_number}</Text>
+                                    <Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 2 }}>Vehicle</Text>
+                                    <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{trip.vehicle.registration_number}</Text>
                                 </Box>
                             )}
                             {trip.cargo?.length > 0 && (
                                 <Box>
-                                    <Text size="xs" style={{ color: '#475569', marginBottom: 2 }}>Cargo</Text>
-                                    <Text size="sm" style={{ color: '#94A3B8' }}>{trip.cargo.length} item(s)</Text>
+                                    <Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 2 }}>Cargo</Text>
+                                    <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{trip.cargo.length} item(s)</Text>
                                 </Box>
                             )}
                         </Group>
@@ -86,7 +86,7 @@ export default function PortalTripsIndex({ client, trips, statuses, filters }) {
                     <Box style={{ textAlign: 'center', padding: '64px 0', background: 'var(--c-card)', borderRadius: 12, border: '1px solid var(--c-border-subtle)' }}>
                         <Text style={{ fontSize: '3rem', marginBottom: 12 }}>🚛</Text>
                         <Text fw={600} style={{ color: 'var(--c-text)' }}>No shipments found</Text>
-                        <Text size="sm" style={{ color: '#475569', marginTop: 6 }}>Your trips will appear here</Text>
+                        <Text size="sm" style={{ color: 'var(--c-text-muted)', marginTop: 6 }}>Your trips will appear here</Text>
                     </Box>
                 )}
             </Stack>
@@ -104,7 +104,7 @@ export default function PortalTripsIndex({ client, trips, statuses, filters }) {
                                 borderRadius: 8, textDecoration: 'none',
                                 background: page === trips.current_page ? '#1565C0' : '#0F1E32',
                                 border: '1px solid var(--c-border-input)',
-                                color: page === trips.current_page ? '#fff' : '#94A3B8',
+                                color: page === trips.current_page ? '#fff' : 'var(--c-text-secondary)',
                                 fontWeight: page === trips.current_page ? 700 : 500, fontSize: 14,
                             }}
                         >

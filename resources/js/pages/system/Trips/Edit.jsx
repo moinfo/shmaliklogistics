@@ -4,7 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import TripForm from './TripForm';
 
-const dk = { textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 export default function EditTrip({ trip, statuses, drivers = [], vehicles = [] }) {
     const { colorScheme } = useMantineColorScheme();

@@ -15,7 +15,7 @@ export default function PortalLogin() {
                 {/* Logo */}
                 <Box style={{ textAlign: 'center', marginBottom: 40 }}>
                     <img src="/logo-full.png" alt="SH Malik Logistics" style={{ height: 52, objectFit: 'contain' }} />
-                    <Text size="sm" style={{ color: '#94A3B8', marginTop: 10 }}>Customer Portal</Text>
+                    <Text size="sm" style={{ color: 'var(--c-text-secondary)', marginTop: 10 }}>Customer Portal</Text>
                 </Box>
 
                 {/* Card */}
@@ -43,7 +43,7 @@ export default function PortalLogin() {
                                 value={data.email}
                                 onChange={e => setData('email', e.target.value)}
                                 styles={{
-                                    label: { color: '#94A3B8', marginBottom: 6 },
+                                    label: { color: 'var(--c-text-secondary)', marginBottom: 6 },
                                     input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)', '&:focus': { borderColor: '#2196F3' } },
                                 }}
                             />
@@ -53,7 +53,7 @@ export default function PortalLogin() {
                                 value={data.password}
                                 onChange={e => setData('password', e.target.value)}
                                 styles={{
-                                    label: { color: '#94A3B8', marginBottom: 6 },
+                                    label: { color: 'var(--c-text-secondary)', marginBottom: 6 },
                                     input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' },
                                     innerInput: { color: 'var(--c-text)' },
                                 }}
@@ -75,7 +75,7 @@ export default function PortalLogin() {
                     </form>
                 </Box>
 
-                <Text size="xs" style={{ color: '#475569', textAlign: 'center', marginTop: 24 }}>
+                <Text size="xs" style={{ color: 'var(--c-text-muted)', textAlign: 'center', marginTop: 24 }}>
                     Contact SH Malik Logistics to get portal access
                 </Text>
             </Box>

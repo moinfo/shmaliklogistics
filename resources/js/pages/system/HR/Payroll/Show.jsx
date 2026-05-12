@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 const MONTHS = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 function fmt(n) { return Number(n ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
 
@@ -104,7 +104,7 @@ export default function ShowPayroll({ run, slips, totals, statuses }) {
         ['SDL (Employer)', totals.sdl, '#8B5CF6'],
         ['NSSF (Employer)', totals.nssf_er, '#8B5CF6'],
         ['WCF (Employer)', totals.wcf, '#8B5CF6'],
-        ['Total Employer Cost', totals.employer_cost, '#475569'],
+        ['Total Employer Cost', totals.employer_cost, 'var(--c-text-muted)'],
     ];
 
     const td = (value, color, bold = false) => (

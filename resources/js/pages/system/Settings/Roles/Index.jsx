@@ -3,29 +3,43 @@ import { Box, Text, Group, Stack, Badge, SimpleGrid } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 const MODULES = [
-    { key: 'trips',           label: 'Trips',              actions: ['view', 'create', 'edit', 'delete'] },
-    { key: 'fleet',           label: 'Fleet',              actions: ['view', 'create', 'edit', 'delete'] },
-    { key: 'drivers',         label: 'Drivers',            actions: ['view', 'create', 'edit', 'delete'] },
-    { key: 'permits',         label: 'Permits',            actions: ['view', 'create', 'edit', 'delete'] },
-    { key: 'clients',         label: 'Clients',            actions: ['view', 'create', 'edit', 'delete'] },
-    { key: 'cargo',           label: 'Cargo',              actions: ['view', 'create', 'edit', 'delete'] },
-    { key: 'billing',         label: 'Billing',            actions: ['view', 'create', 'edit', 'delete'] },
-    { key: 'expenses',        label: 'Expenses',           actions: ['view', 'create', 'edit', 'delete'] },
-    { key: 'maintenance',     label: 'Maintenance',        actions: ['view', 'create', 'edit', 'delete'] },
-    { key: 'documents',       label: 'Documents',          actions: ['view', 'create', 'delete'] },
-    { key: 'hr_employees',    label: 'HR: Employees',      actions: ['view', 'create', 'edit', 'delete'] },
-    { key: 'hr_leave',        label: 'HR: Leave',          actions: ['view', 'create', 'approve'] },
-    { key: 'hr_payroll',      label: 'HR: Payroll',        actions: ['view', 'create', 'process'] },
-    { key: 'hr_advances',     label: 'HR: Advances',       actions: ['view', 'create', 'approve'] },
-    { key: 'hr_loans',        label: 'HR: Loans',          actions: ['view', 'create', 'approve'] },
-    { key: 'hr_attendance',   label: 'HR: Attendance',     actions: ['view', 'create'] },
-    { key: 'hr_salary_slips', label: 'HR: Salary Slips',   actions: ['view'] },
-    { key: 'reports',         label: 'Reports',            actions: ['view'] },
-    { key: 'settings',        label: 'Settings',           actions: ['view', 'edit'] },
+    { key: 'trips',                       label: 'Trips',                     actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'fleet',                       label: 'Fleet — Vehicles',          actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'fleet_fuel_logs',             label: 'Fleet — Fuel Logs',         actions: ['view', 'create', 'delete'] },
+    { key: 'drivers',                     label: 'Drivers',                   actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'permits',                     label: 'Permits',                   actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'clients',                     label: 'Clients',                   actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'cargo',                       label: 'Cargo',                     actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'billing_quotes',              label: 'Billing — Quotes',          actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'billing_proformas',           label: 'Billing — Proformas',       actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'billing_invoices',            label: 'Billing — Invoices',        actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'billing_payments',            label: 'Billing — Payments',        actions: ['view', 'create', 'delete'] },
+    { key: 'billing_quote_requests',      label: 'Billing — Quote Requests',  actions: ['view', 'edit'] },
+    { key: 'expenses',                    label: 'Expenses',                  actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'maintenance',                 label: 'Maintenance',               actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'documents',                   label: 'Documents',                 actions: ['view', 'create', 'delete'] },
+    { key: 'procurement_suppliers',       label: 'Procurement — Suppliers',   actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'procurement_orders',          label: 'Procurement — Orders',      actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'inventory',                   label: 'Inventory',                 actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'hr_employees',                label: 'HR: Employees',             actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'hr_leave',                    label: 'HR: Leave',                 actions: ['view', 'create', 'approve'] },
+    { key: 'hr_payroll',                  label: 'HR: Payroll',               actions: ['view', 'create', 'process'] },
+    { key: 'hr_advances',                 label: 'HR: Advances',              actions: ['view', 'create', 'approve'] },
+    { key: 'hr_loans',                    label: 'HR: Loans',                 actions: ['view', 'create', 'approve'] },
+    { key: 'hr_allowances',               label: 'HR: Allowances',            actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'hr_attendance',               label: 'HR: Attendance',            actions: ['view', 'create'] },
+    { key: 'hr_salary_slips',             label: 'HR: Salary Slips',          actions: ['view'] },
+    { key: 'hr_appraisals',               label: 'HR: Appraisals',            actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'hr_recruitment',              label: 'HR: Recruitment',           actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'reports_route_profitability', label: 'Reports — Route Profitability', actions: ['view'] },
+    { key: 'reports_financial_summary',   label: 'Reports — Financial Summary',   actions: ['view'] },
+    { key: 'reports_fleet_utilization',   label: 'Reports — Fleet Utilization',   actions: ['view'] },
+    { key: 'settings',                    label: 'Settings',                  actions: ['view', 'edit'] },
 ];
 
 const ALL_ACTIONS = ['view', 'create', 'edit', 'delete', 'approve', 'process'];
@@ -134,35 +148,45 @@ function RoleForm({ role, onClose, isDark, cardBorder }) {
                         </tr>
                     </thead>
                     <tbody>
-                        {MODULES.map((mod, i) => (
+                        {MODULES.map((mod, i) => {
+                            const wildcard = hasWildcard(data.permissions);
+                            const moduleAll = hasModuleAll(data.permissions, mod.key);
+                            return (
                             <tr key={mod.key} style={{ borderBottom: `1px solid ${matrixBorder}`, background: i % 2 === 0 ? matrixBg : 'transparent' }}>
                                 <td style={{ padding: '8px 12px', color: textPri, fontWeight: 600, fontSize: 12 }}>{mod.label}</td>
                                 {/* ALL toggle */}
                                 <td style={{ padding: '8px 10px', textAlign: 'center' }}>
-                                    <input type="checkbox"
-                                        checked={hasModuleAll(data.permissions, mod.key)}
-                                        disabled={hasWildcard(data.permissions)}
-                                        onChange={() => setData('permissions', toggleModuleAll(data.permissions, mod.key, mod.actions))}
-                                        style={{ accentColor: '#3B82F6', width: 15, height: 15, cursor: 'pointer' }} />
+                                    {wildcard ? (
+                                        <Text size="sm" style={{ color: '#3B82F6', fontWeight: 700 }}>✓</Text>
+                                    ) : (
+                                        <input type="checkbox"
+                                            checked={moduleAll}
+                                            onChange={() => setData('permissions', toggleModuleAll(data.permissions, mod.key, mod.actions))}
+                                            style={{ accentColor: '#3B82F6', width: 15, height: 15, cursor: 'pointer' }} />
+                                    )}
                                 </td>
                                 {ALL_ACTIONS.map(action => {
                                     const supported = mod.actions.includes(action);
+                                    const granted = hasPerm(data.permissions, mod.key, action);
+                                    const inherited = supported && granted && (wildcard || moduleAll);
                                     return (
                                         <td key={action} style={{ padding: '8px 10px', textAlign: 'center' }}>
-                                            {supported ? (
+                                            {!supported ? (
+                                                <Text size="xs" style={{ color: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0' }}>—</Text>
+                                            ) : inherited ? (
+                                                <Text size="sm" style={{ color: '#3B82F6', fontWeight: 700 }}>✓</Text>
+                                            ) : (
                                                 <input type="checkbox"
-                                                    checked={hasPerm(data.permissions, mod.key, action)}
-                                                    disabled={hasWildcard(data.permissions) || hasModuleAll(data.permissions, mod.key)}
+                                                    checked={granted}
                                                     onChange={() => setData('permissions', togglePerm(data.permissions, mod.key, action))}
                                                     style={{ accentColor: '#3B82F6', width: 14, height: 14, cursor: 'pointer' }} />
-                                            ) : (
-                                                <Text size="xs" style={{ color: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0' }}>—</Text>
                                             )}
                                         </td>
                                     );
                                 })}
                             </tr>
-                        ))}
+                            );
+                        })}
                     </tbody>
                 </table>
             </Box>
@@ -199,6 +223,8 @@ export default function RolesIndex({ roles }) {
     const [showNew, setShowNew] = useState(false);
     const [editing, setEditing] = useState(null);
     const [confirmDel, setConfirmDel] = useState(null);
+    const can = useCan();
+    const canManage = can('settings.edit');
 
     const deleteRole = (id) => {
         router.delete(`/system/settings/roles/${id}`, { onSuccess: () => setConfirmDel(null) });
@@ -220,10 +246,12 @@ export default function RolesIndex({ roles }) {
                     <Text fw={800} size="xl" style={{ color: textPri }}>Roles & Permissions</Text>
                     <Text size="sm" style={{ color: textSec }}>Define what each role can access across the system</Text>
                 </Stack>
-                <Box component="button" onClick={() => { setShowNew(true); setEditing(null); }}
-                    style={{ padding: '10px 22px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                    + Add Role
-                </Box>
+                {canManage && (
+                    <Box component="button" onClick={() => { setShowNew(true); setEditing(null); }}
+                        style={{ padding: '10px 22px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
+                        + Add Role
+                    </Box>
+                )}
             </Group>
 
             {showNew && !editing && (
@@ -268,13 +296,15 @@ export default function RolesIndex({ roles }) {
                                             <Box component="button" onClick={() => setConfirmDel(null)}
                                                 style={{ padding: '5px 12px', borderRadius: 6, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, border: 'none', cursor: 'pointer', fontSize: 12 }}>No</Box>
                                         </>
-                                    ) : (
+                                    ) : canManage ? (
                                         <>
                                             <Box component="button" onClick={() => { setEditing(r.id); setShowNew(false); }}
                                                 style={{ padding: '5px 14px', borderRadius: 6, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Edit</Box>
                                             <Box component="button" onClick={() => setConfirmDel(r.id)} disabled={r.users_count > 0}
                                                 style={{ padding: '5px 14px', borderRadius: 6, background: r.users_count > 0 ? 'transparent' : 'rgba(239,68,68,0.1)', color: r.users_count > 0 ? (isDark ? '#334155' : '#CBD5E1') : '#EF4444', border: `1px solid ${r.users_count > 0 ? 'transparent' : 'rgba(239,68,68,0.2)'}`, cursor: r.users_count > 0 ? 'not-allowed' : 'pointer', fontSize: 12, fontWeight: 600 }}>Delete</Box>
                                         </>
+                                    ) : (
+                                        <Text size="xs" style={{ color: textSec }}>Read-only</Text>
                                     )}
                                 </Group>
                             </Box>

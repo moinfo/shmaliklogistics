@@ -4,8 +4,10 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
+import { formatDate } from '../../../../lib/date';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
 function StatCard({ label, value, icon, color, isDark }) {
     return (
@@ -32,6 +34,7 @@ export default function EmployeesIndex({ employees, stats, statuses, departments
     const [search, setSearch]       = useState(filters.search ?? '');
     const [department, setDept]     = useState(filters.department ?? '');
     const [status, setStatus]       = useState(filters.status ?? '');
+    const can = useCan();
 
     const applyFilters = (overrides = {}) => {
         router.get('/system/hr/employees', { search, department, status, ...overrides }, { preserveState: true, replace: true });
@@ -54,11 +57,13 @@ export default function EmployeesIndex({ employees, stats, statuses, departments
                     <Text fw={800} size="xl" style={{ color: textPri }}>Employees</Text>
                     <Text size="sm" style={{ color: textSec }}>Manage your workforce</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box component={Link} href="/system/hr/employees/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                        + Add Employee
-                    </Box>
-                </motion.div>
+                {can('hr_employees.create') && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box component={Link} href="/system/hr/employees/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
+                            + Add Employee
+                        </Box>
+                    </motion.div>
+                )}
             </Group>
 
             <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md" mb="xl">
@@ -105,19 +110,19 @@ export default function EmployeesIndex({ employees, stats, statuses, departments
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         <Text fw={700} size="sm" style={{ color: textPri }}>{emp.name}</Text>
-                                        {emp.hire_date && <Text size="xs" style={{ color: textSec }}>Since {emp.hire_date}</Text>}
+                                        {emp.hire_date && <Text size="xs" style={{ color: textSec }}>Since {formatDate(emp.hire_date)}</Text>}
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         {emp.department && <Text size="sm" style={{ color: textPri }}>{emp.department}</Text>}
                                         {emp.position && <Text size="xs" style={{ color: textSec }}>{emp.position}</Text>}
-                                        {!emp.department && !emp.position && <Text size="xs" style={{ color: isDark ? dk.textMut : '#94A3B8' }}>—</Text>}
+                                        {!emp.department && !emp.position && <Text size="xs" style={{ color: isDark ? dk.textMut : 'var(--c-text-secondary)' }}>—</Text>}
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         <Text size="sm" style={{ color: textSec }}>{emp.phone ?? '—'}</Text>
-                                        {emp.email && <Text size="xs" style={{ color: isDark ? dk.textMut : '#94A3B8' }}>{emp.email}</Text>}
+                                        {emp.email && <Text size="xs" style={{ color: isDark ? dk.textMut : 'var(--c-text-secondary)' }}>{emp.email}</Text>}
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
-                                        {emp.salary ? <Text size="sm" fw={600} style={{ color: '#F59E0B', whiteSpace: 'nowrap' }}>{emp.salary_currency} {Number(emp.salary).toLocaleString()}</Text> : <Text size="xs" style={{ color: isDark ? dk.textMut : '#94A3B8' }}>—</Text>}
+                                        {emp.salary ? <Text size="sm" fw={600} style={{ color: '#F59E0B', whiteSpace: 'nowrap' }}>{emp.salary_currency} {Number(emp.salary).toLocaleString()}</Text> : <Text size="xs" style={{ color: isDark ? dk.textMut : 'var(--c-text-secondary)' }}>—</Text>}
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         <Badge size="sm" style={{ background: statuses[emp.status]?.color + '22', color: statuses[emp.status]?.color, border: `1px solid ${statuses[emp.status]?.color}44` }}>
@@ -126,9 +131,15 @@ export default function EmployeesIndex({ employees, stats, statuses, departments
                                     </td>
                                     <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                                         <Group gap={6} justify="flex-end">
-                                            <ActionIcon component={Link} href={`/system/hr/employees/${emp.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
-                                            <ActionIcon component={Link} href={`/system/hr/employees/${emp.id}/edit`} variant="subtle" size="sm" style={{ color: textSec }}>✏️</ActionIcon>
-                                            <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(emp.id)}>🗑️</ActionIcon>
+                                            {can('hr_employees.view') && (
+                                                <ActionIcon component={Link} href={`/system/hr/employees/${emp.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
+                                            )}
+                                            {can('hr_employees.edit') && (
+                                                <ActionIcon component={Link} href={`/system/hr/employees/${emp.id}/edit`} variant="subtle" size="sm" style={{ color: textSec }}>✏️</ActionIcon>
+                                            )}
+                                            {can('hr_employees.delete') && (
+                                                <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(emp.id)}>🗑️</ActionIcon>
+                                            )}
                                         </Group>
                                     </td>
                                 </tr>

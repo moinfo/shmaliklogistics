@@ -6,13 +6,13 @@ import DashboardLayout from '../../layouts/DashboardLayout';
 
 const dk = {
     card: '#0F1E32', cardHov: '#132436', border: 'var(--c-border-color)',
-    divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569',
+    divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)',
 };
 
 const STATUS_PROGRESS = { planned: 5, loading: 15, in_transit: 60, at_border: 80, delivered: 100, completed: 100, cancelled: 0 };
 const STATUS_COLOR    = { planned: '#A78BFA', loading: '#A78BFA', in_transit: '#3B82F6', at_border: '#F59E0B', delivered: '#22C55E', completed: '#10B981', cancelled: '#EF4444' };
 const STATUS_LABEL    = { planned: 'Planned', loading: 'Loading', in_transit: 'In Transit', at_border: 'At Border', delivered: 'Delivered', completed: 'Completed', cancelled: 'Cancelled' };
-const FLEET_COLORS    = { active: '#22C55E', on_road: '#3B82F6', at_border: '#F59E0B', loading: '#A78BFA', idle: '#475569', maintenance: '#EF4444', retired: '#334155' };
+const FLEET_COLORS    = { active: '#22C55E', on_road: '#3B82F6', at_border: '#F59E0B', loading: '#A78BFA', idle: 'var(--c-text-muted)', maintenance: '#EF4444', retired: '#334155' };
 
 const fmt = (n) => new Intl.NumberFormat('en-TZ').format(Math.round(n ?? 0));
 
@@ -25,7 +25,7 @@ const quickActions = [
 
 function RevenueChart({ data, isDark }) {
     const textSec = isDark ? dk.textSec : '#64748B';
-    const textMut = isDark ? dk.textMut : '#94A3B8';
+    const textMut = isDark ? dk.textMut : 'var(--c-text-secondary)';
     const maxVal  = Math.max(...data.map(d => Math.max(d.revenue, d.expenses)), 1);
     const H = 100, W = 560, barW = 26, gap = 10;
     const totalW = data.length * (barW * 2 + gap + 8);
@@ -70,7 +70,7 @@ export default function Dashboard() {
     const divider    = isDark ? `1px solid ${dk.divider}` : '1px solid #F1F5F9';
     const textPri    = isDark ? dk.textPri : '#1E293B';
     const textSec    = isDark ? dk.textSec : '#64748B';
-    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
     const rowHovBg   = isDark ? dk.cardHov : '#F8FAFC';
 
     const revPct = stats.revenue_change_pct;
@@ -133,7 +133,7 @@ export default function Dashboard() {
                         {[
                             ['#3B82F6', `${stats.fleet_on_road ?? 0} On Road`],
                             ['#F59E0B', `${stats.active_trips ?? 0} Active Trips`],
-                            ['#475569', `${stats.fleet_idle ?? 0} Idle`],
+                            ['var(--c-text-muted)', `${stats.fleet_idle ?? 0} Idle`],
                         ].map(([dot, label]) => (
                             <Group key={label} gap={7} style={{ background: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff', border: isDark ? `1px solid ${dk.divider}` : '1px solid #E2E8F0', borderRadius: 20, padding: '6px 14px' }}>
                                 <Box style={{ width: 7, height: 7, borderRadius: '50%', background: dot }} />
@@ -215,7 +215,7 @@ export default function Dashboard() {
                         ) : (
                             <Stack gap={0}>
                                 {recentTrips.map((trip, i) => {
-                                    const sc = STATUS_COLOR[trip.status] || '#475569';
+                                    const sc = STATUS_COLOR[trip.status] || 'var(--c-text-muted)';
                                     const progress = STATUS_PROGRESS[trip.status] ?? 0;
                                     const progressColor = trip.status === 'delivered' || trip.status === 'completed' ? 'teal' : trip.status === 'at_border' ? 'yellow' : trip.status === 'loading' ? 'violet' : 'blue';
                                     return (
@@ -267,7 +267,7 @@ export default function Dashboard() {
                         ) : (
                             <Stack gap={0}>
                                 {fleetStatus.map((v, i) => {
-                                    const sc = FLEET_COLORS[v.status] || '#475569';
+                                    const sc = FLEET_COLORS[v.status] || 'var(--c-text-muted)';
                                     const statusLabel = v.status?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Unknown';
                                     return (
                                         <Box key={v.id} style={{ padding: '12px 22px', borderBottom: i < fleetStatus.length - 1 ? divider : 'none', transition: 'background 0.15s' }}
@@ -374,12 +374,12 @@ export default function Dashboard() {
                         <Box style={{ padding: '16px 22px' }}>
                             {(() => {
                                 const total = expenseByCategory.reduce((s, e) => s + Number(e.total), 0);
-                                const CATS  = { fuel: ['⛽','#3B82F6'], tyre: ['🔄','#8B5CF6'], repair: ['🔧','#F59E0B'], driver_salary: ['👤','#10B981'], accommodation: ['🏨','#06B6D4'], toll: ['🛣️','#F97316'], port: ['🚢','#6366F1'], permit_fee: ['🛂','#84CC16'], communication: ['📱','#EC4899'], office: ['🏢','#64748B'], other: ['📦','#94A3B8'] };
+                                const CATS  = { fuel: ['⛽','#3B82F6'], tyre: ['🔄','#8B5CF6'], repair: ['🔧','#F59E0B'], driver_salary: ['👤','#10B981'], accommodation: ['🏨','#06B6D4'], toll: ['🛣️','#F97316'], port: ['🚢','#6366F1'], permit_fee: ['🛂','#84CC16'], communication: ['📱','#EC4899'], office: ['🏢','#64748B'], other: ['📦','var(--c-text-secondary)'] };
                                 return (
                                     <Stack gap={8}>
                                         {expenseByCategory.slice(0, 6).map(e => {
                                             const pct = total > 0 ? Math.round(Number(e.total) / total * 100) : 0;
-                                            const [icon, color] = CATS[e.category] ?? ['📦', '#94A3B8'];
+                                            const [icon, color] = CATS[e.category] ?? ['📦', 'var(--c-text-secondary)'];
                                             return (
                                                 <Box key={e.category}>
                                                     <Group justify="space-between" mb={3}>

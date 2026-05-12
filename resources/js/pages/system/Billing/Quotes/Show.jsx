@@ -6,8 +6,9 @@ import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { printBillingDoc } from '../../../../utils/billingPrint';
 import SendDocModal from '../../../../components/SendDocModal';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 const fmt = (n) => new Intl.NumberFormat('en-TZ').format(Math.round(Number(n) || 0));
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
@@ -22,6 +23,7 @@ export default function ShowQuote({ quote, statuses, company }) {
     const cur        = quote.currency ?? 'TZS';
 
     const [sendOpen, setSendOpen] = useState(false);
+    const can = useCan();
 
     const handleDelete = () => {
         if (confirm(`Delete quote ${quote.document_number}?`)) router.delete(`/system/billing/quotes/${quote.id}`);
@@ -45,27 +47,35 @@ export default function ShowQuote({ quote, statuses, company }) {
                     <Text size="sm" style={{ color: textSec }}>{quote.client?.name}{quote.client?.company_name ? ` — ${quote.client.company_name}` : ''}</Text>
                 </Stack>
                 <Group gap="sm" wrap="wrap">
-                    {['draft', 'sent', 'accepted'].includes(quote.status) && (
+                    {can('billing_quotes.edit') && ['draft', 'sent', 'accepted'].includes(quote.status) && (
                         <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                             <Box component="button" onClick={convertToProforma} style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#059669,#10B981)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13 }}>
                                 → Convert to Proforma
                             </Box>
                         </motion.div>
                     )}
-                    <Box component="button" onClick={() => setSendOpen(true)}
-                        style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#059669,#10B981)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
-                        ✉ Send
-                    </Box>
+                    {can('billing_quotes.edit') && (
+                        <Box component="button" onClick={() => setSendOpen(true)}
+                            style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#059669,#10B981)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+                            ✉ Send
+                        </Box>
+                    )}
                     <Box component="button" onClick={() => printBillingDoc(quote, company, 'quote')}
                         style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
                         🖨 Print
                     </Box>
-                    <Box component="a" href={`/system/billing/quotes/${quote.id}/pdf`} target="_blank"
-                        style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#065F46,#059669)', color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>
-                        ⬇ Download PDF
-                    </Box>
-                    <Box component={Link} href={`/system/billing/quotes/${quote.id}/edit`} style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>Edit</Box>
-                    <Box component="button" onClick={handleDelete} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #EF444444', color: '#EF4444', background: 'transparent', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>Delete</Box>
+                    {can('billing_quotes.view') && (
+                        <Box component="a" href={`/system/billing/quotes/${quote.id}/pdf`} target="_blank"
+                            style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#065F46,#059669)', color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>
+                            ⬇ Download PDF
+                        </Box>
+                    )}
+                    {can('billing_quotes.edit') && (
+                        <Box component={Link} href={`/system/billing/quotes/${quote.id}/edit`} style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>Edit</Box>
+                    )}
+                    {can('billing_quotes.delete') && (
+                        <Box component="button" onClick={handleDelete} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #EF444444', color: '#EF4444', background: 'transparent', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>Delete</Box>
+                    )}
                 </Group>
             </Group>
 

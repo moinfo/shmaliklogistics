@@ -4,8 +4,10 @@ import { Box, Text, Group, Stack, SimpleGrid, Select, Tooltip, ActionIcon } from
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useCan } from '../../../lib/can';
+import { formatDate } from '../../../lib/date';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
 function DataRow({ label, value, isDark, mono }) {
     const textSec = isDark ? dk.textSec : '#64748B';
@@ -55,7 +57,7 @@ function Card({ title, children, isDark, accent }) {
     );
 }
 
-function GpsPanel({ vehicle, isDark, cardBg, cardBorder, textPri, textSec, textMut, divider }) {
+function GpsPanel({ vehicle, isDark, cardBg, cardBorder, textPri, textSec, textMut, divider, canEdit }) {
     const [lat, setLat] = useState(vehicle.gps_lat ? String(vehicle.gps_lat) : '');
     const [lng, setLng] = useState(vehicle.gps_lng ? String(vehicle.gps_lng) : '');
     const [locName, setLocName] = useState(vehicle.gps_location_name ?? '');
@@ -88,25 +90,27 @@ function GpsPanel({ vehicle, isDark, cardBg, cardBorder, textPri, textSec, textM
                         </Text>
                     </Box>
                 )}
-                <form onSubmit={handleSubmit}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr auto', gap: 10, alignItems: 'end' }}>
-                        <div>
-                            <Text size="xs" fw={600} style={{ color: textMut, marginBottom: 4 }}>Latitude</Text>
-                            <input type="number" step="any" placeholder="-6.369" value={lat} onChange={e => setLat(e.target.value)} style={inputStyle} required />
+                {canEdit && (
+                    <form onSubmit={handleSubmit}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr auto', gap: 10, alignItems: 'end' }}>
+                            <div>
+                                <Text size="xs" fw={600} style={{ color: textMut, marginBottom: 4 }}>Latitude</Text>
+                                <input type="number" step="any" placeholder="-6.369" value={lat} onChange={e => setLat(e.target.value)} style={inputStyle} required />
+                            </div>
+                            <div>
+                                <Text size="xs" fw={600} style={{ color: textMut, marginBottom: 4 }}>Longitude</Text>
+                                <input type="number" step="any" placeholder="34.889" value={lng} onChange={e => setLng(e.target.value)} style={inputStyle} required />
+                            </div>
+                            <div>
+                                <Text size="xs" fw={600} style={{ color: textMut, marginBottom: 4 }}>Location Name (optional)</Text>
+                                <input type="text" placeholder="e.g. Namanga Border, Dar es Salaam Port" value={locName} onChange={e => setLocName(e.target.value)} style={inputStyle} />
+                            </div>
+                            <button type="submit" style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap' }}>
+                                Update GPS
+                            </button>
                         </div>
-                        <div>
-                            <Text size="xs" fw={600} style={{ color: textMut, marginBottom: 4 }}>Longitude</Text>
-                            <input type="number" step="any" placeholder="34.889" value={lng} onChange={e => setLng(e.target.value)} style={inputStyle} required />
-                        </div>
-                        <div>
-                            <Text size="xs" fw={600} style={{ color: textMut, marginBottom: 4 }}>Location Name (optional)</Text>
-                            <input type="text" placeholder="e.g. Namanga Border, Dar es Salaam Port" value={locName} onChange={e => setLocName(e.target.value)} style={inputStyle} />
-                        </div>
-                        <button type="submit" style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap' }}>
-                            Update GPS
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                )}
             </Box>
         </Box>
     );
@@ -117,12 +121,13 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons, avail
     const isDark = colorScheme === 'dark';
     const { props } = usePage();
     const [assignDriverId, setAssignDriverId] = useState(vehicle.driver?.id ? String(vehicle.driver.id) : null);
+    const can = useCan();
 
     const cardBg     = isDark ? dk.card : '#ffffff';
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const textPri    = isDark ? dk.textPri : '#1E293B';
     const textSec    = isDark ? dk.textSec : '#64748B';
-    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
     const divider    = isDark ? dk.divider : '#E2E8F0';
 
     const meta     = statuses[vehicle.status] ?? { label: vehicle.status, color: '#94A3B8' };
@@ -170,19 +175,25 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons, avail
                     </Stack>
                 </Group>
                 <Group gap="sm" wrap="wrap">
-                    <Select
-                        value={vehicle.status}
-                        onChange={s => router.patch(`/system/fleet/${vehicle.id}/status`, { status: s })}
-                        data={Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))}
-                        size="sm"
-                        styles={{ input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8, width: 150 }, dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` } }}
-                    />
-                    <Box component={Link} href={`/system/fleet/${vehicle.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
-                        ✏️ Edit
-                    </Box>
-                    <Tooltip label="Remove from fleet">
-                        <ActionIcon onClick={confirmDelete} size={36} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, color: '#EF4444' }}>🗑️</ActionIcon>
-                    </Tooltip>
+                    {can('fleet.edit') && (
+                        <Select
+                            value={vehicle.status}
+                            onChange={s => router.patch(`/system/fleet/${vehicle.id}/status`, { status: s })}
+                            data={Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))}
+                            size="sm"
+                            styles={{ input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8, width: 150 }, dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` } }}
+                        />
+                    )}
+                    {can('fleet.edit') && (
+                        <Box component={Link} href={`/system/fleet/${vehicle.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
+                            ✏️ Edit
+                        </Box>
+                    )}
+                    {can('fleet.delete') && (
+                        <Tooltip label="Remove from fleet">
+                            <ActionIcon onClick={confirmDelete} size={36} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, color: '#EF4444' }}>🗑️</ActionIcon>
+                        </Tooltip>
+                    )}
                 </Group>
             </Group>
 
@@ -243,28 +254,30 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons, avail
                         <Text size="sm" style={{ color: textMut, paddingTop: 10, paddingBottom: 4 }}>No driver currently assigned.</Text>
                     )}
 
-                    <Group align="flex-end" gap="sm" mt="md">
-                        <Box style={{ flex: 1 }}>
-                            <Select
-                                label={driver ? 'Change Driver' : 'Assign Driver'}
-                                placeholder="Select a driver…"
-                                value={assignDriverId}
-                                onChange={v => setAssignDriverId(v)}
-                                clearable
-                                data={availableDrivers.map(d => ({ value: String(d.id), label: `${d.name} — ${d.phone}` }))}
-                                styles={{
-                                    label:    { color: textSec, fontSize: 13, marginBottom: 4 },
-                                    input:    { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 },
-                                    dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` },
-                                }}
-                            />
-                        </Box>
-                        <motion.div whileTap={{ scale: 0.97 }}>
-                            <Box component="button" type="button" onClick={doAssignDriver} style={{ padding: '10px 22px', borderRadius: 8, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 12px rgba(33,150,243,0.25)', marginBottom: 1 }}>
-                                {driver ? 'Reassign' : 'Assign'}
+                    {can('fleet.edit') && (
+                        <Group align="flex-end" gap="sm" mt="md">
+                            <Box style={{ flex: 1 }}>
+                                <Select
+                                    label={driver ? 'Change Driver' : 'Assign Driver'}
+                                    placeholder="Select a driver…"
+                                    value={assignDriverId}
+                                    onChange={v => setAssignDriverId(v)}
+                                    clearable
+                                    data={availableDrivers.map(d => ({ value: String(d.id), label: `${d.name} — ${d.phone}` }))}
+                                    styles={{
+                                        label:    { color: textSec, fontSize: 13, marginBottom: 4 },
+                                        input:    { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 },
+                                        dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` },
+                                    }}
+                                />
                             </Box>
-                        </motion.div>
-                    </Group>
+                            <motion.div whileTap={{ scale: 0.97 }}>
+                                <Box component="button" type="button" onClick={doAssignDriver} style={{ padding: '10px 22px', borderRadius: 8, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 12px rgba(33,150,243,0.25)', marginBottom: 1 }}>
+                                    {driver ? 'Reassign' : 'Assign'}
+                                </Box>
+                            </motion.div>
+                        </Group>
+                    )}
                 </Card>
             </Box>
 
@@ -316,7 +329,7 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons, avail
                             <Box key={t.id} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 120px 140px', padding: '10px 0', borderBottom: `1px solid ${divider}`, cursor: 'pointer', transition: 'background 0.15s' }} onClick={() => router.visit(`/system/trips/${t.id}`)}>
                                 <Text size="sm" fw={700} style={{ color: '#3B82F6' }}>{t.trip_number}</Text>
                                 <Text size="sm" style={{ color: textPri }}>{t.route_from} → {t.route_to}</Text>
-                                <Text size="sm" style={{ color: textSec }}>{t.departure_date}</Text>
+                                <Text size="sm" style={{ color: textSec }}>{formatDate(t.departure_date)}</Text>
                                 <Text size="sm" style={{ color: textSec }}>{t.status}</Text>
                             </Box>
                         ))}
@@ -334,7 +347,7 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons, avail
 
             {/* GPS Location */}
             <Box mt="md">
-                <GpsPanel vehicle={vehicle} isDark={isDark} cardBg={cardBg} cardBorder={cardBorder} textPri={textPri} textSec={textSec} textMut={textMut} divider={divider} />
+                <GpsPanel vehicle={vehicle} isDark={isDark} cardBg={cardBg} cardBorder={cardBorder} textPri={textPri} textSec={textSec} textMut={textMut} divider={divider} canEdit={can('fleet.edit')} />
             </Box>
 
             <Box mt="xl">

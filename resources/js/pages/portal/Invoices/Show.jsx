@@ -4,20 +4,20 @@ import { Link } from '@inertiajs/react';
 import { printBillingDoc } from '../../../utils/billingPrint';
 
 const statusColor = {
-    draft: '#94A3B8', sent: '#2196F3', paid: '#22C55E',
-    overdue: '#EF4444', partial: '#F59E0B', cancelled: '#475569',
+    draft: 'var(--c-text-secondary)', sent: '#2196F3', paid: '#22C55E',
+    overdue: '#EF4444', partial: '#F59E0B', cancelled: 'var(--c-text-muted)',
 };
 
 const Field = ({ label, value }) => (
     <Box>
-        <Text size="xs" style={{ color: '#475569', marginBottom: 3 }}>{label}</Text>
+        <Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 3 }}>{label}</Text>
         <Text size="sm" fw={600} style={{ color: 'var(--c-text)' }}>{value || '—'}</Text>
     </Box>
 );
 
 export default function PortalInvoiceShow({ client, invoice, company }) {
     const fmt = (n) => new Intl.NumberFormat().format(Math.round(n ?? 0));
-    const sc = statusColor[invoice.status] || '#94A3B8';
+    const sc = statusColor[invoice.status] || 'var(--c-text-secondary)';
 
     return (
         <PortalLayout title={`Invoice ${invoice.document_number}`}>
@@ -30,7 +30,7 @@ export default function PortalInvoiceShow({ client, invoice, company }) {
                 <Group justify="space-between" mb="lg">
                     <Box>
                         <Text fw={800} size="xl" style={{ color: 'var(--c-text)' }}>{invoice.document_number}</Text>
-                        <Text size="sm" style={{ color: '#94A3B8', marginTop: 4 }}>Tax Invoice</Text>
+                        <Text size="sm" style={{ color: 'var(--c-text-secondary)', marginTop: 4 }}>Tax Invoice</Text>
                     </Box>
                     <Group gap="md">
                         <Box style={{ padding: '6px 18px', borderRadius: 20, background: `${sc}22`, border: `1px solid ${sc}55` }}>
@@ -74,8 +74,8 @@ export default function PortalInvoiceShow({ client, invoice, company }) {
                             {invoice.items?.map((item, i) => (
                                 <tr key={i} style={{ borderBottom: '1px solid var(--c-border-row)' }}>
                                     <td style={{ padding: '12px', color: 'var(--c-text)', fontSize: 14 }}>{item.description}</td>
-                                    <td style={{ padding: '12px', color: '#94A3B8', fontSize: 14 }}>{item.quantity} {item.unit}</td>
-                                    <td style={{ padding: '12px', color: '#94A3B8', fontSize: 14 }}>TZS {fmt(item.unit_price)}</td>
+                                    <td style={{ padding: '12px', color: 'var(--c-text-secondary)', fontSize: 14 }}>{item.quantity} {item.unit}</td>
+                                    <td style={{ padding: '12px', color: 'var(--c-text-secondary)', fontSize: 14 }}>TZS {fmt(item.unit_price)}</td>
                                     <td style={{ padding: '12px', color: 'var(--c-text)', fontSize: 14, fontWeight: 700 }}>TZS {fmt(item.total_price)}</td>
                                 </tr>
                             ))}

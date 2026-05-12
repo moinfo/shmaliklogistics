@@ -3,8 +3,9 @@ import { Box, Text, Group, Stack, SimpleGrid } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useCan } from '../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 const STATUS_FLOW = ['registered', 'loaded', 'in_transit', 'at_border', 'cleared', 'delivered'];
 const fmtW = kg => kg >= 1000 ? `${(kg / 1000).toFixed(2)} t` : `${Number(kg).toFixed(0)} kg`;
@@ -24,6 +25,7 @@ export default function ShowCargo({ cargo, statusLogs = [], statuses, types }) {
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [logNotes, setLogNotes]          = useState('');
     const [logLocation, setLogLocation]    = useState('');
+    const can = useCan();
 
     const st  = statuses[cargo.status] ?? { label: cargo.status, color: '#64748B' };
     const tp  = types[cargo.type]     ?? { label: cargo.type,   color: '#64748B' };
@@ -66,10 +68,12 @@ export default function ShowCargo({ cargo, statusLogs = [], statuses, types }) {
                     <Text size="sm" style={{ color: textSec }}>{cargo.description}</Text>
                 </Stack>
                 <Group gap="sm">
-                    <Box component={Link} href={`/system/cargo/${cargo.id}/edit`}
-                        style={{ padding: '9px 20px', borderRadius: 10, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>
-                        ✏️ Edit
-                    </Box>
+                    {can('cargo.edit') && (
+                        <Box component={Link} href={`/system/cargo/${cargo.id}/edit`}
+                            style={{ padding: '9px 20px', borderRadius: 10, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>
+                            ✏️ Edit
+                        </Box>
+                    )}
                     <Box component={Link} href="/system/cargo"
                         style={{ padding: '9px 20px', borderRadius: 10, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>
                         ← Back
@@ -89,11 +93,11 @@ export default function ShowCargo({ cargo, statusLogs = [], statuses, types }) {
                             <Box key={s} style={{ display: 'flex', alignItems: 'center', flex: i < STATUS_FLOW.length - 1 ? 1 : 0 }}>
                                 <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, minWidth: 72 }}>
                                     <Box
-                                        onClick={() => !updating && handleStatusChange(s)}
-                                        style={{ width: cur ? 36 : 28, height: cur ? 36 : 28, borderRadius: '50%', background: done ? sd.color : (isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'), border: cur ? `3px solid ${sd.color}` : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s', boxShadow: cur ? `0 0 12px ${sd.color}66` : 'none' }}>
-                                        <Text style={{ fontSize: done ? 14 : 10, color: done ? '#fff' : (isDark ? '#475569' : '#94A3B8') }}>{done ? '✓' : ''}</Text>
+                                        onClick={() => can('cargo.edit') && !updating && handleStatusChange(s)}
+                                        style={{ width: cur ? 36 : 28, height: cur ? 36 : 28, borderRadius: '50%', background: done ? sd.color : (isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'), border: cur ? `3px solid ${sd.color}` : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: can('cargo.edit') ? 'pointer' : 'default', transition: 'all 0.2s', boxShadow: cur ? `0 0 12px ${sd.color}66` : 'none' }}>
+                                        <Text style={{ fontSize: done ? 14 : 10, color: done ? '#fff' : (isDark ? 'var(--c-text-muted)' : 'var(--c-text-secondary)') }}>{done ? '✓' : ''}</Text>
                                     </Box>
-                                    <Text size="10px" fw={cur ? 700 : 500} style={{ color: done ? sd.color : (isDark ? '#475569' : '#94A3B8'), textAlign: 'center', whiteSpace: 'nowrap' }}>{sd.label}</Text>
+                                    <Text size="10px" fw={cur ? 700 : 500} style={{ color: done ? sd.color : (isDark ? 'var(--c-text-muted)' : 'var(--c-text-secondary)'), textAlign: 'center', whiteSpace: 'nowrap' }}>{sd.label}</Text>
                                 </Box>
                                 {i < STATUS_FLOW.length - 1 && (
                                     <Box style={{ flex: 1, height: 2, background: i < idx ? '#3B82F6' : (isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'), margin: '0 4px', marginBottom: 20 }} />
@@ -105,18 +109,20 @@ export default function ShowCargo({ cargo, statusLogs = [], statuses, types }) {
                 {cargo.status === 'cancelled' && (
                     <Text size="xs" style={{ color: '#EF4444', marginTop: 8 }}>This cargo has been cancelled.</Text>
                 )}
-                <Group gap="md" mt="md" wrap="wrap">
-                    <Box style={{ flex: 1, minWidth: 160 }}>
-                        <Text size="xs" style={{ color: textSec, marginBottom: 4 }}>Location (optional)</Text>
-                        <input value={logLocation} onChange={e => setLogLocation(e.target.value)} placeholder="e.g. Dar es Salaam Port"
-                            style={{ width: '100%', padding: '7px 10px', background: inputBg, border: `1px solid ${cardBorder}`, borderRadius: 7, color: textPri, fontSize: 12, outline: 'none', boxSizing: 'border-box' }} />
-                    </Box>
-                    <Box style={{ flex: 2, minWidth: 200 }}>
-                        <Text size="xs" style={{ color: textSec, marginBottom: 4 }}>Note (optional)</Text>
-                        <input value={logNotes} onChange={e => setLogNotes(e.target.value)} placeholder="Add a note for this update…"
-                            style={{ width: '100%', padding: '7px 10px', background: inputBg, border: `1px solid ${cardBorder}`, borderRadius: 7, color: textPri, fontSize: 12, outline: 'none', boxSizing: 'border-box' }} />
-                    </Box>
-                </Group>
+                {can('cargo.edit') && (
+                    <Group gap="md" mt="md" wrap="wrap">
+                        <Box style={{ flex: 1, minWidth: 160 }}>
+                            <Text size="xs" style={{ color: textSec, marginBottom: 4 }}>Location (optional)</Text>
+                            <input value={logLocation} onChange={e => setLogLocation(e.target.value)} placeholder="e.g. Dar es Salaam Port"
+                                style={{ width: '100%', padding: '7px 10px', background: inputBg, border: `1px solid ${cardBorder}`, borderRadius: 7, color: textPri, fontSize: 12, outline: 'none', boxSizing: 'border-box' }} />
+                        </Box>
+                        <Box style={{ flex: 2, minWidth: 200 }}>
+                            <Text size="xs" style={{ color: textSec, marginBottom: 4 }}>Note (optional)</Text>
+                            <input value={logNotes} onChange={e => setLogNotes(e.target.value)} placeholder="Add a note for this update…"
+                                style={{ width: '100%', padding: '7px 10px', background: inputBg, border: `1px solid ${cardBorder}`, borderRadius: 7, color: textPri, fontSize: 12, outline: 'none', boxSizing: 'border-box' }} />
+                        </Box>
+                    </Group>
+                )}
             </Box>
 
             <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
@@ -190,27 +196,29 @@ export default function ShowCargo({ cargo, statusLogs = [], statuses, types }) {
                     )}
 
                     {/* Danger zone */}
-                    <Box style={{ border: '1px solid rgba(239,68,68,0.25)', borderRadius: 12, padding: 20 }}>
-                        <Text fw={700} size="sm" style={{ color: '#EF4444', marginBottom: 8 }}>Danger Zone</Text>
-                        {confirmDelete ? (
-                            <Group gap="sm">
-                                <Text size="sm" style={{ color: textSec }}>Delete this cargo record?</Text>
-                                <Box component="button" onClick={handleDelete}
-                                    style={{ padding: '6px 14px', borderRadius: 6, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
-                                    Yes, delete
+                    {can('cargo.delete') && (
+                        <Box style={{ border: '1px solid rgba(239,68,68,0.25)', borderRadius: 12, padding: 20 }}>
+                            <Text fw={700} size="sm" style={{ color: '#EF4444', marginBottom: 8 }}>Danger Zone</Text>
+                            {confirmDelete ? (
+                                <Group gap="sm">
+                                    <Text size="sm" style={{ color: textSec }}>Delete this cargo record?</Text>
+                                    <Box component="button" onClick={handleDelete}
+                                        style={{ padding: '6px 14px', borderRadius: 6, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+                                        Yes, delete
+                                    </Box>
+                                    <Box component="button" onClick={() => setConfirmDelete(false)}
+                                        style={{ padding: '6px 14px', borderRadius: 6, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+                                        Cancel
+                                    </Box>
+                                </Group>
+                            ) : (
+                                <Box component="button" onClick={() => setConfirmDelete(true)}
+                                    style={{ padding: '7px 16px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.25)', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+                                    Delete Cargo Record
                                 </Box>
-                                <Box component="button" onClick={() => setConfirmDelete(false)}
-                                    style={{ padding: '6px 14px', borderRadius: 6, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
-                                    Cancel
-                                </Box>
-                            </Group>
-                        ) : (
-                            <Box component="button" onClick={() => setConfirmDelete(true)}
-                                style={{ padding: '7px 16px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.25)', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
-                                Delete Cargo Record
-                            </Box>
-                        )}
-                    </Box>
+                            )}
+                        </Box>
+                    )}
                 </Stack>
             </SimpleGrid>
 
@@ -240,7 +248,7 @@ export default function ShowCargo({ cargo, statusLogs = [], statuses, types }) {
                                             {log.location && (
                                                 <Text size="xs" style={{ color: textSec }}>📍 {log.location}</Text>
                                             )}
-                                            <Text size="xs" style={{ color: isDark ? '#475569' : '#94A3B8', marginLeft: 'auto' }}>
+                                            <Text size="xs" style={{ color: isDark ? 'var(--c-text-muted)' : 'var(--c-text-secondary)', marginLeft: 'auto' }}>
                                                 {dt.toLocaleDateString('en-TZ', { day: '2-digit', month: 'short', year: 'numeric' })} {dt.toLocaleTimeString('en-TZ', { hour: '2-digit', minute: '2-digit' })}
                                             </Text>
                                         </Group>

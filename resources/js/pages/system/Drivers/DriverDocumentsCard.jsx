@@ -3,9 +3,10 @@ import { router } from '@inertiajs/react';
 import { Box, Text, Group, Stack, SimpleGrid } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
+import { useCan } from '../../../lib/can';
 
-function DocStatus({ path, label, expiry, isDark, onDelete }) {
-    const textSec = isDark ? '#94A3B8' : '#64748B';
+function DocStatus({ path, label, expiry, isDark, onDelete, canDelete }) {
+    const textSec = isDark ? 'var(--c-text-secondary)' : '#64748B';
     const textPri = isDark ? '#E2E8F0' : '#1E293B';
 
     let expiryColor = textPri;
@@ -29,13 +30,13 @@ function DocStatus({ path, label, expiry, isDark, onDelete }) {
                             style={{ color: '#60A5FA', fontSize: 12, textDecoration: 'none', fontWeight: 600 }}>View ↗</Box>
                     </Group>
                 ) : (
-                    <Text size="xs" style={{ color: isDark ? '#475569' : '#94A3B8' }}>Not uploaded</Text>
+                    <Text size="xs" style={{ color: isDark ? 'var(--c-text-muted)' : 'var(--c-text-secondary)' }}>Not uploaded</Text>
                 )}
                 {expiryDisplay && (
                     <Text size="xs" fw={600} style={{ color: expiryColor }}>{expiryDisplay}</Text>
                 )}
             </Stack>
-            {path && (
+            {path && canDelete && (
                 <Box component="button" onClick={onDelete}
                     style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: 12, padding: '2px 6px', opacity: 0.7, flexShrink: 0, marginTop: 2 }}>
                     ✕ Remove
@@ -52,7 +53,7 @@ export default function DriverDocumentsCard({ driver }) {
     const cardBg     = isDark ? '#0F1E32' : '#ffffff';
     const cardBorder = isDark ? 'var(--c-border-color)' : '#E2E8F0';
     const textPri    = isDark ? '#E2E8F0' : '#1E293B';
-    const textSec    = isDark ? '#94A3B8' : '#64748B';
+    const textSec    = isDark ? 'var(--c-text-secondary)' : '#64748B';
     const divider    = isDark ? 'rgba(255,255,255,0.06)' : '#E2E8F0';
     const inputBg    = isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC';
 
@@ -64,6 +65,9 @@ export default function DriverDocumentsCard({ driver }) {
         driver.visa_expiry ? new Date(driver.visa_expiry).toISOString().slice(0, 10) : ''
     );
     const [busy, setBusy] = useState({ lic: false, vis: false });
+    const can = useCan();
+    const canEdit = can('drivers.edit');
+    const canDelete = can('drivers.delete');
 
     const uploadLicense = () => {
         if (!licFile) return;
@@ -112,30 +116,32 @@ export default function DriverDocumentsCard({ driver }) {
                 <Stack gap="md">
                     <DocStatus
                         label="Driving Licence" path={driver.license_doc_path}
-                        isDark={isDark} onDelete={() => deleteDoc('license')} />
+                        isDark={isDark} onDelete={() => deleteDoc('license')} canDelete={canDelete} />
 
-                    <Box style={{ borderTop: `1px solid ${divider}`, paddingTop: 12 }}>
-                        <Text size="xs" fw={600} style={{ color: textSec, marginBottom: 8 }}>Upload Licence Document</Text>
-                        <Stack gap="sm">
-                            <Box style={{ display: 'flex', alignItems: 'center', gap: 10, background: inputBg, border: `1px solid ${cardBorder}`, borderRadius: 8, padding: '8px 12px' }}>
-                                <input ref={licRef} type="file" accept=".pdf,.jpg,.jpeg,.png"
-                                    style={{ flex: 1, fontSize: 12, color: textSec, background: 'none', border: 'none', outline: 'none' }}
-                                    onChange={e => setLicFile(e.target.files[0] || null)} />
-                            </Box>
-                            {licFile && (
-                                <Text size="xs" style={{ color: '#60A5FA' }}>
-                                    Selected: {licFile.name} ({(licFile.size / 1024).toFixed(0)} KB)
-                                </Text>
-                            )}
-                            <motion.div whileTap={{ scale: 0.97 }}>
-                                <Box component="button" type="button" onClick={uploadLicense}
-                                    disabled={!licFile || busy.lic}
-                                    style={{ ...btnBase, background: licFile && !busy.lic ? 'linear-gradient(135deg, #1565C0, #2196F3)' : (isDark ? 'rgba(255,255,255,0.07)' : '#E2E8F0'), color: licFile && !busy.lic ? '#fff' : (isDark ? '#475569' : '#94A3B8'), width: '100%', textAlign: 'center', opacity: busy.lic ? 0.6 : 1 }}>
-                                    {busy.lic ? 'Uploading…' : '↑ Upload Licence'}
+                    {canEdit && (
+                        <Box style={{ borderTop: `1px solid ${divider}`, paddingTop: 12 }}>
+                            <Text size="xs" fw={600} style={{ color: textSec, marginBottom: 8 }}>Upload Licence Document</Text>
+                            <Stack gap="sm">
+                                <Box style={{ display: 'flex', alignItems: 'center', gap: 10, background: inputBg, border: `1px solid ${cardBorder}`, borderRadius: 8, padding: '8px 12px' }}>
+                                    <input ref={licRef} type="file" accept=".pdf,.jpg,.jpeg,.png"
+                                        style={{ flex: 1, fontSize: 12, color: textSec, background: 'none', border: 'none', outline: 'none' }}
+                                        onChange={e => setLicFile(e.target.files[0] || null)} />
                                 </Box>
-                            </motion.div>
-                        </Stack>
-                    </Box>
+                                {licFile && (
+                                    <Text size="xs" style={{ color: '#60A5FA' }}>
+                                        Selected: {licFile.name} ({(licFile.size / 1024).toFixed(0)} KB)
+                                    </Text>
+                                )}
+                                <motion.div whileTap={{ scale: 0.97 }}>
+                                    <Box component="button" type="button" onClick={uploadLicense}
+                                        disabled={!licFile || busy.lic}
+                                        style={{ ...btnBase, background: licFile && !busy.lic ? 'linear-gradient(135deg, #1565C0, #2196F3)' : (isDark ? 'rgba(255,255,255,0.07)' : '#E2E8F0'), color: licFile && !busy.lic ? '#fff' : (isDark ? 'var(--c-text-muted)' : 'var(--c-text-secondary)'), width: '100%', textAlign: 'center', opacity: busy.lic ? 0.6 : 1 }}>
+                                        {busy.lic ? 'Uploading…' : '↑ Upload Licence'}
+                                    </Box>
+                                </motion.div>
+                            </Stack>
+                        </Box>
+                    )}
                 </Stack>
 
                 {/* Visa */}
@@ -143,38 +149,40 @@ export default function DriverDocumentsCard({ driver }) {
                     <DocStatus
                         label="Visa / Work Permit" path={driver.visa_doc_path}
                         expiry={driver.visa_expiry} isDark={isDark}
-                        onDelete={() => deleteDoc('visa')} />
+                        onDelete={() => deleteDoc('visa')} canDelete={canDelete} />
 
-                    <Box style={{ borderTop: `1px solid ${divider}`, paddingTop: 12 }}>
-                        <Text size="xs" fw={600} style={{ color: textSec, marginBottom: 8 }}>Upload Visa Document</Text>
-                        <Stack gap="sm">
-                            <Box>
-                                <Text size="xs" style={{ color: textSec, marginBottom: 4 }}>Expiry Date</Text>
-                                <Box style={{ background: inputBg, border: `1px solid ${cardBorder}`, borderRadius: 8, padding: '2px 4px' }}>
-                                    <input type="date" value={visaExpiry}
-                                        onChange={e => setVisaExpiry(e.target.value)}
-                                        style={{ width: '100%', background: 'none', border: 'none', outline: 'none', padding: '6px 8px', fontSize: 13, color: textPri }} />
+                    {canEdit && (
+                        <Box style={{ borderTop: `1px solid ${divider}`, paddingTop: 12 }}>
+                            <Text size="xs" fw={600} style={{ color: textSec, marginBottom: 8 }}>Upload Visa Document</Text>
+                            <Stack gap="sm">
+                                <Box>
+                                    <Text size="xs" style={{ color: textSec, marginBottom: 4 }}>Expiry Date</Text>
+                                    <Box style={{ background: inputBg, border: `1px solid ${cardBorder}`, borderRadius: 8, padding: '2px 4px' }}>
+                                        <input type="date" value={visaExpiry}
+                                            onChange={e => setVisaExpiry(e.target.value)}
+                                            style={{ width: '100%', background: 'none', border: 'none', outline: 'none', padding: '6px 8px', fontSize: 13, color: textPri }} />
+                                    </Box>
                                 </Box>
-                            </Box>
-                            <Box style={{ display: 'flex', alignItems: 'center', gap: 10, background: inputBg, border: `1px solid ${cardBorder}`, borderRadius: 8, padding: '8px 12px' }}>
-                                <input ref={visRef} type="file" accept=".pdf,.jpg,.jpeg,.png"
-                                    style={{ flex: 1, fontSize: 12, color: textSec, background: 'none', border: 'none', outline: 'none' }}
-                                    onChange={e => setVisFile(e.target.files[0] || null)} />
-                            </Box>
-                            {visFile && (
-                                <Text size="xs" style={{ color: '#60A5FA' }}>
-                                    Selected: {visFile.name} ({(visFile.size / 1024).toFixed(0)} KB)
-                                </Text>
-                            )}
-                            <motion.div whileTap={{ scale: 0.97 }}>
-                                <Box component="button" type="button" onClick={uploadVisa}
-                                    disabled={(!visFile && !visaExpiry) || busy.vis}
-                                    style={{ ...btnBase, background: (visFile || visaExpiry) && !busy.vis ? 'linear-gradient(135deg, #7C3AED, #A855F7)' : (isDark ? 'rgba(255,255,255,0.07)' : '#E2E8F0'), color: (visFile || visaExpiry) && !busy.vis ? '#fff' : (isDark ? '#475569' : '#94A3B8'), width: '100%', textAlign: 'center', opacity: busy.vis ? 0.6 : 1 }}>
-                                    {busy.vis ? 'Saving…' : '↑ Save Visa Details'}
+                                <Box style={{ display: 'flex', alignItems: 'center', gap: 10, background: inputBg, border: `1px solid ${cardBorder}`, borderRadius: 8, padding: '8px 12px' }}>
+                                    <input ref={visRef} type="file" accept=".pdf,.jpg,.jpeg,.png"
+                                        style={{ flex: 1, fontSize: 12, color: textSec, background: 'none', border: 'none', outline: 'none' }}
+                                        onChange={e => setVisFile(e.target.files[0] || null)} />
                                 </Box>
-                            </motion.div>
-                        </Stack>
-                    </Box>
+                                {visFile && (
+                                    <Text size="xs" style={{ color: '#60A5FA' }}>
+                                        Selected: {visFile.name} ({(visFile.size / 1024).toFixed(0)} KB)
+                                    </Text>
+                                )}
+                                <motion.div whileTap={{ scale: 0.97 }}>
+                                    <Box component="button" type="button" onClick={uploadVisa}
+                                        disabled={(!visFile && !visaExpiry) || busy.vis}
+                                        style={{ ...btnBase, background: (visFile || visaExpiry) && !busy.vis ? 'linear-gradient(135deg, #7C3AED, #A855F7)' : (isDark ? 'rgba(255,255,255,0.07)' : '#E2E8F0'), color: (visFile || visaExpiry) && !busy.vis ? '#fff' : (isDark ? 'var(--c-text-muted)' : 'var(--c-text-secondary)'), width: '100%', textAlign: 'center', opacity: busy.vis ? 0.6 : 1 }}>
+                                        {busy.vis ? 'Saving…' : '↑ Save Visa Details'}
+                                    </Box>
+                                </motion.div>
+                            </Stack>
+                        </Box>
+                    )}
                 </Stack>
             </SimpleGrid>
         </Box>

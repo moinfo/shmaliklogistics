@@ -2,8 +2,9 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Box, Text, Group, Stack, Badge, SimpleGrid } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useCan } from '../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 function Card({ title, icon, children, isDark }) {
     const cardBg = isDark ? dk.card : '#fff';
@@ -44,6 +45,7 @@ export default function ShowPermit({ permit, statuses }) {
     const handleDelete = () => {
         if (confirm('Delete this permit?')) router.delete(`/system/permits/${permit.id}`);
     };
+    const can = useCan();
 
     return (
         <DashboardLayout title={`Permit · ${permit.permit_type}`}>
@@ -58,8 +60,12 @@ export default function ShowPermit({ permit, statuses }) {
                     <Text size="sm" style={{ color: textSec }}>Vehicle: <b style={{ color: '#3B82F6', fontFamily: 'monospace' }}>{permit.vehicle_plate}</b></Text>
                 </Stack>
                 <Group gap="sm">
-                    <Box component={Link} href={`/system/permits/${permit.id}/edit`} style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>Edit</Box>
-                    <Box component="button" onClick={handleDelete} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #EF444444', color: '#EF4444', background: 'transparent', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>Delete</Box>
+                    {can('permits.edit') && (
+                        <Box component={Link} href={`/system/permits/${permit.id}/edit`} style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>Edit</Box>
+                    )}
+                    {can('permits.delete') && (
+                        <Box component="button" onClick={handleDelete} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #EF444444', color: '#EF4444', background: 'transparent', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>Delete</Box>
+                    )}
                 </Group>
             </Group>
 

@@ -5,8 +5,10 @@ import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import DriverDocumentsCard from './DriverDocumentsCard';
+import { useCan } from '../../../lib/can';
+import { formatDate } from '../../../lib/date';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
 function DataRow({ label, value, isDark }) {
     const d = isDark ? dk : { textSec: '#64748B', textPri: '#1E293B', divider: '#E2E8F0' };
@@ -67,12 +69,13 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
     const isDark = colorScheme === 'dark';
     const { props } = usePage();
     const [assignVehicleId, setAssignVehicleId] = useState(driver.vehicle?.id ? String(driver.vehicle.id) : null);
+    const can = useCan();
 
     const cardBg     = isDark ? dk.card : '#ffffff';
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const textPri    = isDark ? dk.textPri : '#1E293B';
     const textSec    = isDark ? dk.textSec : '#64748B';
-    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
     const divider    = isDark ? dk.divider : '#E2E8F0';
 
     const meta  = statuses[driver.status] ?? { label: driver.status, color: '#94A3B8' };
@@ -117,19 +120,25 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
                     </Stack>
                 </Group>
                 <Group gap="sm" wrap="wrap">
-                    <Select
-                        value={driver.status}
-                        onChange={s => router.patch(`/system/drivers/${driver.id}/status`, { status: s })}
-                        data={Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))}
-                        size="sm"
-                        styles={{ input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8, width: 150 }, dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` } }}
-                    />
-                    <Box component={Link} href={`/system/drivers/${driver.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
-                        ✏️ Edit
-                    </Box>
-                    <Tooltip label="Remove driver">
-                        <ActionIcon onClick={confirmDelete} size={36} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, color: '#EF4444' }}>🗑️</ActionIcon>
-                    </Tooltip>
+                    {can('drivers.edit') && (
+                        <Select
+                            value={driver.status}
+                            onChange={s => router.patch(`/system/drivers/${driver.id}/status`, { status: s })}
+                            data={Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))}
+                            size="sm"
+                            styles={{ input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8, width: 150 }, dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` } }}
+                        />
+                    )}
+                    {can('drivers.edit') && (
+                        <Box component={Link} href={`/system/drivers/${driver.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
+                            ✏️ Edit
+                        </Box>
+                    )}
+                    {can('drivers.delete') && (
+                        <Tooltip label="Remove driver">
+                            <ActionIcon onClick={confirmDelete} size={36} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, color: '#EF4444' }}>🗑️</ActionIcon>
+                        </Tooltip>
+                    )}
                 </Group>
             </Group>
 
@@ -193,28 +202,30 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
                         <Text size="sm" style={{ color: textMut, paddingTop: 10, paddingBottom: 4 }}>No vehicle currently assigned.</Text>
                     )}
 
-                    <Group align="flex-end" gap="sm" mt="md">
-                        <Box style={{ flex: 1 }}>
-                            <Select
-                                label={vehicle ? 'Change Vehicle' : 'Assign Vehicle'}
-                                placeholder="Select a vehicle…"
-                                value={assignVehicleId}
-                                onChange={v => setAssignVehicleId(v)}
-                                clearable
-                                data={availableVehicles.map(v => ({ value: String(v.id), label: `${v.plate} — ${v.make} ${v.model_name}` }))}
-                                styles={{
-                                    label:    { color: textSec, fontSize: 13, marginBottom: 4 },
-                                    input:    { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 },
-                                    dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` },
-                                }}
-                            />
-                        </Box>
-                        <motion.div whileTap={{ scale: 0.97 }}>
-                            <Box component="button" type="button" onClick={doAssignVehicle} style={{ padding: '10px 22px', borderRadius: 8, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 12px rgba(33,150,243,0.25)', marginBottom: 1 }}>
-                                {vehicle ? 'Reassign' : 'Assign'}
+                    {can('drivers.edit') && (
+                        <Group align="flex-end" gap="sm" mt="md">
+                            <Box style={{ flex: 1 }}>
+                                <Select
+                                    label={vehicle ? 'Change Vehicle' : 'Assign Vehicle'}
+                                    placeholder="Select a vehicle…"
+                                    value={assignVehicleId}
+                                    onChange={v => setAssignVehicleId(v)}
+                                    clearable
+                                    data={availableVehicles.map(v => ({ value: String(v.id), label: `${v.plate} — ${v.make} ${v.model_name}` }))}
+                                    styles={{
+                                        label:    { color: textSec, fontSize: 13, marginBottom: 4 },
+                                        input:    { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 },
+                                        dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` },
+                                    }}
+                                />
                             </Box>
-                        </motion.div>
-                    </Group>
+                            <motion.div whileTap={{ scale: 0.97 }}>
+                                <Box component="button" type="button" onClick={doAssignVehicle} style={{ padding: '10px 22px', borderRadius: 8, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 12px rgba(33,150,243,0.25)', marginBottom: 1 }}>
+                                    {vehicle ? 'Reassign' : 'Assign'}
+                                </Box>
+                            </motion.div>
+                        </Group>
+                    )}
                 </Card>
             </Box>
 
@@ -238,7 +249,7 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
                             <Box key={t.id} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 120px 120px', padding: '10px 0', borderBottom: `1px solid ${divider}`, cursor: 'pointer' }} onClick={() => router.visit(`/system/trips/${t.id}`)}>
                                 <Text size="sm" fw={700} style={{ color: '#3B82F6' }}>{t.trip_number}</Text>
                                 <Text size="sm" style={{ color: textPri }}>{t.route_from} → {t.route_to}</Text>
-                                <Text size="sm" style={{ color: textSec }}>{t.departure_date}</Text>
+                                <Text size="sm" style={{ color: textSec }}>{formatDate(t.departure_date)}</Text>
                                 <Text size="sm" style={{ color: textSec }}>{t.status}</Text>
                             </Box>
                         ))}

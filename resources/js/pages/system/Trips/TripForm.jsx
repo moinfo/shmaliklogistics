@@ -9,8 +9,8 @@ const dk = {
     border:  'var(--c-border-color)',
     divider: 'rgba(255,255,255,0.06)',
     textPri: '#E2E8F0',
-    textSec: '#94A3B8',
-    textMut: '#475569',
+    textSec: 'var(--c-text-secondary)',
+    textMut: 'var(--c-text-muted)',
 };
 
 function Section({ title, icon, children, isDark }) {

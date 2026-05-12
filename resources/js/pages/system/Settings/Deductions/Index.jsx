@@ -3,8 +3,9 @@ import { Box, Text, Group, Stack, Badge, Modal, Select, Textarea } from '@mantin
 import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 function DeductionForm({ deduction, natures, onClose, isDark, cardBorder }) {
     const isEdit = !!deduction;
@@ -64,6 +65,8 @@ export default function DeductionsIndex({ deductions, natures }) {
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const rowHover = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC';
     const [modal, setModal] = useState(null);
+    const can = useCan();
+    const canManage = can('settings.edit');
 
     const natureColors = { TAXABLE: '#F59E0B', GROSS: '#3B82F6', NET: '#22C55E' };
 
@@ -79,7 +82,9 @@ export default function DeductionsIndex({ deductions, natures }) {
                     <Text fw={800} size="xl" style={{ color: textPri }}>Deduction Types</Text>
                     <Text size="sm" style={{ color: textSec }}>Statutory and custom payroll deduction definitions</Text>
                 </Stack>
-                <Box component="button" onClick={() => setModal('new')} style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>+ Add Deduction</Box>
+                {canManage && (
+                    <Box component="button" onClick={() => setModal('new')} style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>+ Add Deduction</Box>
+                )}
             </Group>
 
             <Box style={{ background: isDark ? dk.card : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 12, overflow: 'hidden' }}>
@@ -102,15 +107,19 @@ export default function DeductionsIndex({ deductions, natures }) {
                                     <td style={{ padding: '13px 14px' }}><Text size="xs" fw={700} style={{ color: '#3B82F6' }}>{idx + 1}</Text></td>
                                     <td style={{ padding: '13px 14px' }}><Text fw={600} size="sm" style={{ color: textPri }}>{d.name}</Text></td>
                                     <td style={{ padding: '13px 14px' }}>
-                                        <Badge size="sm" style={{ background: (natureColors[d.nature] ?? '#94A3B8') + '22', color: natureColors[d.nature] ?? '#94A3B8', border: `1px solid ${(natureColors[d.nature] ?? '#94A3B8')}44` }}>{d.nature}</Badge>
+                                        <Badge size="sm" style={{ background: (natureColors[d.nature] ?? 'var(--c-text-secondary)') + '22', color: natureColors[d.nature] ?? 'var(--c-text-secondary)', border: `1px solid ${(natureColors[d.nature] ?? 'var(--c-text-secondary)')}44` }}>{d.nature}</Badge>
                                     </td>
                                     <td style={{ padding: '13px 14px' }}><Text size="sm" fw={700} style={{ color: '#3B82F6' }}>{d.abbreviation}</Text></td>
                                     <td style={{ padding: '13px 14px' }}><Text size="sm" style={{ color: textSec }}>{d.description ?? '—'}</Text></td>
                                     <td style={{ padding: '13px 14px' }}><Text size="sm" style={{ color: textSec, fontFamily: 'monospace' }}>{d.registration_number ?? '—'}</Text></td>
                                     <td style={{ padding: '13px 14px' }}>
                                         <Group gap={6}>
-                                            <Box component="button" onClick={() => setModal(d)} style={{ padding: '5px 12px', borderRadius: 6, background: '#3B82F6', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12 }}>✏️</Box>
-                                            <Box component="button" onClick={() => { if (confirm('Delete this deduction type?')) router.delete(`/system/settings/deductions/${d.id}`, { preserveScroll: true }); }} style={{ padding: '5px 12px', borderRadius: 6, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12 }}>×</Box>
+                                            {canManage && (
+                                                <Box component="button" onClick={() => setModal(d)} style={{ padding: '5px 12px', borderRadius: 6, background: '#3B82F6', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12 }}>✏️</Box>
+                                            )}
+                                            {canManage && (
+                                                <Box component="button" onClick={() => { if (confirm('Delete this deduction type?')) router.delete(`/system/settings/deductions/${d.id}`, { preserveScroll: true }); }} style={{ padding: '5px 12px', borderRadius: 6, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12 }}>×</Box>
+                                            )}
                                         </Group>
                                     </td>
                                 </tr>

@@ -5,7 +5,7 @@ const PACKING    = ['Pallets', 'Loose', 'Crates', 'Drums', 'Bags', 'Containers',
 
 export default function CargoForm({ data, setData, errors, trips, clients, statuses, types, isDark }) {
     const textPri    = isDark ? '#E2E8F0' : '#1E293B';
-    const textSec    = isDark ? '#94A3B8' : '#64748B';
+    const textSec    = isDark ? 'var(--c-text-secondary)' : '#64748B';
     const cardBorder = isDark ? 'rgba(33,150,243,0.18)' : '#E2E8F0';
     const inputBg    = isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC';
 

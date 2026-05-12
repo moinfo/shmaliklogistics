@@ -6,7 +6,7 @@ import DatePicker from '../../../components/DatePicker';
 
 const dk = {
     card: '#0F1E32', border: 'var(--c-border-color)',
-    divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8',
+    divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)',
 };
 
 function Section({ title, icon, children, isDark }) {

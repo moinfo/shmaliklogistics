@@ -2,6 +2,7 @@ import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { Box, Grid, Text, Group, Stack, Textarea, NumberInput, Select, Button, SegmentedControl } from '@mantine/core';
 import { Link, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { useCan } from '../../../../lib/can';
 
 const StarDisplay = ({ value, max = 5 }) => (
     <Group gap={2}>
@@ -21,14 +22,15 @@ const MetricCard = ({ label, value, unit = '', icon }) => (
 
 const Field = ({ label, value }) => (
     <Box>
-        <Text size="xs" style={{ color: '#475569', marginBottom: 3 }}>{label}</Text>
+        <Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 3 }}>{label}</Text>
         <Text size="sm" fw={600} style={{ color: 'var(--c-text)' }}>{value || '—'}</Text>
     </Box>
 );
 
 export default function AppraisalShow({ appraisal, statuses }) {
     const [editing, setEditing] = useState(false);
-    const inputStyle = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: '#94A3B8', marginBottom: 6 } };
+    const can = useCan();
+    const inputStyle = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: 'var(--c-text-secondary)', marginBottom: 6 } };
 
     const { data, setData, put, processing } = useForm({
         period_from: appraisal.period_from,
@@ -56,10 +58,14 @@ export default function AppraisalShow({ appraisal, statuses }) {
             <Group justify="space-between" mb="lg">
                 <Box component={Link} href="/system/hr/appraisals" style={{ color: '#60A5FA', textDecoration: 'none', fontSize: 14 }}>← Back</Box>
                 <Group gap="sm">
-                    <Button variant="default" onClick={() => setEditing(!editing)} style={{ borderColor: 'rgba(33,150,243,0.3)', color: '#94A3B8', background: 'transparent' }}>
-                        {editing ? 'Cancel' : '✏️ Edit'}
-                    </Button>
-                    <Button onClick={del} style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444' }}>Delete</Button>
+                    {can('hr_appraisals.edit') && (
+                        <Button variant="default" onClick={() => setEditing(!editing)} style={{ borderColor: 'rgba(33,150,243,0.3)', color: 'var(--c-text-secondary)', background: 'transparent' }}>
+                            {editing ? 'Cancel' : '✏️ Edit'}
+                        </Button>
+                    )}
+                    {can('hr_appraisals.delete') && (
+                        <Button onClick={del} style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444' }}>Delete</Button>
+                    )}
                 </Group>
             </Group>
 
@@ -68,7 +74,7 @@ export default function AppraisalShow({ appraisal, statuses }) {
                 <Group justify="space-between" mb="lg">
                     <Box>
                         <Text fw={800} size="xl" style={{ color: 'var(--c-text)' }}>{appraisal.employee?.name}</Text>
-                        <Text size="sm" style={{ color: '#94A3B8' }}>{appraisal.employee?.department} · {appraisal.employee?.employee_number}</Text>
+                        <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{appraisal.employee?.department} · {appraisal.employee?.employee_number}</Text>
                     </Box>
                     <Group gap="md">
                         {sc && <Box style={{ padding: '6px 18px', borderRadius: 20, background: `${sc.color}22`, border: `1px solid ${sc.color}55` }}><Text fw={700} style={{ color: sc.color }}>{sc.label}</Text></Box>}
@@ -113,7 +119,7 @@ export default function AppraisalShow({ appraisal, statuses }) {
                         <Grid.Col span={{ base: 12, md: 4 }}>
                             <Box style={{ background: 'var(--c-card)', border: '1px solid var(--c-border-color)', borderRadius: 12, padding: '24px' }}>
                                 <Text fw={700} style={{ color: 'var(--c-text)', marginBottom: 16 }}>Status</Text>
-                                <SegmentedControl value={data.status} onChange={v => setData('status', v)} data={Object.entries(statuses).map(([v, s]) => ({ value: v, label: s.label }))} fullWidth styles={{ root: { background: 'var(--c-input)' }, label: { color: '#94A3B8' } }} />
+                                <SegmentedControl value={data.status} onChange={v => setData('status', v)} data={Object.entries(statuses).map(([v, s]) => ({ value: v, label: s.label }))} fullWidth styles={{ root: { background: 'var(--c-input)' }, label: { color: 'var(--c-text-secondary)' } }} />
                                 <Button type="submit" fullWidth loading={processing} style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 10, fontWeight: 700, marginTop: 16 }}>Save Changes</Button>
                             </Box>
                         </Grid.Col>
@@ -156,7 +162,7 @@ export default function AppraisalShow({ appraisal, statuses }) {
                     <Grid.Col span={{ base: 12, md: 4 }}>
                         <Box style={{ background: 'var(--c-card)', border: '1px solid var(--c-border-color)', borderRadius: 12, padding: '24px' }}>
                             <Text fw={700} style={{ color: 'var(--c-text)', marginBottom: 16 }}>Manager Notes</Text>
-                            <Text size="sm" style={{ color: '#94A3B8', lineHeight: 1.7 }}>{appraisal.manager_notes || 'No notes added.'}</Text>
+                            <Text size="sm" style={{ color: 'var(--c-text-secondary)', lineHeight: 1.7 }}>{appraisal.manager_notes || 'No notes added.'}</Text>
                         </Box>
                     </Grid.Col>
                 </Grid>

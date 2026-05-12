@@ -4,7 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
 const MONTHS = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -25,7 +25,7 @@ function SummaryCard({ label, value, sub, color, isDark }) {
 function profitColor(profit) {
     if (profit > 0) return '#22C55E';
     if (profit < 0) return '#EF4444';
-    return '#94A3B8';
+    return 'var(--c-text-secondary)';
 }
 
 function marginBadgeColor(margin) {
@@ -188,7 +188,7 @@ export default function RouteProfitability({ routes, summary, monthly, drivers, 
                                         onMouseEnter={e => e.currentTarget.style.background = rowHover}
                                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                         <td style={{ padding: '14px 16px' }}>
-                                            <Text size="sm" fw={700} style={{ color: i < 3 ? ['#F59E0B', '#94A3B8', '#CD7F32'][i] : textSec }}>{i + 1}</Text>
+                                            <Text size="sm" fw={700} style={{ color: i < 3 ? ['#F59E0B', 'var(--c-text-secondary)', '#CD7F32'][i] : textSec }}>{i + 1}</Text>
                                         </td>
                                         <td style={{ padding: '14px 16px' }}>
                                             <Text size="sm" fw={600} style={{ color: textPri }}>{d.driver_name ?? '—'}</Text>

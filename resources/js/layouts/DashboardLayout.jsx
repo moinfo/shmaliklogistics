@@ -4,82 +4,106 @@ import { useDisclosure } from '@mantine/hooks';
 import { useMantineColorScheme } from '@mantine/core';
 import { Link, usePage, router } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { checkPermission } from '../lib/can';
 
+// Each item carries a `perm` (single permission) or `anyPerm` (array; visible if user has any).
+// Items without either are always visible (Dashboard, Notifications).
 const navItems = [
     { icon: '📊', label: 'Dashboard', href: '/system/dashboard' },
-    { icon: '🚛', label: 'Trips',     href: '/system/trips' },
+    { icon: '🚛', label: 'Trips',     href: '/system/trips', perm: 'trips.view' },
     {
         icon: '🚗', label: 'Fleet', href: '/system/fleet',
+        anyPerm: ['fleet.view', 'fleet_fuel_logs.view'],
         children: [
-            { icon: '🚗', label: 'All Vehicles',  href: '/system/fleet' },
-            { icon: '⛽', label: 'Fuel Logs',     href: '/system/fleet/fuel-logs' },
+            { icon: '🚗', label: 'All Vehicles',  href: '/system/fleet',           perm: 'fleet.view' },
+            { icon: '⛽', label: 'Fuel Logs',     href: '/system/fleet/fuel-logs', perm: 'fleet_fuel_logs.view' },
         ],
     },
-    { icon: '👤', label: 'Drivers',   href: '/system/drivers' },
-    { icon: '🛂', label: 'Permits',   href: '/system/permits' },
-    { icon: '👥', label: 'Clients',   href: '/system/clients' },
+    { icon: '👤', label: 'Drivers',   href: '/system/drivers', perm: 'drivers.view' },
+    { icon: '🛂', label: 'Permits',   href: '/system/permits', perm: 'permits.view' },
+    { icon: '👥', label: 'Clients',   href: '/system/clients', perm: 'clients.view' },
     {
         icon: '🧾', label: 'Billing', href: '/system/billing',
+        anyPerm: ['billing_quotes.view', 'billing_proformas.view', 'billing_invoices.view', 'billing_payments.view', 'billing_quote_requests.view'],
         children: [
-            { icon: '💬', label: 'Quotes',    href: '/system/billing/quotes' },
-            { icon: '📋', label: 'Proforma',  href: '/system/billing/proformas' },
-            { icon: '📄', label: 'Invoices',  href: '/system/billing/invoices' },
-            { icon: '💳', label: 'Payments',        href: '/system/billing/payments' },
-            { icon: '📥', label: 'Quote Requests',  href: '/system/billing/quote-requests' },
+            { icon: '💬', label: 'Quotes',          href: '/system/billing/quotes',         perm: 'billing_quotes.view' },
+            { icon: '📋', label: 'Proforma',        href: '/system/billing/proformas',      perm: 'billing_proformas.view' },
+            { icon: '📄', label: 'Invoices',        href: '/system/billing/invoices',       perm: 'billing_invoices.view' },
+            { icon: '💳', label: 'Payments',        href: '/system/billing/payments',       perm: 'billing_payments.view' },
+            { icon: '📥', label: 'Quote Requests',  href: '/system/billing/quote-requests', perm: 'billing_quote_requests.view' },
         ],
     },
-    { icon: '💸', label: 'Expenses',    href: '/system/expenses' },
-    { icon: '🔧', label: 'Maintenance', href: '/system/maintenance' },
-    { icon: '📁', label: 'Documents',   href: '/system/documents' },
+    { icon: '💸', label: 'Expenses',    href: '/system/expenses',    perm: 'expenses.view' },
+    { icon: '🔧', label: 'Maintenance', href: '/system/maintenance', perm: 'maintenance.view' },
+    { icon: '📁', label: 'Documents',   href: '/system/documents',   perm: 'documents.view' },
     {
         icon: '👥', label: 'HR', href: '/system/hr',
+        anyPerm: ['hr_employees.view', 'hr_leave.view', 'hr_payroll.view', 'hr_advances.view', 'hr_loans.view', 'hr_allowances.view', 'hr_attendance.view', 'hr_salary_slips.view', 'hr_appraisals.view', 'hr_recruitment.view'],
         children: [
-            { icon: '🧑‍💼', label: 'Employees',  href: '/system/hr/employees' },
-            { icon: '🏖️',  label: 'Leave',      href: '/system/hr/leave' },
-            { icon: '💰',  label: 'Payroll',    href: '/system/hr/payroll' },
-            { icon: '💵',  label: 'Advances',   href: '/system/hr/advances' },
-            { icon: '🏦',  label: 'Loans',      href: '/system/hr/loans' },
-            { icon: '🎁',  label: 'Allowances',  href: '/system/hr/allowances' },
-            { icon: '🕐',  label: 'Attendance',  href: '/system/hr/attendance' },
-            { icon: '📑',  label: 'Salary Slip', href: '/system/hr/salary-slips' },
-            { icon: '⭐',  label: 'Appraisals',  href: '/system/hr/appraisals' },
-            { icon: '🎯',  label: 'Recruitment', href: '/system/hr/recruitment' },
+            { icon: '🧑‍💼', label: 'Employees',  href: '/system/hr/employees',    perm: 'hr_employees.view' },
+            { icon: '🏖️',  label: 'Leave',      href: '/system/hr/leave',        perm: 'hr_leave.view' },
+            { icon: '💰',  label: 'Payroll',    href: '/system/hr/payroll',      perm: 'hr_payroll.view' },
+            { icon: '💵',  label: 'Advances',   href: '/system/hr/advances',     perm: 'hr_advances.view' },
+            { icon: '🏦',  label: 'Loans',      href: '/system/hr/loans',        perm: 'hr_loans.view' },
+            { icon: '🎁',  label: 'Allowances',  href: '/system/hr/allowances',   perm: 'hr_allowances.view' },
+            { icon: '🕐',  label: 'Attendance',  href: '/system/hr/attendance',   perm: 'hr_attendance.view' },
+            { icon: '📑',  label: 'Salary Slip', href: '/system/hr/salary-slips', perm: 'hr_salary_slips.view' },
+            { icon: '⭐',  label: 'Appraisals',  href: '/system/hr/appraisals',   perm: 'hr_appraisals.view' },
+            { icon: '🎯',  label: 'Recruitment', href: '/system/hr/recruitment',  perm: 'hr_recruitment.view' },
         ],
     },
     {
         icon: '🛒', label: 'Procurement', href: '/system/procurement',
+        anyPerm: ['procurement_suppliers.view', 'procurement_orders.view'],
         children: [
-            { icon: '🏭', label: 'Suppliers',       href: '/system/procurement/suppliers' },
-            { icon: '📋', label: 'Purchase Orders', href: '/system/procurement/orders' },
+            { icon: '🏭', label: 'Suppliers',       href: '/system/procurement/suppliers', perm: 'procurement_suppliers.view' },
+            { icon: '📋', label: 'Purchase Orders', href: '/system/procurement/orders',    perm: 'procurement_orders.view' },
         ],
     },
-    { icon: '🏗️', label: 'Inventory', href: '/system/inventory' },
+    { icon: '🏗️', label: 'Inventory', href: '/system/inventory', perm: 'inventory.view' },
     {
         icon: '📈', label: 'Reports', href: '/system/reports',
+        anyPerm: ['reports_route_profitability.view', 'reports_financial_summary.view', 'reports_fleet_utilization.view'],
         children: [
-            { icon: '📊', label: 'Route Profitability', href: '/system/reports/route-profitability' },
-            { icon: '💹', label: 'Financial Summary',   href: '/system/reports/financial-summary' },
-            { icon: '🚛', label: 'Fleet Utilization',   href: '/system/reports/fleet-utilization' },
+            { icon: '📊', label: 'Route Profitability', href: '/system/reports/route-profitability', perm: 'reports_route_profitability.view' },
+            { icon: '💹', label: 'Financial Summary',   href: '/system/reports/financial-summary',   perm: 'reports_financial_summary.view' },
+            { icon: '🚛', label: 'Fleet Utilization',   href: '/system/reports/fleet-utilization',   perm: 'reports_fleet_utilization.view' },
         ],
     },
-    { icon: '📦', label: 'Cargo', href: '/system/cargo' },
+    { icon: '📦', label: 'Cargo', href: '/system/cargo', perm: 'cargo.view' },
     {
-        icon: '⚙️', label: 'Settings', href: '/system/settings',
+        icon: '⚙️', label: 'Settings', href: '/system/settings', perm: 'settings.view',
         children: [
-            { icon: '🏢', label: 'Company Settings',        href: '/system/settings/company' },
-            { icon: '🪪', label: 'Licence Classes',         href: '/system/settings/license-classes' },
-            { icon: '📄', label: 'Document Types',          href: '/system/settings/document-types' },
-            { icon: '💰', label: 'Payroll Settings',        href: '/system/settings/payroll' },
-            { icon: '📋', label: 'Deductions',              href: '/system/settings/deductions' },
-            { icon: '🔗', label: 'Deduction Subscriptions', href: '/system/settings/deduction-subscriptions' },
-            { icon: '🏛️', label: 'Staff Bank Details',      href: '/system/settings/bank-details' },
-            { icon: '🏢', label: 'Departments',              href: '/system/settings/departments' },
-            { icon: '🔑', label: 'Roles & Permissions', href: '/system/settings/roles' },
-            { icon: '👤', label: 'Users',               href: '/system/settings/users' },
+            { icon: '🏢', label: 'Company Settings',        href: '/system/settings/company',                 perm: 'settings.view' },
+            { icon: '🪪', label: 'Licence Classes',         href: '/system/settings/license-classes',         perm: 'settings.view' },
+            { icon: '📄', label: 'Document Types',          href: '/system/settings/document-types',          perm: 'settings.view' },
+            { icon: '💰', label: 'Payroll Settings',        href: '/system/settings/payroll',                 perm: 'settings.view' },
+            { icon: '📋', label: 'Deductions',              href: '/system/settings/deductions',              perm: 'settings.view' },
+            { icon: '🔗', label: 'Deduction Subscriptions', href: '/system/settings/deduction-subscriptions', perm: 'settings.view' },
+            { icon: '🏛️', label: 'Staff Bank Details',      href: '/system/settings/bank-details',            perm: 'settings.view' },
+            { icon: '🏢', label: 'Departments',              href: '/system/settings/departments',            perm: 'settings.view' },
+            { icon: '🔑', label: 'Roles & Permissions',     href: '/system/settings/roles',                   perm: 'settings.view' },
+            { icon: '👤', label: 'Users',                    href: '/system/settings/users',                  perm: 'settings.view' },
         ],
     },
     { icon: '🔔', label: 'Notifications', href: '/system/notifications' },
 ];
+
+function visibleNav(items, permissions) {
+    return items
+        .map(item => {
+            if (item.children) {
+                const kids = visibleNav(item.children, permissions);
+                if (kids.length === 0 && item.perm && !checkPermission(permissions, item.perm)) return null;
+                if (kids.length === 0 && item.anyPerm && !item.anyPerm.some(p => checkPermission(permissions, p))) return null;
+                return { ...item, children: kids };
+            }
+            if (item.perm && !checkPermission(permissions, item.perm)) return null;
+            if (item.anyPerm && !item.anyPerm.some(p => checkPermission(permissions, p))) return null;
+            return item;
+        })
+        .filter(Boolean);
+}
 
 // Dark layer system: sidebar < header < main < card < hover
 const dk = {
@@ -91,8 +115,8 @@ const dk = {
     border:   'rgba(33,150,243,0.12)',
     divider:  'rgba(255,255,255,0.06)',
     textPri:  '#E2E8F0',
-    textSec:  '#94A3B8',
-    textMut:  '#475569',
+    textSec:  'var(--c-text-secondary)',
+    textMut:  'var(--c-text-muted)',
 };
 
 // Light sidebar tokens
@@ -101,7 +125,7 @@ const lk = {
     divider:  '#E8EDF4',
     textPri:  '#1E293B',
     textSec:  '#64748B',
-    textMut:  '#94A3B8',
+    textMut:  'var(--c-text-secondary)',
 };
 
 export default function DashboardLayout({ title = 'Dashboard', children }) {
@@ -110,6 +134,8 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
     const { colorScheme, setColorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const user = props.auth?.user;
+    const userPermissions = user?.permissions ?? [];
+    const filteredNav = visibleNav(navItems, userPermissions);
 
     const flash       = props.flash ?? {};
     const alertCount  = props.alert_count ?? 0;
@@ -127,7 +153,7 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
 
     // Auto-expand any group whose href matches the current URL
     const [expandedGroups, setExpandedGroups] = useState(() =>
-        navItems
+        filteredNav
             .filter(item => item.children && url.startsWith(item.href))
             .map(item => item.href)
     );
@@ -200,7 +226,7 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
                         </Box>
                         <Box visibleFrom="sm">
                             <Text fw={600} size="sm" style={{ color: isDark ? dk.textPri : '#1E293B' }} lh={1.2}>{user?.name || 'Admin'}</Text>
-                            <Text size="xs" style={{ color: isDark ? dk.textMut : '#94A3B8' }}>{user?.email}</Text>
+                            <Text size="xs" style={{ color: isDark ? dk.textMut : 'var(--c-text-secondary)' }}>{user?.email}</Text>
                         </Box>
 
                         <Tooltip label="Logout" position="bottom">
@@ -241,7 +267,7 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
                     {/* Nav items */}
                     <Box style={{ flex: 1, padding: '0 8px', overflowY: 'auto' }}>
                         <Stack gap={2}>
-                            {navItems.map((item) => {
+                            {filteredNav.map((item) => {
                                 const isGroup    = !!item.children;
                                 const expanded   = expandedGroups.includes(item.href);
                                 const active     = !isGroup && url.startsWith(item.href);

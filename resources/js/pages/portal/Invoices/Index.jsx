@@ -4,8 +4,8 @@ import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
 const statusColor = {
-    draft: '#94A3B8', sent: '#2196F3', paid: '#22C55E',
-    overdue: '#EF4444', partial: '#F59E0B', cancelled: '#475569',
+    draft: 'var(--c-text-secondary)', sent: '#2196F3', paid: '#22C55E',
+    overdue: '#EF4444', partial: '#F59E0B', cancelled: 'var(--c-text-muted)',
 };
 
 export default function PortalInvoicesIndex({ client, invoices, summary, filters }) {
@@ -30,7 +30,7 @@ export default function PortalInvoicesIndex({ client, invoices, summary, filters
             {/* Summary cards */}
             <Grid mb="xl" gutter="md">
                 {[
-                    { label: 'Total Billed', value: `TZS ${fmt(summary.total_billed)}`, color: '#94A3B8', icon: '📊' },
+                    { label: 'Total Billed', value: `TZS ${fmt(summary.total_billed)}`, color: 'var(--c-text-secondary)', icon: '📊' },
                     { label: 'Total Paid', value: `TZS ${fmt(summary.total_paid)}`, color: '#22C55E', icon: '✅' },
                     { label: 'Balance Due', value: `TZS ${fmt(summary.balance_due)}`, color: '#F59E0B', icon: '⚠️' },
                 ].map(s => (
@@ -62,7 +62,7 @@ export default function PortalInvoicesIndex({ client, invoices, summary, filters
             {/* Invoice list */}
             <Stack gap="sm">
                 {invoices.data.map(inv => {
-                    const sc = statusColor[inv.status] || '#94A3B8';
+                    const sc = statusColor[inv.status] || 'var(--c-text-secondary)';
                     return (
                         <Box
                             key={inv.id}
@@ -84,18 +84,18 @@ export default function PortalInvoicesIndex({ client, invoices, summary, filters
                             </Group>
                             <Group justify="space-between">
                                 <Box>
-                                    <Text size="xs" style={{ color: '#475569' }}>Total</Text>
+                                    <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>Total</Text>
                                     <Text fw={700} style={{ color: 'var(--c-text)' }}>TZS {fmt(inv.total)}</Text>
                                 </Box>
                                 {inv.balance_due > 0 && (
                                     <Box style={{ textAlign: 'right' }}>
-                                        <Text size="xs" style={{ color: '#475569' }}>Balance Due</Text>
+                                        <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>Balance Due</Text>
                                         <Text fw={700} style={{ color: '#F59E0B' }}>TZS {fmt(inv.balance_due)}</Text>
                                     </Box>
                                 )}
                                 <Box style={{ textAlign: 'right' }}>
-                                    <Text size="xs" style={{ color: '#475569' }}>Date</Text>
-                                    <Text size="sm" style={{ color: '#94A3B8' }}>{inv.issue_date ? new Date(inv.issue_date).toLocaleDateString() : '—'}</Text>
+                                    <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>Date</Text>
+                                    <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{inv.issue_date ? new Date(inv.issue_date).toLocaleDateString() : '—'}</Text>
                                 </Box>
                             </Group>
                         </Box>

@@ -4,23 +4,23 @@ import { Link } from '@inertiajs/react';
 
 const statusColor = {
     loading: '#F59E0B', in_transit: '#2196F3', at_border: '#A855F7',
-    delivered: '#22C55E', completed: '#22C55E', cancelled: '#EF4444', planned: '#94A3B8',
+    delivered: '#22C55E', completed: '#22C55E', cancelled: '#EF4444', planned: 'var(--c-text-secondary)',
 };
 
 const cargoStatusColor = {
-    pending: '#94A3B8', loaded: '#F59E0B', in_transit: '#2196F3',
+    pending: 'var(--c-text-secondary)', loaded: '#F59E0B', in_transit: '#2196F3',
     delivered: '#22C55E', damaged: '#EF4444',
 };
 
 const Field = ({ label, value }) => (
     <Box>
-        <Text size="xs" style={{ color: '#475569', marginBottom: 3 }}>{label}</Text>
+        <Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 3 }}>{label}</Text>
         <Text size="sm" fw={600} style={{ color: 'var(--c-text)' }}>{value || '—'}</Text>
     </Box>
 );
 
 export default function PortalTripShow({ client, trip }) {
-    const sc = statusColor[trip.status] || '#94A3B8';
+    const sc = statusColor[trip.status] || 'var(--c-text-secondary)';
 
     return (
         <PortalLayout title={`Trip ${trip.trip_number}`}>
@@ -34,7 +34,7 @@ export default function PortalTripShow({ client, trip }) {
                 <Group justify="space-between" mb="lg">
                     <Box>
                         <Text fw={800} size="xl" style={{ color: 'var(--c-text)' }}>{trip.trip_number}</Text>
-                        <Text size="sm" style={{ color: '#94A3B8', marginTop: 4 }}>{trip.origin} → {trip.destination}</Text>
+                        <Text size="sm" style={{ color: 'var(--c-text-secondary)', marginTop: 4 }}>{trip.origin} → {trip.destination}</Text>
                     </Box>
                     <Box style={{ padding: '6px 18px', borderRadius: 20, background: `${sc}22`, border: `1px solid ${sc}55` }}>
                         <Text fw={700} style={{ color: sc, textTransform: 'capitalize' }}>{trip.status?.replace('_', ' ')}</Text>
@@ -50,8 +50,8 @@ export default function PortalTripShow({ client, trip }) {
 
                 {trip.notes && (
                     <Box style={{ marginTop: 16, padding: '12px 16px', background: 'var(--c-input)', borderRadius: 8, border: '1px solid var(--c-border-subtle)' }}>
-                        <Text size="xs" style={{ color: '#475569', marginBottom: 4 }}>Notes</Text>
-                        <Text size="sm" style={{ color: '#94A3B8' }}>{trip.notes}</Text>
+                        <Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 4 }}>Notes</Text>
+                        <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{trip.notes}</Text>
                     </Box>
                 )}
             </Box>
@@ -62,7 +62,7 @@ export default function PortalTripShow({ client, trip }) {
                     <Text fw={700} style={{ color: 'var(--c-text)', marginBottom: 16 }}>Cargo ({trip.cargo.length})</Text>
                     <Stack gap="sm">
                         {trip.cargo.map(item => {
-                            const cc = cargoStatusColor[item.status] || '#94A3B8';
+                            const cc = cargoStatusColor[item.status] || 'var(--c-text-secondary)';
                             return (
                                 <Box key={item.id} style={{ padding: '12px 16px', background: 'var(--c-input)', borderRadius: 10, border: '1px solid var(--c-thead)' }}>
                                     <Group justify="space-between">

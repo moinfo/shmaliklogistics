@@ -3,8 +3,9 @@ import { Box, Text, Group, Stack, Badge } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 function DeptForm({ dept, onClose, isDark, cardBorder }) {
     const isEdit = !!dept;
@@ -77,6 +78,8 @@ export default function DepartmentsIndex({ departments }) {
     const [showNew, setShowNew]   = useState(false);
     const [editing, setEditing]   = useState(null);
     const [confirmDel, setConfirmDel] = useState(null);
+    const can = useCan();
+    const canManage = can('settings.edit');
 
     const deleteDept = (id) => {
         router.delete(`/system/settings/departments/${id}`, { onSuccess: () => setConfirmDel(null) });
@@ -91,10 +94,12 @@ export default function DepartmentsIndex({ departments }) {
                     <Text fw={800} size="xl" style={{ color: textPri }}>Departments</Text>
                     <Text size="sm" style={{ color: textSec }}>Manage company departments for employee grouping</Text>
                 </Stack>
-                <Box component="button" onClick={() => { setShowNew(true); setEditing(null); }}
-                    style={{ padding: '10px 22px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                    + Add Department
-                </Box>
+                {canManage && (
+                    <Box component="button" onClick={() => { setShowNew(true); setEditing(null); }}
+                        style={{ padding: '10px 22px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
+                        + Add Department
+                    </Box>
+                )}
             </Group>
 
             {showNew && !editing && (
@@ -127,7 +132,7 @@ export default function DepartmentsIndex({ departments }) {
                                     </Box>
                                 </Group>
                                 <Group gap="sm">
-                                    {confirmDel === d.id ? (
+                                    {canManage && confirmDel === d.id ? (
                                         <>
                                             <Text size="xs" style={{ color: textSec }}>Delete?</Text>
                                             <Box component="button" onClick={() => deleteDept(d.id)}
@@ -135,14 +140,14 @@ export default function DepartmentsIndex({ departments }) {
                                             <Box component="button" onClick={() => setConfirmDel(null)}
                                                 style={{ padding: '5px 12px', borderRadius: 6, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, border: 'none', cursor: 'pointer', fontSize: 12 }}>No</Box>
                                         </>
-                                    ) : (
+                                    ) : canManage ? (
                                         <>
                                             <Box component="button" onClick={() => { setEditing(d.id); setShowNew(false); }}
                                                 style={{ padding: '5px 14px', borderRadius: 6, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Edit</Box>
                                             <Box component="button" onClick={() => setConfirmDel(d.id)}
                                                 style={{ padding: '5px 14px', borderRadius: 6, background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Delete</Box>
                                         </>
-                                    )}
+                                    ) : null}
                                 </Group>
                             </Box>
                         )}

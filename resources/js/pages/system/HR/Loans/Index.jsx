@@ -4,8 +4,9 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 function fmt(n) { return Number(n ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
 
 function StatCard({ label, value, icon, color, isDark }) {
@@ -48,6 +49,7 @@ export default function LoansIndex({ loans, stats, statuses, employees, filters 
     const [empId, setEmpId]   = useState(filters.employee_id ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
     const [modal, setModal]   = useState(null);
+    const can = useCan();
 
     const applyFilters = (o = {}) => router.get('/system/hr/loans', { employee_id: empId, status, ...o }, { preserveState: true, replace: true });
     const handleDelete = (id) => { if (!confirm('Delete this loan?')) return; router.delete(`/system/hr/loans/${id}`, { preserveScroll: true }); };
@@ -68,9 +70,11 @@ export default function LoansIndex({ loans, stats, statuses, employees, filters 
                     <Text fw={800} size="xl" style={{ color: textPri }}>Employee Loans</Text>
                     <Text size="sm" style={{ color: textSec }}>Monthly installments auto-deducted from payroll</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box component={Link} href="/system/hr/loans/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>+ New Loan</Box>
-                </motion.div>
+                {can('hr_loans.create') && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box component={Link} href="/system/hr/loans/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>+ New Loan</Box>
+                    </motion.div>
+                )}
             </Group>
 
             <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="xl">
@@ -130,11 +134,11 @@ export default function LoansIndex({ loans, stats, statuses, employees, filters 
                                         <td style={{ padding: '13px 14px', textAlign: 'right' }}>
                                             <Group gap={6} justify="flex-end">
                                                 <ActionIcon component={Link} href={`/system/hr/loans/${loan.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
-                                                {loan.status === 'pending' && <>
+                                                {can('hr_loans.approve') && loan.status === 'pending' && <>
                                                     <ActionIcon variant="subtle" size="sm" style={{ color: '#22C55E' }} onClick={() => setModal({ loan, action: 'approve' })}>✅</ActionIcon>
                                                     <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => setModal({ loan, action: 'reject' })}>❌</ActionIcon>
                                                 </>}
-                                                {(loan.status === 'pending' || loan.status === 'rejected') && <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(loan.id)}>🗑️</ActionIcon>}
+                                                {can('hr_loans.delete') && (loan.status === 'pending' || loan.status === 'rejected') && <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(loan.id)}>🗑️</ActionIcon>}
                                             </Group>
                                         </td>
                                     </tr>

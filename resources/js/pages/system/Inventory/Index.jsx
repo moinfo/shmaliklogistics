@@ -2,6 +2,7 @@ import DashboardLayout from '../../../layouts/DashboardLayout';
 import { Box, Grid, Text, Group, Select, TextInput, Button } from '@mantine/core';
 import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { useCan } from '../../../lib/can';
 
 const STAT_META = [
     { key: 'total_items',  icon: '📦', label: 'Total Items',  color: '#60A5FA', bg: 'rgba(96,165,250,0.08)',  border: 'rgba(96,165,250,0.25)'  },
@@ -33,6 +34,7 @@ export default function InventoryIndex({ items, categories, stats, filters }) {
     const [search, setSearch]   = useState(filters.search || '');
     const [catId,  setCatId]    = useState(filters.category_id || '');
     const [lowStock, setLowStock] = useState(filters.low_stock || '');
+    const can = useCan();
 
     const applyFilters = (overrides = {}) => {
         const p = { search, category_id: catId, ...overrides };
@@ -119,14 +121,16 @@ export default function InventoryIndex({ items, categories, stats, filters }) {
                     >
                         📋 Movement Log
                     </Button>
-                    <Button
-                        component={Link}
-                        href="/system/inventory/create"
-                        size="sm"
-                        style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 10, fontWeight: 700 }}
-                    >
-                        + Add Item
-                    </Button>
+                    {can('inventory.create') && (
+                        <Button
+                            component={Link}
+                            href="/system/inventory/create"
+                            size="sm"
+                            style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 10, fontWeight: 700 }}
+                        >
+                            + Add Item
+                        </Button>
+                    )}
                 </Group>
             </Group>
 
@@ -174,12 +178,12 @@ export default function InventoryIndex({ items, categories, stats, filters }) {
                                                 <Box style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 8, background: `${item.category.color}18`, border: `1px solid ${item.category.color}33` }}>
                                                     <Text size="xs" fw={700} style={{ color: item.category.color }}>{item.category.name}</Text>
                                                 </Box>
-                                            ) : <Text size="sm" style={{ color: '#475569' }}>—</Text>}
+                                            ) : <Text size="sm" style={{ color: 'var(--c-text-muted)' }}>—</Text>}
                                         </td>
 
                                         {/* Location */}
                                         <td style={{ padding: '13px 16px' }}>
-                                            <Text size="sm" style={{ color: '#94A3B8' }}>{item.location || '—'}</Text>
+                                            <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{item.location || '—'}</Text>
                                         </td>
 
                                         {/* Stock level: value + badge + mini bar */}
@@ -195,37 +199,39 @@ export default function InventoryIndex({ items, categories, stats, filters }) {
 
                                         {/* Reorder level */}
                                         <td style={{ padding: '13px 16px' }}>
-                                            <Text size="sm" style={{ color: '#64748B' }}>{fmt(item.reorder_level, 1)} <Text span size="xs" style={{ color: '#475569' }}>{item.unit}</Text></Text>
+                                            <Text size="sm" style={{ color: '#64748B' }}>{fmt(item.reorder_level, 1)} <Text span size="xs" style={{ color: 'var(--c-text-muted)' }}>{item.unit}</Text></Text>
                                         </td>
 
                                         {/* Unit cost */}
                                         <td style={{ padding: '13px 16px' }}>
-                                            <Text size="sm" style={{ color: '#94A3B8' }}>{item.unit_cost ? `TZS ${fmt(item.unit_cost)}` : '—'}</Text>
+                                            <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{item.unit_cost ? `TZS ${fmt(item.unit_cost)}` : '—'}</Text>
                                         </td>
 
                                         {/* Total value (unit_cost × stock) */}
                                         <td style={{ padding: '13px 16px' }}>
-                                            <Text size="sm" fw={600} style={{ color: totalVal ? '#60A5FA' : '#475569' }}>
+                                            <Text size="sm" fw={600} style={{ color: totalVal ? '#60A5FA' : 'var(--c-text-muted)' }}>
                                                 {totalVal ? `TZS ${fmt(totalVal)}` : '—'}
                                             </Text>
                                         </td>
 
                                         {/* Action */}
                                         <td style={{ padding: '13px 16px' }}>
-                                            <Box
-                                                component={Link}
-                                                href={`/system/inventory/${item.id}`}
-                                                style={{
-                                                    display: 'inline-flex', alignItems: 'center', gap: 4,
-                                                    padding: '5px 12px', borderRadius: 8,
-                                                    background: 'rgba(96,165,250,0.08)',
-                                                    border: '1px solid rgba(96,165,250,0.25)',
-                                                    color: '#60A5FA', textDecoration: 'none',
-                                                    fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap',
-                                                }}
-                                            >
-                                                View →
-                                            </Box>
+                                            {can('inventory.view') && (
+                                                <Box
+                                                    component={Link}
+                                                    href={`/system/inventory/${item.id}`}
+                                                    style={{
+                                                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                                                        padding: '5px 12px', borderRadius: 8,
+                                                        background: 'rgba(96,165,250,0.08)',
+                                                        border: '1px solid rgba(96,165,250,0.25)',
+                                                        color: '#60A5FA', textDecoration: 'none',
+                                                        fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap',
+                                                    }}
+                                                >
+                                                    View →
+                                                </Box>
+                                            )}
                                         </td>
                                     </tr>
                                 );
@@ -239,12 +245,14 @@ export default function InventoryIndex({ items, categories, stats, filters }) {
                     <Box style={{ textAlign: 'center', padding: '60px 0' }}>
                         <Text style={{ fontSize: '3rem', marginBottom: 12 }}>🏗️</Text>
                         <Text fw={700} size="lg" style={{ color: 'var(--c-text)' }}>No inventory items</Text>
-                        <Text size="sm" style={{ color: '#475569', marginTop: 6 }}>Add spare parts and consumables to start tracking stock levels</Text>
-                        <Box mt="md">
-                            <Button component={Link} href="/system/inventory/create" style={{ background: 'linear-gradient(135deg,#1565C0,#2196F3)', border: 'none', borderRadius: 10 }}>
-                                + Add First Item
-                            </Button>
-                        </Box>
+                        <Text size="sm" style={{ color: 'var(--c-text-muted)', marginTop: 6 }}>Add spare parts and consumables to start tracking stock levels</Text>
+                        {can('inventory.create') && (
+                            <Box mt="md">
+                                <Button component={Link} href="/system/inventory/create" style={{ background: 'linear-gradient(135deg,#1565C0,#2196F3)', border: 'none', borderRadius: 10 }}>
+                                    + Add First Item
+                                </Button>
+                            </Box>
+                        )}
                     </Box>
                 )}
 

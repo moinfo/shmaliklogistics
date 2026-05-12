@@ -35,7 +35,7 @@ export default function PortalCargoShow({ cargo, logs, statuses }) {
                             <Text size="xs" fw={700} style={{ color: 'var(--c-text-muted)', marginBottom: 4 }}>ORIGIN</Text>
                             <Text fw={700} style={{ color: 'var(--c-text)' }}>{cargo.origin ?? '—'}</Text>
                         </Box>
-                        <Text style={{ fontSize: '1.4rem', color: 'var(--c-text-muted)' }}>→</Text>
+                        <Text style={{ fontSize: '1.4rem', color: '#475569' }}>→</Text>
                         <Box style={{ flex: 1 }}>
                             <Text size="xs" fw={700} style={{ color: 'var(--c-text-muted)', marginBottom: 4 }}>DESTINATION</Text>
                             <Text fw={700} style={{ color: 'var(--c-text)' }}>{cargo.destination ?? '—'}</Text>

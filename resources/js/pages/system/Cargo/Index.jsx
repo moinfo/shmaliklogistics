@@ -4,8 +4,9 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useCan } from '../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
 const fmt  = n => new Intl.NumberFormat('en-TZ').format(Math.round(n ?? 0));
 const fmtW = kg => kg >= 1000 ? `${(kg / 1000).toFixed(1)} t` : `${Math.round(kg)} kg`;
@@ -15,13 +16,14 @@ export default function CargoIndex({ cargos, stats, statuses, types, filters }) 
     const isDark = colorScheme === 'dark';
     const textPri    = isDark ? dk.textPri : '#1E293B';
     const textSec    = isDark ? dk.textSec : '#64748B';
-    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
     const cardBg     = isDark ? dk.card : '#ffffff';
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const divider    = isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9';
 
     const [search, setSearch] = useState(filters?.search ?? '');
     const [status, setStatus] = useState(filters?.status ?? '');
+    const can = useCan();
 
     const applyFilter = (newStatus) => {
         setStatus(newStatus);
@@ -50,10 +52,12 @@ export default function CargoIndex({ cargos, stats, statuses, types, filters }) 
                         {fmt(stats.total_kg)} kg active cargo across all shipments
                     </Text>
                 </Stack>
-                <Box component={Link} href="/system/cargo/create"
-                    style={{ padding: '10px 24px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                    + Register Cargo
-                </Box>
+                {can('cargo.create') && (
+                    <Box component={Link} href="/system/cargo/create"
+                        style={{ padding: '10px 24px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
+                        + Register Cargo
+                    </Box>
+                )}
             </Group>
 
             {/* Stats */}
@@ -138,14 +142,18 @@ export default function CargoIndex({ cargos, stats, statuses, types, filters }) 
                                         </td>
                                         <td style={{ padding: '12px 14px' }}>
                                             <Group gap={6} wrap="nowrap">
-                                                <Box component={Link} href={`/system/cargo/${c.id}`}
-                                                    style={{ padding: '5px 12px', borderRadius: 6, background: isDark ? 'var(--c-border-strong)' : '#EFF6FF', color: '#3B82F6', textDecoration: 'none', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>
-                                                    View
-                                                </Box>
-                                                <Box component={Link} href={`/system/cargo/${c.id}/edit`}
-                                                    style={{ padding: '5px 12px', borderRadius: 6, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, textDecoration: 'none', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>
-                                                    Edit
-                                                </Box>
+                                                {can('cargo.view') && (
+                                                    <Box component={Link} href={`/system/cargo/${c.id}`}
+                                                        style={{ padding: '5px 12px', borderRadius: 6, background: isDark ? 'var(--c-border-strong)' : '#EFF6FF', color: '#3B82F6', textDecoration: 'none', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                                        View
+                                                    </Box>
+                                                )}
+                                                {can('cargo.edit') && (
+                                                    <Box component={Link} href={`/system/cargo/${c.id}/edit`}
+                                                        style={{ padding: '5px 12px', borderRadius: 6, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, textDecoration: 'none', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                                        Edit
+                                                    </Box>
+                                                )}
                                             </Group>
                                         </td>
                                     </tr>

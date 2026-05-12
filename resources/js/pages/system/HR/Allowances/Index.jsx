@@ -3,8 +3,9 @@ import { Box, Text, Group, Stack, Select, Modal, Badge } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 function fmt(n) { return Number(n ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
 
 function AllowanceForm({ allowance, employees, types, onClose, isDark, cardBorder }) {
@@ -76,6 +77,7 @@ export default function AllowancesIndex({ allowances, employees, types }) {
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const rowHover = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC';
     const [modal, setModal] = useState(null);
+    const can = useCan();
 
     return (
         <DashboardLayout title="Employee Allowances">
@@ -89,7 +91,9 @@ export default function AllowancesIndex({ allowances, employees, types }) {
                     <Text fw={800} size="xl" style={{ color: textPri }}>Employee Allowances</Text>
                     <Text size="sm" style={{ color: textSec }}>Per-employee allowances auto-included in payroll</Text>
                 </Stack>
-                <Box component="button" onClick={() => setModal('new')} style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>+ New Allowance</Box>
+                {can('hr_allowances.create') && (
+                    <Box component="button" onClick={() => setModal('new')} style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>+ New Allowance</Box>
+                )}
             </Group>
 
             <Box style={{ background: isDark ? dk.card : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 12, overflow: 'hidden' }}>
@@ -123,8 +127,12 @@ export default function AllowancesIndex({ allowances, employees, types }) {
                                     <td style={{ padding: '13px 14px' }}><Text size="sm" style={{ color: textSec }}>{a.description ?? '—'}</Text></td>
                                     <td style={{ padding: '13px 14px' }}>
                                         <Group gap={6}>
-                                            <Box component="button" onClick={() => setModal(a)} style={{ padding: '5px 12px', borderRadius: 6, background: '#3B82F6', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12 }}>✏️</Box>
-                                            <Box component="button" onClick={() => { if (confirm('Delete this allowance?')) router.delete(`/system/hr/allowances/${a.id}`, { preserveScroll: true }); }} style={{ padding: '5px 12px', borderRadius: 6, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12 }}>×</Box>
+                                            {can('hr_allowances.edit') && (
+                                                <Box component="button" onClick={() => setModal(a)} style={{ padding: '5px 12px', borderRadius: 6, background: '#3B82F6', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12 }}>✏️</Box>
+                                            )}
+                                            {can('hr_allowances.delete') && (
+                                                <Box component="button" onClick={() => { if (confirm('Delete this allowance?')) router.delete(`/system/hr/allowances/${a.id}`, { preserveScroll: true }); }} style={{ padding: '5px 12px', borderRadius: 6, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12 }}>×</Box>
+                                            )}
                                         </Group>
                                     </td>
                                 </tr>

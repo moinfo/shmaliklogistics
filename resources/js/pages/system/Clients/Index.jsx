@@ -4,8 +4,9 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useCan } from '../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
 function StatCard({ label, value, icon, color, isDark }) {
     return (
@@ -31,6 +32,7 @@ export default function ClientsIndex({ clients, stats, statuses, filters }) {
 
     const [search, setSearch]   = useState(filters.search ?? '');
     const [status, setStatus]   = useState(filters.status ?? '');
+    const can = useCan();
 
     const applyFilters = (overrides = {}) => {
         router.get('/system/clients', { search, status, ...overrides }, { preserveState: true, replace: true });
@@ -45,11 +47,13 @@ export default function ClientsIndex({ clients, stats, statuses, filters }) {
                     <Text fw={800} size="xl" style={{ color: textPri }}>Clients</Text>
                     <Text size="sm" style={{ color: textSec }}>Manage your customer base</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box component={Link} href="/system/clients/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                        + New Client
-                    </Box>
-                </motion.div>
+                {can('clients.create') && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box component={Link} href="/system/clients/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
+                            + New Client
+                        </Box>
+                    </motion.div>
+                )}
             </Group>
 
             <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md" mb="xl">
@@ -108,12 +112,12 @@ export default function ClientsIndex({ clients, stats, statuses, filters }) {
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         <Text size="sm" style={{ color: textSec }}>{client.phone ?? '—'}</Text>
-                                        {client.email && <Text size="xs" style={{ color: isDark ? '#475569' : '#94A3B8' }}>{client.email}</Text>}
+                                        {client.email && <Text size="xs" style={{ color: isDark ? 'var(--c-text-muted)' : 'var(--c-text-secondary)' }}>{client.email}</Text>}
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         {client.tin_number && <Text size="xs" style={{ color: textSec }}>TIN: {client.tin_number}</Text>}
                                         {client.vrn_number && <Text size="xs" style={{ color: textSec }}>VRN: {client.vrn_number}</Text>}
-                                        {!client.tin_number && !client.vrn_number && <Text size="xs" style={{ color: isDark ? '#475569' : '#94A3B8' }}>—</Text>}
+                                        {!client.tin_number && !client.vrn_number && <Text size="xs" style={{ color: isDark ? 'var(--c-text-muted)' : 'var(--c-text-secondary)' }}>—</Text>}
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         <Badge size="sm" style={{ background: statuses[client.status]?.color + '22', color: statuses[client.status]?.color, border: `1px solid ${statuses[client.status]?.color}44` }}>
@@ -122,8 +126,12 @@ export default function ClientsIndex({ clients, stats, statuses, filters }) {
                                     </td>
                                     <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                                         <Group gap={6} justify="flex-end">
-                                            <ActionIcon component={Link} href={`/system/clients/${client.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
-                                            <ActionIcon component={Link} href={`/system/clients/${client.id}/edit`} variant="subtle" size="sm" style={{ color: textSec }}>✏️</ActionIcon>
+                                            {can('clients.view') && (
+                                                <ActionIcon component={Link} href={`/system/clients/${client.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
+                                            )}
+                                            {can('clients.edit') && (
+                                                <ActionIcon component={Link} href={`/system/clients/${client.id}/edit`} variant="subtle" size="sm" style={{ color: textSec }}>✏️</ActionIcon>
+                                            )}
                                         </Group>
                                     </td>
                                 </tr>

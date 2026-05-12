@@ -3,7 +3,7 @@ import { Box, Text, Group, Stack, SimpleGrid } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
 function AlertRow({ alert, isDark }) {
     const d = isDark
@@ -48,7 +48,7 @@ function Section({ title, color, alerts, isDark, emptyText }) {
     const cardBg     = isDark ? dk.card : '#ffffff';
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const textPri    = isDark ? dk.textPri : '#1E293B';
-    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
     const divider    = isDark ? dk.divider : '#E2E8F0';
 
     return (

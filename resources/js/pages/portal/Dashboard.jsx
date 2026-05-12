@@ -49,7 +49,7 @@ export default function PortalDashboard({ client, company, activeTrips, recentIn
                         {activeTrips.length === 0 ? (
                             <Box style={{ textAlign: 'center', padding: '32px 0' }}>
                                 <Text style={{ fontSize: '2rem', marginBottom: 8 }}>🚛</Text>
-                                <Text size="sm" style={{ color: '#475569' }}>No active shipments right now</Text>
+                                <Text size="sm" style={{ color: 'var(--c-text-muted)' }}>No active shipments right now</Text>
                             </Box>
                         ) : (
                             <Stack gap="sm">
@@ -68,12 +68,12 @@ export default function PortalDashboard({ client, company, activeTrips, recentIn
                                     >
                                         <Group justify="space-between" mb={4}>
                                             <Text fw={700} size="sm" style={{ color: 'var(--c-text)' }}>{trip.trip_number}</Text>
-                                            <Box style={{ padding: '2px 10px', borderRadius: 12, background: `${tripStatusColor[trip.status] || '#94A3B8'}22`, border: `1px solid ${tripStatusColor[trip.status] || '#94A3B8'}55` }}>
-                                                <Text size="xs" fw={700} style={{ color: tripStatusColor[trip.status] || '#94A3B8', textTransform: 'capitalize' }}>{trip.status?.replace('_', ' ')}</Text>
+                                            <Box style={{ padding: '2px 10px', borderRadius: 12, background: `${tripStatusColor[trip.status] || 'var(--c-text-secondary)'}22`, border: `1px solid ${tripStatusColor[trip.status] || 'var(--c-text-secondary)'}55` }}>
+                                                <Text size="xs" fw={700} style={{ color: tripStatusColor[trip.status] || 'var(--c-text-secondary)', textTransform: 'capitalize' }}>{trip.status?.replace('_', ' ')}</Text>
                                             </Box>
                                         </Group>
                                         <Text size="xs" style={{ color: '#64748B' }}>{trip.origin} → {trip.destination}</Text>
-                                        {trip.driver && <Text size="xs" style={{ color: '#475569', marginTop: 2 }}>Driver: {trip.driver.name}</Text>}
+                                        {trip.driver && <Text size="xs" style={{ color: 'var(--c-text-muted)', marginTop: 2 }}>Driver: {trip.driver.name}</Text>}
                                     </Box>
                                 ))}
                             </Stack>
@@ -91,12 +91,12 @@ export default function PortalDashboard({ client, company, activeTrips, recentIn
                         {recentInvoices.length === 0 ? (
                             <Box style={{ textAlign: 'center', padding: '32px 0' }}>
                                 <Text style={{ fontSize: '2rem', marginBottom: 8 }}>📄</Text>
-                                <Text size="sm" style={{ color: '#475569' }}>No invoices yet</Text>
+                                <Text size="sm" style={{ color: 'var(--c-text-muted)' }}>No invoices yet</Text>
                             </Box>
                         ) : (
                             <Stack gap="sm">
                                 {recentInvoices.map(inv => {
-                                    const statusColor = { paid: '#22C55E', sent: '#2196F3', overdue: '#EF4444', partial: '#F59E0B', draft: '#94A3B8' }[inv.status] || '#94A3B8';
+                                    const statusColor = { paid: '#22C55E', sent: '#2196F3', overdue: '#EF4444', partial: '#F59E0B', draft: 'var(--c-text-secondary)' }[inv.status] || 'var(--c-text-secondary)';
                                     return (
                                         <Box key={inv.id} component={Link} href={`/portal/invoices/${inv.id}`} style={{ display: 'block', padding: '12px 14px', borderRadius: 10, background: 'var(--c-input)', border: '1px solid var(--c-border-subtle)', textDecoration: 'none', transition: 'border-color 0.15s' }}
                                             onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(33,150,243,0.35)'}

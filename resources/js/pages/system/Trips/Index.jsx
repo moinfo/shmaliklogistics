@@ -4,6 +4,8 @@ import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useCan } from '../../../lib/can';
+import { formatDate } from '../../../lib/date';
 
 const dk = {
     card:    '#0F1E32',
@@ -11,8 +13,8 @@ const dk = {
     border:  'var(--c-border-color)',
     divider: 'rgba(255,255,255,0.06)',
     textPri: '#E2E8F0',
-    textSec: '#94A3B8',
-    textMut: '#475569',
+    textSec: 'var(--c-text-secondary)',
+    textMut: 'var(--c-text-muted)',
 };
 
 function fmt(n) {
@@ -37,12 +39,13 @@ export default function TripsIndex({ trips, stats, statuses, filters }) {
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const textPri    = isDark ? dk.textPri : '#1E293B';
     const textSec    = isDark ? dk.textSec : '#64748B';
-    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
     const rowHov     = isDark ? dk.cardHov : '#F8FAFC';
     const divider    = isDark ? dk.divider : '#E2E8F0';
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
+    const can = useCan();
 
     const applyFilters = (s, st) => {
         router.get('/system/trips', { search: s, status: st }, { preserveState: true, replace: true });
@@ -65,21 +68,23 @@ export default function TripsIndex({ trips, stats, statuses, filters }) {
                     <Text fw={800} size="xl" style={{ color: textPri }}>Trip Management</Text>
                     <Text size="sm" style={{ color: textSec }}>All cargo trips — create, track and close</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box
-                        component={Link}
-                        href="/system/trips/create"
-                        style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 8,
-                            background: 'linear-gradient(135deg, #1565C0, #2196F3)',
-                            color: '#fff', fontWeight: 700, fontSize: 14,
-                            padding: '10px 20px', borderRadius: 10, textDecoration: 'none',
-                            boxShadow: '0 4px 16px rgba(33,150,243,0.35)',
-                        }}
-                    >
-                        <Text size="sm">＋</Text> New Trip
-                    </Box>
-                </motion.div>
+                {can('trips.create') && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box
+                            component={Link}
+                            href="/system/trips/create"
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 8,
+                                background: 'linear-gradient(135deg, #1565C0, #2196F3)',
+                                color: '#fff', fontWeight: 700, fontSize: 14,
+                                padding: '10px 20px', borderRadius: 10, textDecoration: 'none',
+                                boxShadow: '0 4px 16px rgba(33,150,243,0.35)',
+                            }}
+                        >
+                            <Text size="sm">＋</Text> New Trip
+                        </Box>
+                    </motion.div>
+                )}
             </Group>
 
             {/* Stats */}
@@ -163,13 +168,15 @@ export default function TripsIndex({ trips, stats, statuses, filters }) {
                                         <Text size="sm" style={{ color: textSec }}>{trip.driver_name}</Text>
                                         <Text size="xs" style={{ color: textMut }}>{trip.vehicle_plate}</Text>
                                     </Stack>
-                                    <Text size="sm" style={{ color: textSec }}>{trip.departure_date}</Text>
+                                    <Text size="sm" style={{ color: textSec }}>{formatDate(trip.departure_date)}</Text>
                                     <StatusPill status={trip.status} statuses={statuses} />
                                     <Text size="sm" fw={600} style={{ color: textPri }}>{fmt(trip.freight_amount)}</Text>
                                     <Group gap={4} onClick={e => e.stopPropagation()}>
-                                        <Tooltip label="Edit">
-                                            <ActionIcon component={Link} href={`/system/trips/${trip.id}/edit`} variant="subtle" size="sm" style={{ color: textMut }}>✏️</ActionIcon>
-                                        </Tooltip>
+                                        {can('trips.edit') && (
+                                            <Tooltip label="Edit">
+                                                <ActionIcon component={Link} href={`/system/trips/${trip.id}/edit`} variant="subtle" size="sm" style={{ color: textMut }}>✏️</ActionIcon>
+                                            </Tooltip>
+                                        )}
                                     </Group>
                                 </Box>
                             </motion.div>

@@ -10,8 +10,8 @@ const dk = {
     border:  'var(--c-border-color)',
     divider: 'rgba(255,255,255,0.06)',
     textPri: '#E2E8F0',
-    textSec: '#94A3B8',
-    textMut: '#475569',
+    textSec: 'var(--c-text-secondary)',
+    textMut: 'var(--c-text-muted)',
 };
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -51,7 +51,7 @@ function VehiclePreview({ data, drivers, typeIcons, isDark }) {
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const textPri    = isDark ? dk.textPri : '#1E293B';
     const textSec    = isDark ? dk.textSec : '#64748B';
-    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
     const divider    = isDark ? dk.divider : '#E2E8F0';
 
     const assignedDriver = drivers.find(d => String(d.id) === String(data.driver_id));

@@ -4,8 +4,10 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useCan } from '../../../lib/can';
+import { formatDate } from '../../../lib/date';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
 function StatCard({ label, value, icon, color, isDark }) {
     return (
@@ -33,6 +35,7 @@ export default function ExpensesIndex({ expenses, stats, categories, filters }) 
 
     const [search, setSearch]     = useState(filters.search ?? '');
     const [category, setCategory] = useState(filters.category ?? '');
+    const can = useCan();
 
     const applyFilters = (overrides = {}) => {
         router.get('/system/expenses', { search, category, ...overrides }, { preserveState: true, replace: true });
@@ -54,11 +57,13 @@ export default function ExpensesIndex({ expenses, stats, categories, filters }) 
                     <Text fw={800} size="xl" style={{ color: textPri }}>Expenses</Text>
                     <Text size="sm" style={{ color: textSec }}>Track all operational costs</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box component={Link} href="/system/expenses/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                        + Record Expense
-                    </Box>
-                </motion.div>
+                {can('expenses.create') && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box component={Link} href="/system/expenses/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
+                            + Record Expense
+                        </Box>
+                    </motion.div>
+                )}
             </Group>
 
             <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md" mb="xl">
@@ -111,7 +116,7 @@ export default function ExpensesIndex({ expenses, stats, categories, filters }) 
                                     onMouseEnter={e => e.currentTarget.style.background = rowHover}
                                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                     <td style={{ padding: '14px 16px' }}>
-                                        <Text size="sm" style={{ color: textPri, whiteSpace: 'nowrap' }}>{exp.expense_date}</Text>
+                                        <Text size="sm" style={{ color: textPri, whiteSpace: 'nowrap' }}>{formatDate(exp.expense_date)}</Text>
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         <Text size="sm" style={{ color: textSec }}>
@@ -124,7 +129,7 @@ export default function ExpensesIndex({ expenses, stats, categories, filters }) 
                                     <td style={{ padding: '14px 16px' }}>
                                         {exp.vehicle_plate && <Text size="xs" style={{ color: textSec }}>🚛 {exp.vehicle_plate}</Text>}
                                         {exp.trip && <Text size="xs" style={{ color: textSec }}>🗺️ {exp.trip.trip_number}</Text>}
-                                        {!exp.vehicle_plate && !exp.trip && <Text size="xs" style={{ color: isDark ? dk.textMut : '#94A3B8' }}>—</Text>}
+                                        {!exp.vehicle_plate && !exp.trip && <Text size="xs" style={{ color: isDark ? dk.textMut : 'var(--c-text-secondary)' }}>—</Text>}
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         <Text fw={700} size="sm" style={{ color: '#F59E0B', whiteSpace: 'nowrap' }}>{exp.currency} {fmt(exp.amount)}</Text>
@@ -134,8 +139,12 @@ export default function ExpensesIndex({ expenses, stats, categories, filters }) 
                                     </td>
                                     <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                                         <Group gap={6} justify="flex-end">
-                                            <ActionIcon component={Link} href={`/system/expenses/${exp.id}/edit`} variant="subtle" size="sm" style={{ color: textSec }}>✏️</ActionIcon>
-                                            <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(exp.id)}>🗑️</ActionIcon>
+                                            {can('expenses.edit') && (
+                                                <ActionIcon component={Link} href={`/system/expenses/${exp.id}/edit`} variant="subtle" size="sm" style={{ color: textSec }}>✏️</ActionIcon>
+                                            )}
+                                            {can('expenses.delete') && (
+                                                <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(exp.id)}>🗑️</ActionIcon>
+                                            )}
                                         </Group>
                                     </td>
                                 </tr>

@@ -8,7 +8,7 @@ export default function CreateCargo({ trips, clients, statuses, types, nextNumbe
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const textPri = isDark ? '#E2E8F0' : '#1E293B';
-    const textSec = isDark ? '#94A3B8' : '#64748B';
+    const textSec = isDark ? 'var(--c-text-secondary)' : '#64748B';
 
     const { data, setData, post, processing, errors } = useForm({
         cargo_number:         nextNumber,

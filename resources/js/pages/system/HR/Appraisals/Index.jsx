@@ -2,6 +2,7 @@ import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { Box, Grid, Text, Group, Select, Stack, Button } from '@mantine/core';
 import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { useCan } from '../../../../lib/can';
 
 const StatusBadge = ({ status, statuses }) => {
     const s = statuses[status];
@@ -20,6 +21,7 @@ const stars = (n) => Array.from({ length: 5 }, (_, i) => (
 export default function AppraisalsIndex({ appraisals, employees, statuses, stats, filters }) {
     const [empId, setEmpId] = useState(filters.employee_id || '');
     const [status, setStatus] = useState(filters.status || '');
+    const can = useCan();
 
     const apply = (key, val) => {
         const updated = { employee_id: empId, status };
@@ -71,13 +73,15 @@ export default function AppraisalsIndex({ appraisals, employees, statuses, stats
                         styles={{ input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' } }}
                     />
                 </Group>
-                <Button
-                    component={Link}
-                    href="/system/hr/appraisals/create"
-                    style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 10, fontWeight: 700 }}
-                >
-                    + New Appraisal
-                </Button>
+                {can('hr_appraisals.create') && (
+                    <Button
+                        component={Link}
+                        href="/system/hr/appraisals/create"
+                        style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 10, fontWeight: 700 }}
+                    >
+                        + New Appraisal
+                    </Button>
+                )}
             </Group>
 
             {/* Table */}
@@ -99,23 +103,25 @@ export default function AppraisalsIndex({ appraisals, employees, statuses, stats
                                 >
                                     <td style={{ padding: '14px 16px' }}>
                                         <Text fw={700} size="sm" style={{ color: 'var(--c-text)' }}>{a.employee?.name}</Text>
-                                        <Text size="xs" style={{ color: '#475569' }}>{a.employee?.department}</Text>
+                                        <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>{a.employee?.department}</Text>
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
-                                        <Text size="sm" style={{ color: '#94A3B8' }}>{a.period_from ? new Date(a.period_from).toLocaleDateString('en-GB', { month:'short', year:'numeric' }) : '—'}</Text>
-                                        <Text size="xs" style={{ color: '#475569' }}>to {a.period_to ? new Date(a.period_to).toLocaleDateString('en-GB', { month:'short', year:'numeric' }) : '—'}</Text>
+                                        <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{a.period_from ? new Date(a.period_from).toLocaleDateString('en-GB', { month:'short', year:'numeric' }) : '—'}</Text>
+                                        <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>to {a.period_to ? new Date(a.period_to).toLocaleDateString('en-GB', { month:'short', year:'numeric' }) : '—'}</Text>
                                     </td>
-                                    <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: '#94A3B8' }}>{a.trips_count}</Text></td>
-                                    <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: '#94A3B8' }}>{a.on_time_pct != null ? `${a.on_time_pct}%` : '—'}</Text></td>
-                                    <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: '#94A3B8' }}>{a.fuel_eff_kml != null ? `${a.fuel_eff_kml} km/L` : '—'}</Text></td>
+                                    <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{a.trips_count}</Text></td>
+                                    <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{a.on_time_pct != null ? `${a.on_time_pct}%` : '—'}</Text></td>
+                                    <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{a.fuel_eff_kml != null ? `${a.fuel_eff_kml} km/L` : '—'}</Text></td>
                                     <td style={{ padding: '14px 16px' }}>
                                         {a.overall_score ? (
                                             <Group gap={2}>{stars(Math.round(a.overall_score))}<Text size="xs" style={{ color: '#F59E0B', marginLeft: 4 }}>{a.overall_score}</Text></Group>
-                                        ) : <Text size="sm" style={{ color: '#475569' }}>—</Text>}
+                                        ) : <Text size="sm" style={{ color: 'var(--c-text-muted)' }}>—</Text>}
                                     </td>
                                     <td style={{ padding: '14px 16px' }}><StatusBadge status={a.status} statuses={statuses} /></td>
                                     <td style={{ padding: '14px 16px' }}>
-                                        <Box component={Link} href={`/system/hr/appraisals/${a.id}`} style={{ color: '#60A5FA', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>View →</Box>
+                                        {can('hr_appraisals.view') && (
+                                            <Box component={Link} href={`/system/hr/appraisals/${a.id}`} style={{ color: '#60A5FA', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>View →</Box>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
@@ -127,7 +133,7 @@ export default function AppraisalsIndex({ appraisals, employees, statuses, stats
                     <Box style={{ textAlign: 'center', padding: '48px 0' }}>
                         <Text style={{ fontSize: '2.5rem', marginBottom: 10 }}>⭐</Text>
                         <Text fw={600} style={{ color: 'var(--c-text)' }}>No appraisals yet</Text>
-                        <Text size="sm" style={{ color: '#475569', marginTop: 6 }}>Create the first performance review</Text>
+                        <Text size="sm" style={{ color: 'var(--c-text-muted)', marginTop: 6 }}>Create the first performance review</Text>
                     </Box>
                 )}
             </Box>

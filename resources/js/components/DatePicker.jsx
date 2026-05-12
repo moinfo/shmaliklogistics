@@ -24,7 +24,7 @@ export default function DatePicker({
     const border   = isDark ? 'rgba(33,150,243,0.12)' : '#E2E8F0';
     const bg       = styles.input?.background ?? (isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC');
     const color    = styles.input?.color      ?? (isDark ? '#E2E8F0' : '#1E293B');
-    const labelCol = styles.label?.color      ?? (isDark ? '#94A3B8' : '#64748B');
+    const labelCol = styles.label?.color      ?? (isDark ? 'var(--c-text-secondary)' : '#64748B');
 
     useEffect(() => {
         fpRef.current = flatpickr(ref.current, {

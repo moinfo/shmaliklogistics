@@ -60,7 +60,7 @@ export default function PortalLayout({ title = 'Customer Portal', children }) {
                                         }}
                                     >
                                         <Text style={{ fontSize: '0.9rem' }}>{link.icon}</Text>
-                                        <Text size="sm" fw={active ? 700 : 500} style={{ color: active ? '#60A5FA' : '#94A3B8' }}>{link.label}</Text>
+                                        <Text size="sm" fw={active ? 700 : 500} style={{ color: active ? '#60A5FA' : 'var(--c-text-secondary)' }}>{link.label}</Text>
                                     </Box>
                                 );
                             })}
@@ -91,7 +91,7 @@ export default function PortalLayout({ title = 'Customer Portal', children }) {
                     const active = url.startsWith(link.href);
                     return (
                         <Box key={link.href} component={Link} href={link.href} style={{ padding: '6px 12px', borderRadius: 8, background: active ? 'rgba(33,150,243,0.15)' : 'transparent', textDecoration: 'none', borderBottom: active ? '2px solid #2196F3' : '2px solid transparent' }}>
-                            <Text size="sm" fw={active ? 700 : 500} style={{ color: active ? '#60A5FA' : '#94A3B8' }}>{link.icon} {link.label}</Text>
+                            <Text size="sm" fw={active ? 700 : 500} style={{ color: active ? '#60A5FA' : 'var(--c-text-secondary)' }}>{link.icon} {link.label}</Text>
                         </Box>
                     );
                 })}

@@ -1,10 +1,27 @@
 import DashboardLayout from '../../../layouts/DashboardLayout';
-import { Box, Grid, Text, Group, Select, TextInput, NumberInput, Textarea, Button, Stack, Switch } from '@mantine/core';
+import { Box, Grid, Text, Group, Select, TextInput, NumberInput, Textarea, Button, Stack, Switch, useMantineColorScheme } from '@mantine/core';
 import { useForm, Link } from '@inertiajs/react';
 
-const inputStyle = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: '#94A3B8', marginBottom: 6 } };
-
 export default function InventoryCreate({ categories }) {
+    const { colorScheme } = useMantineColorScheme();
+    const isDark = colorScheme === 'dark';
+
+    const cardBg     = isDark ? '#0F1E32' : '#FFFFFF';
+    const cardBorder = isDark ? 'rgba(33,150,243,0.12)' : '#E2E8F0';
+    const inputBg    = isDark ? '#07111F' : '#F8FAFC';
+    const inputBorder= isDark ? 'rgba(33,150,243,0.2)' : '#E2E8F0';
+    const textPri    = isDark ? '#E2E8F0' : '#1E293B';
+    const textSec    = isDark ? 'var(--c-text-secondary)' : '#64748B';
+    const textMut    = isDark ? 'var(--c-text-muted)' : 'var(--c-text-secondary)';
+    const tipBg      = isDark ? 'rgba(33,150,243,0.08)' : '#EFF6FF';
+    const tipBorder  = isDark ? 'rgba(33,150,243,0.2)' : '#BFDBFE';
+
+    const inputStyle = {
+        input: { background: inputBg, border: `1px solid ${inputBorder}`, color: textPri, borderRadius: 8 },
+        label: { color: textSec, marginBottom: 6, fontSize: 13, fontWeight: 600 },
+        dropdown: { background: cardBg, border: `1px solid ${cardBorder}` },
+    };
+
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         category_id: '',
@@ -24,31 +41,31 @@ export default function InventoryCreate({ categories }) {
 
     return (
         <DashboardLayout title="Add Inventory Item">
-            <Box component={Link} href="/system/inventory" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#60A5FA', textDecoration: 'none', fontSize: 14, marginBottom: 20 }}>
+            <Box component={Link} href="/system/inventory" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#2196F3', textDecoration: 'none', fontSize: 14, marginBottom: 20, fontWeight: 600 }}>
                 ← Back to Inventory
             </Box>
 
             <form onSubmit={submit}>
                 <Grid gutter="lg">
                     <Grid.Col span={{ base: 12, md: 8 }}>
-                        <Box style={{ background: 'var(--c-card)', border: '1px solid var(--c-border-color)', borderRadius: 12, padding: '24px' }}>
-                            <Text fw={700} style={{ color: 'var(--c-text)', marginBottom: 20 }}>Item Details</Text>
+                        <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 12, padding: '24px' }}>
+                            <Text fw={700} size="md" style={{ color: textPri, marginBottom: 20 }}>Item Details</Text>
                             <Grid gutter="md">
                                 <Grid.Col span={12}>
                                     <TextInput label="Item Name *" placeholder="e.g. Engine Oil Filter" value={data.name} onChange={e => setData('name', e.target.value)} styles={inputStyle} required />
                                     {err('name')}
                                 </Grid.Col>
                                 <Grid.Col span={{ base: 12, sm: 6 }}>
-                                    <Select label="Category" placeholder="Select category" value={data.category_id} onChange={v => setData('category_id', v || '')} data={[{ value: '', label: 'None' }, ...categories.map(c => ({ value: String(c.id), label: c.name }))]} clearable styles={inputStyle} />
+                                    <Select label="Category" placeholder="Select category" value={data.category_id} onChange={v => setData('category_id', v || '')} data={[{ value: '', label: 'None' }, ...categories.map(c => ({ value: String(c.id), label: c.name }))]} clearable styles={inputStyle} comboboxProps={{ zIndex: 1100 }} />
                                 </Grid.Col>
                                 <Grid.Col span={{ base: 12, sm: 6 }}>
                                     <TextInput label="Part Number" placeholder="e.g. OPT-D1234" value={data.part_number} onChange={e => setData('part_number', e.target.value)} styles={inputStyle} />
                                 </Grid.Col>
                                 <Grid.Col span={{ base: 12, sm: 4 }}>
-                                    <Select label="Unit *" data={units.map(u => ({ value: u, label: u }))} value={data.unit} onChange={v => setData('unit', v)} styles={inputStyle} required />
+                                    <Select label="Unit *" data={units.map(u => ({ value: u, label: u }))} value={data.unit} onChange={v => setData('unit', v)} styles={inputStyle} comboboxProps={{ zIndex: 1100 }} required />
                                 </Grid.Col>
                                 <Grid.Col span={{ base: 12, sm: 4 }}>
-                                    <NumberInput label="Reorder Level" placeholder="Minimum stock before alert" value={data.reorder_level} onChange={v => setData('reorder_level', v)} min={0} decimalScale={3} styles={inputStyle} />
+                                    <NumberInput label="Reorder Level" placeholder="Min before alert" value={data.reorder_level} onChange={v => setData('reorder_level', v)} min={0} decimalScale={3} styles={inputStyle} />
                                 </Grid.Col>
                                 <Grid.Col span={{ base: 12, sm: 4 }}>
                                     <NumberInput label="Unit Cost (TZS)" value={data.unit_cost} onChange={v => setData('unit_cost', v)} min={0} decimalScale={2} styles={inputStyle} />
@@ -64,20 +81,20 @@ export default function InventoryCreate({ categories }) {
                     </Grid.Col>
 
                     <Grid.Col span={{ base: 12, md: 4 }}>
-                        <Box style={{ background: 'var(--c-card)', border: '1px solid var(--c-border-color)', borderRadius: 12, padding: '24px', position: 'sticky', top: 90 }}>
-                            <Text fw={700} style={{ color: 'var(--c-text)', marginBottom: 20 }}>Settings</Text>
+                        <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 12, padding: '24px', position: 'sticky', top: 90 }}>
+                            <Text fw={700} size="md" style={{ color: textPri, marginBottom: 20 }}>Settings</Text>
                             <Stack gap="lg">
-                                <Box style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--c-input)', borderRadius: 10, border: '1px solid var(--c-border-subtle)' }}>
+                                <Box style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: inputBg, borderRadius: 10, border: `1px solid ${inputBorder}` }}>
                                     <Box>
-                                        <Text size="sm" fw={600} style={{ color: 'var(--c-text)' }}>Active</Text>
-                                        <Text size="xs" style={{ color: '#475569' }}>Show this item in stock management</Text>
+                                        <Text size="sm" fw={600} style={{ color: textPri }}>Active</Text>
+                                        <Text size="xs" style={{ color: textMut }}>Show in stock management</Text>
                                     </Box>
                                     <Switch checked={data.is_active} onChange={e => setData('is_active', e.currentTarget.checked)} />
                                 </Box>
-                                <Box style={{ padding: '12px 16px', background: 'var(--c-border-row)', borderRadius: 10, border: '1px solid var(--c-border-subtle)' }}>
-                                    <Text size="xs" style={{ color: '#60A5FA' }}>💡 Initial stock is 0. Use "Stock In" on the item page to add opening stock.</Text>
+                                <Box style={{ padding: '12px 16px', background: tipBg, borderRadius: 10, border: `1px solid ${tipBorder}` }}>
+                                    <Text size="xs" style={{ color: isDark ? '#60A5FA' : '#1565C0', lineHeight: 1.5 }}>💡 Initial stock is 0. Use “Stock In” on the item page to add opening stock.</Text>
                                 </Box>
-                                <Button type="submit" loading={processing} fullWidth style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 10, fontWeight: 700 }}>
+                                <Button type="submit" loading={processing} fullWidth style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 10, fontWeight: 700, height: 42 }}>
                                     Create Item
                                 </Button>
                             </Stack>

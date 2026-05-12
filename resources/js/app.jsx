@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { MantineProvider, createTheme, ColorSchemeScript } from '@mantine/core';
 import '@mantine/core/styles.css';
+import '../css/app.css';
 import { LanguageProvider } from './contexts/LanguageContext';
 
 const theme = createTheme({

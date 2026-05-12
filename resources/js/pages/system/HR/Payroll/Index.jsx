@@ -3,8 +3,9 @@ import { Box, Text, Group, Stack, SimpleGrid, Badge, ActionIcon, Pagination } fr
 import { useMantineColorScheme } from '@mantine/core';
 import { useState, useRef, useEffect } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 const MONTHS = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 function fmt(n) { return Number(n ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
 
@@ -28,6 +29,7 @@ export default function PayrollIndex({ runs, stats, statuses, available }) {
     const rowHover = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC';
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropRef = useRef(null);
+    const can = useCan();
 
     useEffect(() => {
         const handler = (e) => { if (dropRef.current && !dropRef.current.contains(e.target)) setDropdownOpen(false); };
@@ -55,31 +57,35 @@ export default function PayrollIndex({ runs, stats, statuses, available }) {
                     <Text size="sm" style={{ color: textSec }}>Monthly payroll runs — Tanzania statutory deductions applied automatically</Text>
                 </Stack>
                 <Group gap="sm">
-                    <Box component={Link} href="/system/hr/payroll/create" style={{ padding: '10px 18px', borderRadius: 10, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, textDecoration: 'none', fontWeight: 600, fontSize: 13, border: `1px solid ${cardBorder}` }}>
-                        👁 Preview Current Payroll
-                    </Box>
+                    {can('hr_payroll.view') && (
+                        <Box component={Link} href="/system/hr/payroll/create" style={{ padding: '10px 18px', borderRadius: 10, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, textDecoration: 'none', fontWeight: 600, fontSize: 13, border: `1px solid ${cardBorder}` }}>
+                            👁 Preview Current Payroll
+                        </Box>
+                    )}
                     {/* Month dropdown for quick creation */}
-                    <Box style={{ position: 'relative' }} ref={dropRef}>
-                        <Group gap={0} style={{ borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                            <Box onClick={() => available[0] && createRun(available[0].year, available[0].month)}
-                                style={{ padding: '10px 18px', background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>
-                                + Create New Payroll
-                            </Box>
-                            <Box onClick={() => setDropdownOpen(!dropdownOpen)} style={{ padding: '10px 12px', background: '#1565C0', color: '#fff', cursor: 'pointer', borderLeft: '1px solid rgba(255,255,255,0.2)' }}>▾</Box>
-                        </Group>
-                        {dropdownOpen && available.length > 0 && (
-                            <Box style={{ position: 'absolute', right: 0, top: '110%', background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 8, overflow: 'hidden', zIndex: 100, minWidth: 180, boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
-                                {available.map(a => (
-                                    <Box key={`${a.year}-${a.month}`} onClick={() => createRun(a.year, a.month)}
-                                        style={{ padding: '10px 16px', cursor: 'pointer', color: textPri, fontSize: 14 }}
-                                        onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9'}
-                                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                                        {a.label}
-                                    </Box>
-                                ))}
-                            </Box>
-                        )}
-                    </Box>
+                    {can('hr_payroll.create') && (
+                        <Box style={{ position: 'relative' }} ref={dropRef}>
+                            <Group gap={0} style={{ borderRadius: 10, overflow: 'hidden', boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
+                                <Box onClick={() => available[0] && createRun(available[0].year, available[0].month)}
+                                    style={{ padding: '10px 18px', background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>
+                                    + Create New Payroll
+                                </Box>
+                                <Box onClick={() => setDropdownOpen(!dropdownOpen)} style={{ padding: '10px 12px', background: '#1565C0', color: '#fff', cursor: 'pointer', borderLeft: '1px solid rgba(255,255,255,0.2)' }}>▾</Box>
+                            </Group>
+                            {dropdownOpen && available.length > 0 && (
+                                <Box style={{ position: 'absolute', right: 0, top: '110%', background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 8, overflow: 'hidden', zIndex: 100, minWidth: 180, boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
+                                    {available.map(a => (
+                                        <Box key={`${a.year}-${a.month}`} onClick={() => createRun(a.year, a.month)}
+                                            style={{ padding: '10px 16px', cursor: 'pointer', color: textPri, fontSize: 14 }}
+                                            onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9'}
+                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                            {a.label}
+                                        </Box>
+                                    ))}
+                                </Box>
+                            )}
+                        </Box>
+                    )}
                 </Group>
             </Group>
 
@@ -119,8 +125,10 @@ export default function PayrollIndex({ runs, stats, statuses, available }) {
                                     </td>
                                     <td style={{ padding: '13px 14px' }}>
                                         <Group gap={6}>
-                                            <Box component={Link} href={`/system/hr/payroll/${run.id}`} style={{ padding: '5px 12px', borderRadius: 6, background: '#22C55E', color: '#fff', textDecoration: 'none', fontSize: 12, fontWeight: 600 }}>👁 View</Box>
-                                            {run.status !== 'closed' && <Box component="button" onClick={() => handleDelete(run.id)} style={{ padding: '5px 12px', borderRadius: 6, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12 }}>×</Box>}
+                                            {can('hr_payroll.view') && (
+                                                <Box component={Link} href={`/system/hr/payroll/${run.id}`} style={{ padding: '5px 12px', borderRadius: 6, background: '#22C55E', color: '#fff', textDecoration: 'none', fontSize: 12, fontWeight: 600 }}>👁 View</Box>
+                                            )}
+                                            {can('hr_payroll.delete') && run.status !== 'closed' && <Box component="button" onClick={() => handleDelete(run.id)} style={{ padding: '5px 12px', borderRadius: 6, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12 }}>×</Box>}
                                         </Group>
                                     </td>
                                 </tr>

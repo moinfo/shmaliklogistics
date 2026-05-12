@@ -3,7 +3,7 @@ import { Box, Text, Group, Stack, SimpleGrid } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 export default function CompanySettingsIndex({ company }) {
     const { colorScheme } = useMantineColorScheme();

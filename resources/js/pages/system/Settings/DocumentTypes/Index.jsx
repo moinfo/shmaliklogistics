@@ -3,8 +3,9 @@ import { Box, Text, Group, Stack, Tooltip, ActionIcon } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569', cardHov: '#132436' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)', cardHov: '#132436' };
 
 export default function DocumentTypesIndex({ types }) {
     const { colorScheme } = useMantineColorScheme();
@@ -15,11 +16,13 @@ export default function DocumentTypesIndex({ types }) {
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const textPri    = isDark ? dk.textPri : '#1E293B';
     const textSec    = isDark ? dk.textSec : '#64748B';
-    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
     const divider    = isDark ? dk.divider : '#E2E8F0';
     const rowHov     = isDark ? dk.cardHov : '#F8FAFC';
 
     const flash = props.flash ?? {};
+    const can = useCan();
+    const canManage = can('settings.edit');
 
     const confirmDelete = (type) => {
         if (window.confirm(`Remove document type "${type.name}"? This will hide the field from all vehicles.`)) {
@@ -47,14 +50,16 @@ export default function DocumentTypesIndex({ types }) {
                     <Text fw={800} size="xl" style={{ color: textPri }}>Vehicle Document Types</Text>
                     <Text size="sm" style={{ color: textSec }}>Define which documents are tracked per vehicle and their expiry dates</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box
-                        component={Link} href="/system/settings/document-types/create"
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, padding: '10px 20px', borderRadius: 10, textDecoration: 'none', boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}
-                    >
-                        <Text size="sm">＋</Text> Add Document Type
-                    </Box>
-                </motion.div>
+                {canManage && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box
+                            component={Link} href="/system/settings/document-types/create"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, padding: '10px 20px', borderRadius: 10, textDecoration: 'none', boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}
+                        >
+                            <Text size="sm">＋</Text> Add Document Type
+                        </Box>
+                    </motion.div>
+                )}
             </Group>
 
             <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden' }}>
@@ -100,10 +105,12 @@ export default function DocumentTypesIndex({ types }) {
 
                                 {/* Actions */}
                                 <Group gap={4} justify="flex-end">
-                                    <Tooltip label="Edit">
-                                        <ActionIcon component={Link} href={`/system/settings/document-types/${type.id}/edit`} variant="subtle" size="sm" style={{ color: textMut }}>✏️</ActionIcon>
-                                    </Tooltip>
-                                    {!type.is_builtin && (
+                                    {canManage && (
+                                        <Tooltip label="Edit">
+                                            <ActionIcon component={Link} href={`/system/settings/document-types/${type.id}/edit`} variant="subtle" size="sm" style={{ color: textMut }}>✏️</ActionIcon>
+                                        </Tooltip>
+                                    )}
+                                    {canManage && !type.is_builtin && (
                                         <Tooltip label="Delete">
                                             <ActionIcon onClick={() => confirmDelete(type)} variant="subtle" size="sm" style={{ color: '#EF4444' }}>🗑️</ActionIcon>
                                         </Tooltip>

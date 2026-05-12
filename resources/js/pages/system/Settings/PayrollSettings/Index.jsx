@@ -5,7 +5,7 @@ import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 function fmt(n) { return Number(n ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 }); }
 
@@ -197,7 +197,7 @@ export default function PayrollSettingsIndex({ grouped }) {
                             ['SDL (Employer)', preview.sdl_employer, '#8B5CF6'],
                             ['NSSF (Employer)', preview.nssf_employer, '#8B5CF6'],
                             ['WCF (Employer)', preview.wcf_employer, '#8B5CF6'],
-                            ['Total Employer Cost', preview.total_employer_cost, '#475569'],
+                            ['Total Employer Cost', preview.total_employer_cost, 'var(--c-text-muted)'],
                         ].map(([label, value, color]) => (
                             <Box key={label} style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC', borderRadius: 8, padding: '12px 14px', border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : '#E2E8F0'}` }}>
                                 <Text size="xs" style={{ color: textSec }}>{label}</Text>

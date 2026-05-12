@@ -4,8 +4,9 @@ import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 const fmt  = (n) => new Intl.NumberFormat('en-TZ').format(Math.round(Number(n) || 0));
 const fmtD = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
@@ -17,7 +18,7 @@ export default function FuelLogsIndex({ logs, stats, vehicles, filters }) {
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const textPri    = isDark ? dk.textPri : '#1E293B';
     const textSec    = isDark ? dk.textSec : '#64748B';
-    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
     const divider    = isDark ? dk.divider : '#E2E8F0';
     const inputBg    = isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC';
 
@@ -27,6 +28,7 @@ export default function FuelLogsIndex({ logs, stats, vehicles, filters }) {
     // Add-log form state
     const [form, setForm] = useState({ vehicle_id: '', driver_id: '', trip_id: '', log_date: new Date().toISOString().slice(0, 10), liters: '', cost_per_liter: '', odometer_km: '', station_name: '', fuel_type: 'diesel', currency: 'TZS', notes: '' });
     const [showForm, setShowForm] = useState(false);
+    const can = useCan();
 
     const applyFilters = (vid, s) => {
         router.get('/system/fleet/fuel-logs', { vehicle_id: vid, search: s }, { preserveState: true, replace: true });
@@ -57,12 +59,14 @@ export default function FuelLogsIndex({ logs, stats, vehicles, filters }) {
                     <Text fw={800} size="xl" style={{ color: textPri }}>Fuel Logs</Text>
                     <Text size="sm" style={{ color: textSec }}>Track fuel consumption and costs across the fleet</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box component="button" type="button" onClick={() => setShowForm(v => !v)}
-                        style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>
-                        {showForm ? '✕ Cancel' : '＋ Add Fuel Log'}
-                    </Box>
-                </motion.div>
+                {can('fleet_fuel_logs.create') && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box component="button" type="button" onClick={() => setShowForm(v => !v)}
+                            style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>
+                            {showForm ? '✕ Cancel' : '＋ Add Fuel Log'}
+                        </Box>
+                    </motion.div>
+                )}
             </Group>
 
             {/* Stats */}
@@ -201,11 +205,13 @@ export default function FuelLogsIndex({ logs, stats, vehicles, filters }) {
                                 <Text size="sm" fw={700} style={{ color: '#22C55E' }}>{log.currency} {fmt(total)}</Text>
                                 <Text size="sm" style={{ color: textSec }}>{log.station_name ?? '—'}</Text>
                                 <Text size="sm" style={{ color: log.driver ? textPri : textMut }}>{log.driver?.name ?? '—'}</Text>
-                                <Tooltip label="Delete">
-                                    <ActionIcon size="sm" variant="subtle" onClick={() => confirm('Delete this log?') && router.delete(`/system/fleet/fuel-logs/${log.id}`)}>
-                                        <Text size="xs" style={{ color: '#EF4444' }}>✕</Text>
-                                    </ActionIcon>
-                                </Tooltip>
+                                {can('fleet_fuel_logs.delete') && (
+                                    <Tooltip label="Delete">
+                                        <ActionIcon size="sm" variant="subtle" onClick={() => confirm('Delete this log?') && router.delete(`/system/fleet/fuel-logs/${log.id}`)}>
+                                            <Text size="xs" style={{ color: '#EF4444' }}>✕</Text>
+                                        </ActionIcon>
+                                    </Tooltip>
+                                )}
                             </Box>
                         );
                     })

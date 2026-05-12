@@ -4,8 +4,9 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useCan } from '../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 export default function PermitsIndex({ permits, stats, statuses, filters }) {
     const { colorScheme } = useMantineColorScheme();
@@ -17,6 +18,7 @@ export default function PermitsIndex({ permits, stats, statuses, filters }) {
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
+    const can = useCan();
 
     const applyFilters = (overrides = {}) => {
         router.get('/system/permits', { search, status, ...overrides }, { preserveState: true, replace: true });
@@ -33,11 +35,13 @@ export default function PermitsIndex({ permits, stats, statuses, filters }) {
                     <Text fw={800} size="xl" style={{ color: textPri }}>Border & Transit Permits</Text>
                     <Text size="sm" style={{ color: textSec }}>Track all permits for your fleet</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box component={Link} href="/system/permits/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                        + New Permit
-                    </Box>
-                </motion.div>
+                {can('permits.create') && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box component={Link} href="/system/permits/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
+                            + New Permit
+                        </Box>
+                    </motion.div>
+                )}
             </Group>
 
             <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="xl">
@@ -91,7 +95,7 @@ export default function PermitsIndex({ permits, stats, statuses, filters }) {
                                     <td style={{ padding: '14px 16px' }}>
                                         <Text fw={700} size="sm" style={{ color: textPri }}>{p.permit_type}</Text>
                                         {p.permit_number && <Text size="xs" style={{ color: textSec, fontFamily: 'monospace' }}>{p.permit_number}</Text>}
-                                        {p.issuing_country && <Text size="xs" style={{ color: isDark ? '#475569' : '#94A3B8' }}>{p.issuing_country}</Text>}
+                                        {p.issuing_country && <Text size="xs" style={{ color: isDark ? 'var(--c-text-muted)' : 'var(--c-text-secondary)' }}>{p.issuing_country}</Text>}
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         <Text size="sm" fw={600} style={{ color: '#3B82F6', fontFamily: 'monospace' }}>{p.vehicle_plate}</Text>
@@ -99,7 +103,7 @@ export default function PermitsIndex({ permits, stats, statuses, filters }) {
                                     <td style={{ padding: '14px 16px' }}>
                                         {p.trip ? (
                                             <Box component={Link} href={`/system/trips/${p.trip.id}`} style={{ color: '#3B82F6', textDecoration: 'none', fontSize: 13 }}>{p.trip.trip_number}</Box>
-                                        ) : <Text size="xs" style={{ color: isDark ? '#475569' : '#94A3B8' }}>—</Text>}
+                                        ) : <Text size="xs" style={{ color: isDark ? 'var(--c-text-muted)' : 'var(--c-text-secondary)' }}>—</Text>}
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         <Text size="xs" style={{ color: textSec }}>{formatDate(p.issue_date)} →</Text>
@@ -115,8 +119,12 @@ export default function PermitsIndex({ permits, stats, statuses, filters }) {
                                     </td>
                                     <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                                         <Group gap={6} justify="flex-end">
-                                            <ActionIcon component={Link} href={`/system/permits/${p.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
-                                            <ActionIcon component={Link} href={`/system/permits/${p.id}/edit`} variant="subtle" size="sm" style={{ color: textSec }}>✏️</ActionIcon>
+                                            {can('permits.view') && (
+                                                <ActionIcon component={Link} href={`/system/permits/${p.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
+                                            )}
+                                            {can('permits.edit') && (
+                                                <ActionIcon component={Link} href={`/system/permits/${p.id}/edit`} variant="subtle" size="sm" style={{ color: textSec }}>✏️</ActionIcon>
+                                            )}
                                         </Group>
                                     </td>
                                 </tr>

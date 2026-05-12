@@ -4,8 +4,10 @@ import { Box, Text, Group, Stack, Select, Textarea } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
+import { formatDate } from '../../../../lib/date';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
 function ReviewModal({ req, statuses, onClose, isDark }) {
     const cardBg     = isDark ? '#07111F' : '#ffffff';
@@ -65,7 +67,7 @@ function ReviewModal({ req, statuses, onClose, isDark }) {
                         {req.preferred_date && (
                             <Group justify="space-between">
                                 <Text size="xs" style={{ color: textSec }}>Preferred Date</Text>
-                                <Text size="sm" fw={600} style={{ color: textPri }}>{req.preferred_date}</Text>
+                                <Text size="sm" fw={600} style={{ color: textPri }}>{formatDate(req.preferred_date)}</Text>
                             </Group>
                         )}
                         {req.notes && (
@@ -115,12 +117,13 @@ export default function QuoteRequestsIndex({ requests, statuses, filters, pendin
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const textPri    = isDark ? dk.textPri : '#1E293B';
     const textSec    = isDark ? dk.textSec : '#64748B';
-    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
     const divider    = isDark ? dk.divider : '#E2E8F0';
     const theadBg    = isDark ? 'rgba(33,150,243,0.06)' : '#F8FAFC';
     const inputBg    = isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC';
 
     const [reviewing, setReviewing] = useState(null);
+    const can = useCan();
 
     const applyFilter = (status) => {
         router.get('/system/billing/quote-requests', { status: status || undefined }, { preserveState: true });
@@ -190,10 +193,19 @@ export default function QuoteRequestsIndex({ requests, statuses, filters, pendin
                                 <Box style={{ background: st.color + '1A', border: `1px solid ${st.color}40`, borderRadius: 20, padding: '4px 12px', display: 'inline-flex' }}>
                                     <Text size="xs" fw={700} style={{ color: st.color }}>{st.label}</Text>
                                 </Box>
-                                <Box component="button" type="button" onClick={() => setReviewing(req)}
-                                    style={{ background: 'none', border: `1px solid ${cardBorder}`, borderRadius: 7, padding: '5px 14px', cursor: 'pointer', color: textSec, fontSize: 12, fontWeight: 600 }}>
-                                    Review
-                                </Box>
+                                {can('billing_quote_requests.edit') ? (
+                                    <Box component="button" type="button" onClick={() => setReviewing(req)}
+                                        style={{ background: 'none', border: `1px solid ${cardBorder}`, borderRadius: 7, padding: '5px 14px', cursor: 'pointer', color: textSec, fontSize: 12, fontWeight: 600 }}>
+                                        Review
+                                    </Box>
+                                ) : can('billing_quote_requests.view') ? (
+                                    <Box component="button" type="button" onClick={() => setReviewing(req)}
+                                        style={{ background: 'none', border: `1px solid ${cardBorder}`, borderRadius: 7, padding: '5px 14px', cursor: 'pointer', color: textSec, fontSize: 12, fontWeight: 600 }}>
+                                        View
+                                    </Box>
+                                ) : (
+                                    <Text size="xs" style={{ color: textMut }}>—</Text>
+                                )}
                             </Box>
                         );
                     })

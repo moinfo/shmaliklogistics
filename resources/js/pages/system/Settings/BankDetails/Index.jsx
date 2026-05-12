@@ -3,8 +3,9 @@ import { Box, Text, Group, Stack, Select, Modal, Badge } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 const COMMON_BANKS = ['CRDB BANK', 'NMB BANK', 'NBC', 'STANBIC BANK', 'STANDARD CHARTERED', 'EQUITY BANK', 'AZANIA BANK', 'DTB', 'BOA BANK', 'NCBA', 'Other'];
 
@@ -64,6 +65,8 @@ export default function BankDetailsIndex({ bankDetails, employees }) {
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const rowHover = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC';
     const [modal, setModal] = useState(null);
+    const can = useCan();
+    const canManage = can('settings.edit');
 
     return (
         <DashboardLayout title="Staff Bank Details">
@@ -77,7 +80,9 @@ export default function BankDetailsIndex({ bankDetails, employees }) {
                     <Text fw={800} size="xl" style={{ color: textPri }}>Staff Bank Details</Text>
                     <Text size="sm" style={{ color: textSec }}>Employee bank accounts for salary disbursement</Text>
                 </Stack>
-                <Box component="button" onClick={() => setModal('new')} style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>+ Add Bank Detail</Box>
+                {canManage && (
+                    <Box component="button" onClick={() => setModal('new')} style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>+ Add Bank Detail</Box>
+                )}
             </Group>
 
             <Box style={{ background: isDark ? dk.card : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 12, overflow: 'hidden' }}>
@@ -107,8 +112,12 @@ export default function BankDetailsIndex({ bankDetails, employees }) {
                                     <td style={{ padding: '13px 14px' }}><Text size="sm" style={{ color: textSec }}>{b.branch ?? '—'}</Text></td>
                                     <td style={{ padding: '13px 14px' }}>
                                         <Group gap={6}>
-                                            <Box component="button" onClick={() => setModal(b)} style={{ padding: '5px 12px', borderRadius: 6, background: '#3B82F6', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12 }}>✏️</Box>
-                                            <Box component="button" onClick={() => { if (confirm('Delete this bank detail?')) router.delete(`/system/settings/bank-details/${b.id}`, { preserveScroll: true }); }} style={{ padding: '5px 12px', borderRadius: 6, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12 }}>×</Box>
+                                            {canManage && (
+                                                <Box component="button" onClick={() => setModal(b)} style={{ padding: '5px 12px', borderRadius: 6, background: '#3B82F6', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12 }}>✏️</Box>
+                                            )}
+                                            {canManage && (
+                                                <Box component="button" onClick={() => { if (confirm('Delete this bank detail?')) router.delete(`/system/settings/bank-details/${b.id}`, { preserveScroll: true }); }} style={{ padding: '5px 12px', borderRadius: 6, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12 }}>×</Box>
+                                            )}
                                         </Group>
                                     </td>
                                 </tr>

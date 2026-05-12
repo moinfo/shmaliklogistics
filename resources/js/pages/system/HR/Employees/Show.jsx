@@ -3,8 +3,10 @@ import { Box, Text, Group, Stack, Badge } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
+import { formatDate } from '../../../../lib/date';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 function Field({ label, value, isDark }) {
     return (
@@ -26,6 +28,7 @@ export default function ShowEmployee({ employee, statuses, leaveTypes }) {
         if (!confirm('Remove this employee?')) return;
         router.delete(`/system/hr/employees/${employee.id}`);
     };
+    const can = useCan();
 
     const leaveRequests = employee.leave_requests ?? [];
     const pendingLeave  = leaveRequests.filter(l => l.status === 'pending').length;
@@ -46,10 +49,14 @@ export default function ShowEmployee({ employee, statuses, leaveTypes }) {
                 </Stack>
                 <Group gap="sm">
                     <Box component={Link} href="/system/hr/employees" style={{ padding: '9px 18px', borderRadius: 9, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>← Back</Box>
-                    <Box component={Link} href={`/system/hr/employees/${employee.id}/edit`} style={{ padding: '9px 18px', borderRadius: 9, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textPri, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>✏️ Edit</Box>
-                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                        <Box component="button" onClick={handleDelete} style={{ padding: '9px 18px', borderRadius: 9, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>🗑️ Remove</Box>
-                    </motion.div>
+                    {can('hr_employees.edit') && (
+                        <Box component={Link} href={`/system/hr/employees/${employee.id}/edit`} style={{ padding: '9px 18px', borderRadius: 9, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textPri, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>✏️ Edit</Box>
+                    )}
+                    {can('hr_employees.delete') && (
+                        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                            <Box component="button" onClick={handleDelete} style={{ padding: '9px 18px', borderRadius: 9, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>🗑️ Remove</Box>
+                        </motion.div>
+                    )}
                 </Group>
             </Group>
 
@@ -61,7 +68,7 @@ export default function ShowEmployee({ employee, statuses, leaveTypes }) {
                         <Field label="Phone" value={employee.phone} isDark={isDark} />
                         <Field label="Email" value={employee.email} isDark={isDark} />
                         <Field label="National ID" value={employee.national_id} isDark={isDark} />
-                        <Field label="Date of Birth" value={employee.birth_date} isDark={isDark} />
+                        <Field label="Date of Birth" value={formatDate(employee.birth_date)} isDark={isDark} />
                         <Box style={{ gridColumn: '1 / -1' }}><Field label="Address" value={employee.address} isDark={isDark} /></Box>
                     </Box>
                 </Box>
@@ -72,7 +79,7 @@ export default function ShowEmployee({ employee, statuses, leaveTypes }) {
                     <Box style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                         <Field label="Position" value={employee.position} isDark={isDark} />
                         <Field label="Department" value={employee.department} isDark={isDark} />
-                        <Field label="Hire Date" value={employee.hire_date} isDark={isDark} />
+                        <Field label="Hire Date" value={formatDate(employee.hire_date)} isDark={isDark} />
                         <Field label="Salary" value={employee.salary ? `${employee.salary_currency} ${Number(employee.salary).toLocaleString()}` : null} isDark={isDark} />
                         <Field label="Emergency Contact" value={employee.emergency_contact_name} isDark={isDark} />
                         <Field label="Emergency Phone" value={employee.emergency_contact_phone} isDark={isDark} />
@@ -104,7 +111,7 @@ export default function ShowEmployee({ employee, statuses, leaveTypes }) {
                                 {leaveRequests.map(l => (
                                     <tr key={l.id} style={{ borderBottom: `1px solid ${isDark ? dk.divider : '#F1F5F9'}` }}>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: textPri }}>{leaveTypes[l.type]?.label ?? l.type}</Text></td>
-                                        <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: textSec }}>{l.start_date} → {l.end_date}</Text></td>
+                                        <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: textSec }}>{formatDate(l.start_date)} → {formatDate(l.end_date)}</Text></td>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: textSec }}>{l.days}d</Text></td>
                                         <td style={{ padding: '12px 16px' }}>
                                             <Badge size="sm" style={{ background: (l.status === 'approved' ? '#22C55E' : l.status === 'rejected' ? '#EF4444' : '#F59E0B') + '22', color: l.status === 'approved' ? '#22C55E' : l.status === 'rejected' ? '#EF4444' : '#F59E0B' }}>

@@ -7,8 +7,9 @@ import DashboardLayout from '../../../../layouts/DashboardLayout';
 import DatePicker from '../../../../components/DatePicker';
 import { printBillingDoc } from '../../../../utils/billingPrint';
 import SendDocModal from '../../../../components/SendDocModal';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 const fmt = (n) => new Intl.NumberFormat('en-TZ').format(Math.round(Number(n) || 0));
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
@@ -31,6 +32,7 @@ export default function ShowInvoice({ invoice, statuses, methods, company }) {
 
     const [showPayForm, setShowPayForm] = useState(false);
     const [sendOpen, setSendOpen]       = useState(false);
+    const can = useCan();
     const { data, setData, post, processing, errors, reset } = useForm({
         amount:           invoice.balance_due ?? '',
         payment_date:     new Date().toISOString().slice(0, 10),
@@ -65,27 +67,35 @@ export default function ShowInvoice({ invoice, statuses, methods, company }) {
                     <Text size="sm" style={{ color: textSec }}>{invoice.client?.name}{invoice.client?.company_name ? ` — ${invoice.client.company_name}` : ''}</Text>
                 </Stack>
                 <Group gap="sm" wrap="wrap">
-                    {!isPaid && (
+                    {can('billing_payments.create') && !isPaid && (
                         <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                             <Box component="button" onClick={() => setShowPayForm(v => !v)} style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#059669,#10B981)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13 }}>
                                 💳 Record Payment
                             </Box>
                         </motion.div>
                     )}
-                    <Box component="button" onClick={() => setSendOpen(true)}
-                        style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#059669,#10B981)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
-                        ✉ Send
-                    </Box>
+                    {can('billing_invoices.edit') && (
+                        <Box component="button" onClick={() => setSendOpen(true)}
+                            style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#059669,#10B981)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+                            ✉ Send
+                        </Box>
+                    )}
                     <Box component="button" onClick={() => printBillingDoc(invoice, company, 'invoice')}
                         style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
                         🖨 Print
                     </Box>
-                    <Box component="a" href={`/system/billing/invoices/${invoice.id}/pdf`} target="_blank"
-                        style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#065F46,#059669)', color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>
-                        ⬇ Download PDF
-                    </Box>
-                    <Box component={Link} href={`/system/billing/invoices/${invoice.id}/edit`} style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>Edit</Box>
-                    <Box component="button" onClick={handleDelete} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #EF444444', color: '#EF4444', background: 'transparent', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>Delete</Box>
+                    {can('billing_invoices.view') && (
+                        <Box component="a" href={`/system/billing/invoices/${invoice.id}/pdf`} target="_blank"
+                            style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#065F46,#059669)', color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>
+                            ⬇ Download PDF
+                        </Box>
+                    )}
+                    {can('billing_invoices.edit') && (
+                        <Box component={Link} href={`/system/billing/invoices/${invoice.id}/edit`} style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>Edit</Box>
+                    )}
+                    {can('billing_invoices.delete') && (
+                        <Box component="button" onClick={handleDelete} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #EF444444', color: '#EF4444', background: 'transparent', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>Delete</Box>
+                    )}
                 </Group>
             </Group>
 

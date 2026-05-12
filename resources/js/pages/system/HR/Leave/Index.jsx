@@ -4,8 +4,10 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
+import { formatDate } from '../../../../lib/date';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
 function StatCard({ label, value, icon, color, isDark }) {
     return (
@@ -38,7 +40,7 @@ function ApprovalModal({ leave, action, onClose, isDark, cardBorder }) {
                 {isApprove ? '✅ Approve' : '❌ Reject'} leave request for {leave.employee?.name}
             </Text>
             <Text size="xs" style={{ color: textSec, marginBottom: 16 }}>
-                {leave.type} · {leave.start_date} → {leave.end_date} · {leave.days} day(s)
+                {leave.type} · {formatDate(leave.start_date)} → {formatDate(leave.end_date)} · {leave.days} day(s)
             </Text>
             <Textarea
                 label="Notes (optional)"
@@ -71,6 +73,7 @@ export default function LeaveIndex({ leaves, stats, types, statuses, employees, 
     const [status, setStatus]       = useState(filters.status ?? '');
     const [type, setType]           = useState(filters.type ?? '');
     const [modal, setModal]         = useState(null); // { leave, action }
+    const can = useCan();
 
     const applyFilters = (overrides = {}) => {
         router.get('/system/hr/leave', { employee_id: empId, status, type, ...overrides }, { preserveState: true, replace: true });
@@ -99,11 +102,13 @@ export default function LeaveIndex({ leaves, stats, types, statuses, employees, 
                     <Text fw={800} size="xl" style={{ color: textPri }}>Leave Management</Text>
                     <Text size="sm" style={{ color: textSec }}>Staff leave requests and approvals</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box component={Link} href="/system/hr/leave/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                        + New Request
-                    </Box>
-                </motion.div>
+                {can('hr_leave.create') && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box component={Link} href="/system/hr/leave/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
+                            + New Request
+                        </Box>
+                    </motion.div>
+                )}
             </Group>
 
             <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="xl">
@@ -148,7 +153,7 @@ export default function LeaveIndex({ leaves, stats, types, statuses, employees, 
                                         </Badge>
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
-                                        <Text size="sm" style={{ color: textSec, whiteSpace: 'nowrap' }}>{leave.start_date} → {leave.end_date}</Text>
+                                        <Text size="sm" style={{ color: textSec, whiteSpace: 'nowrap' }}>{formatDate(leave.start_date)} → {formatDate(leave.end_date)}</Text>
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         <Text size="sm" fw={700} style={{ color: textPri }}>{leave.days}d</Text>
@@ -160,14 +165,18 @@ export default function LeaveIndex({ leaves, stats, types, statuses, employees, 
                                     </td>
                                     <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                                         <Group gap={6} justify="flex-end">
-                                            <ActionIcon component={Link} href={`/system/hr/leave/${leave.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
-                                            {leave.status === 'pending' && (
+                                            {can('hr_leave.view') && (
+                                                <ActionIcon component={Link} href={`/system/hr/leave/${leave.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
+                                            )}
+                                            {can('hr_leave.approve') && leave.status === 'pending' && (
                                                 <>
                                                     <ActionIcon variant="subtle" size="sm" style={{ color: '#22C55E' }} onClick={() => setModal({ leave, action: 'approve' })} title="Approve">✅</ActionIcon>
                                                     <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => setModal({ leave, action: 'reject' })} title="Reject">❌</ActionIcon>
                                                 </>
                                             )}
-                                            <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(leave.id)}>🗑️</ActionIcon>
+                                            {can('hr_leave.delete') && (
+                                                <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(leave.id)}>🗑️</ActionIcon>
+                                            )}
                                         </Group>
                                     </td>
                                 </tr>

@@ -4,8 +4,9 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 function ApproveRejectForm({ leaveId, action, onClose, isDark, cardBorder }) {
     const { data, setData, post, processing } = useForm({ approval_notes: '' });
@@ -41,6 +42,7 @@ export default function ShowLeave({ leave, types, statuses }) {
     const cardBorder = isDark ? dk.border : '#E2E8F0';
 
     const [modal, setModal] = useState(null);
+    const can = useCan();
 
     const handleDelete = () => {
         if (!confirm('Delete this leave request?')) return;
@@ -70,7 +72,7 @@ export default function ShowLeave({ leave, types, statuses }) {
                 </Stack>
                 <Group gap="sm">
                     <Box component={Link} href="/system/hr/leave" style={{ padding: '9px 18px', borderRadius: 9, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>← Back</Box>
-                    {isPending && (
+                    {can('hr_leave.approve') && isPending && (
                         <>
                             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                                 <Box component="button" onClick={() => setModal('approve')} style={{ padding: '9px 18px', borderRadius: 9, background: '#22C55E', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>✅ Approve</Box>
@@ -80,7 +82,9 @@ export default function ShowLeave({ leave, types, statuses }) {
                             </motion.div>
                         </>
                     )}
-                    <Box component="button" onClick={handleDelete} style={{ padding: '9px 16px', borderRadius: 9, background: 'transparent', border: `1px solid ${cardBorder}`, color: '#EF4444', cursor: 'pointer', fontSize: 13 }}>🗑️</Box>
+                    {can('hr_leave.delete') && (
+                        <Box component="button" onClick={handleDelete} style={{ padding: '9px 16px', borderRadius: 9, background: 'transparent', border: `1px solid ${cardBorder}`, color: '#EF4444', cursor: 'pointer', fontSize: 13 }}>🗑️</Box>
+                    )}
                 </Group>
             </Group>
 

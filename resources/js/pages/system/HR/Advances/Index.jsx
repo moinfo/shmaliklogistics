@@ -5,8 +5,10 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import DatePicker from '../../../../components/DatePicker';
+import { useCan } from '../../../../lib/can';
+import { formatDate } from '../../../../lib/date';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
 function fmt(n) { return Number(n ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
 
@@ -60,6 +62,7 @@ export default function AdvancesIndex({ advances, stats, statuses, employees, fi
     const [empId, setEmpId]   = useState(filters.employee_id ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
     const [modal, setModal]   = useState(null);
+    const can = useCan();
 
     const applyFilters = (o = {}) => router.get('/system/hr/advances', { employee_id: empId, status, ...o }, { preserveState: true, replace: true });
     const handleDelete = (id) => { if (!confirm('Delete this advance request?')) return; router.delete(`/system/hr/advances/${id}`, { preserveScroll: true }); };
@@ -80,9 +83,11 @@ export default function AdvancesIndex({ advances, stats, statuses, employees, fi
                     <Text fw={800} size="xl" style={{ color: textPri }}>Salary Advances</Text>
                     <Text size="sm" style={{ color: textSec }}>One-time advance requests deducted from next payroll</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box component={Link} href="/system/hr/advances/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>+ New Advance</Box>
-                </motion.div>
+                {can('hr_advances.create') && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box component={Link} href="/system/hr/advances/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>+ New Advance</Box>
+                    </motion.div>
+                )}
             </Group>
 
             <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="xl">
@@ -122,7 +127,7 @@ export default function AdvancesIndex({ advances, stats, statuses, employees, fi
                                     </td>
                                     <td style={{ padding: '13px 14px' }}><Text fw={700} size="sm" style={{ color: '#3B82F6' }}>TZS {fmt(adv.amount)}</Text></td>
                                     <td style={{ padding: '13px 14px' }}><Text size="sm" style={{ color: textSec }}>{adv.purpose ?? '—'}</Text></td>
-                                    <td style={{ padding: '13px 14px' }}><Text size="sm" style={{ color: textSec, whiteSpace: 'nowrap' }}>{adv.requested_date}</Text></td>
+                                    <td style={{ padding: '13px 14px' }}><Text size="sm" style={{ color: textSec, whiteSpace: 'nowrap' }}>{formatDate(adv.requested_date)}</Text></td>
                                     <td style={{ padding: '13px 14px' }}><Text size="sm" style={{ color: textSec, whiteSpace: 'nowrap' }}>{adv.deduction_month ? adv.deduction_month.slice(0, 7) : '—'}</Text></td>
                                     <td style={{ padding: '13px 14px' }}>
                                         <Badge size="sm" style={{ background: statuses[adv.status]?.color + '22', color: statuses[adv.status]?.color, border: `1px solid ${statuses[adv.status]?.color}44` }}>
@@ -132,11 +137,11 @@ export default function AdvancesIndex({ advances, stats, statuses, employees, fi
                                     <td style={{ padding: '13px 14px', textAlign: 'right' }}>
                                         <Group gap={6} justify="flex-end">
                                             <ActionIcon component={Link} href={`/system/hr/advances/${adv.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
-                                            {adv.status === 'pending' && <>
+                                            {can('hr_advances.approve') && adv.status === 'pending' && <>
                                                 <ActionIcon variant="subtle" size="sm" style={{ color: '#22C55E' }} onClick={() => setModal({ advance: adv, action: 'approve' })}>✅</ActionIcon>
                                                 <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => setModal({ advance: adv, action: 'reject' })}>❌</ActionIcon>
                                             </>}
-                                            {adv.status !== 'deducted' && <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(adv.id)}>🗑️</ActionIcon>}
+                                            {can('hr_advances.delete') && adv.status !== 'deducted' && <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(adv.id)}>🗑️</ActionIcon>}
                                         </Group>
                                     </td>
                                 </tr>

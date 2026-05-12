@@ -4,8 +4,9 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 function DeviceForm({ device, onClose, isDark, cardBorder }) {
     const isEdit = !!device;
@@ -70,6 +71,7 @@ export default function AttendanceDevices({ devices }) {
     const rowHover = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC';
     const [modal, setModal] = useState(null);
     const [syncing, setSyncing] = useState(null);
+    const can = useCan();
 
     const handleSync = (device) => {
         if (!confirm(`Sync attendance logs from "${device.name}" (${device.ip_address})?`)) return;
@@ -93,7 +95,9 @@ export default function AttendanceDevices({ devices }) {
                 </Stack>
                 <Group gap="sm">
                     <Box component={Link} href="/system/hr/attendance" style={{ padding: '9px 18px', borderRadius: 9, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>← Attendance Logs</Box>
-                    <Box component="button" onClick={() => setModal('new')} style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>+ Register Device</Box>
+                    {can('hr_attendance.create') && (
+                        <Box component="button" onClick={() => setModal('new')} style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>+ Register Device</Box>
+                    )}
                 </Group>
             </Group>
 
@@ -115,7 +119,7 @@ export default function AttendanceDevices({ devices }) {
                                         <Text size="xs" style={{ color: textSec }}>{device.location ?? 'No location set'}</Text>
                                     </div>
                                 </Group>
-                                <Badge size="sm" style={{ background: device.is_active ? 'rgba(34,197,94,0.15)' : 'rgba(148,163,184,0.15)', color: device.is_active ? '#22C55E' : '#94A3B8', border: `1px solid ${device.is_active ? 'rgba(34,197,94,0.3)' : 'rgba(148,163,184,0.3)'}` }}>{device.is_active ? 'Active' : 'Inactive'}</Badge>
+                                <Badge size="sm" style={{ background: device.is_active ? 'rgba(34,197,94,0.15)' : 'rgba(148,163,184,0.15)', color: device.is_active ? '#22C55E' : 'var(--c-text-secondary)', border: `1px solid ${device.is_active ? 'rgba(34,197,94,0.3)' : 'rgba(148,163,184,0.3)'}` }}>{device.is_active ? 'Active' : 'Inactive'}</Badge>
                             </Group>
 
                             <Box style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
@@ -134,12 +138,18 @@ export default function AttendanceDevices({ devices }) {
                             </Box>
 
                             <Group gap={8}>
-                                <Box component="button" onClick={() => handleSync(device)} disabled={syncing === device.id || !device.is_active}
-                                    style={{ flex: 1, padding: '8px', borderRadius: 8, background: syncing === device.id ? '#475569' : '#22C55E', color: '#fff', border: 'none', cursor: device.is_active ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: 13 }}>
-                                    {syncing === device.id ? '⟳ Syncing…' : '⟳ Sync Now'}
-                                </Box>
-                                <Box component="button" onClick={() => setModal(device)} style={{ padding: '8px 14px', borderRadius: 8, background: 'transparent', border: `1px solid ${cardBorder}`, color: textSec, cursor: 'pointer', fontSize: 12 }}>✏️</Box>
-                                <Box component="button" onClick={() => { if (confirm('Remove this device?')) router.delete(`/system/hr/attendance/devices/${device.id}`, { preserveScroll: true }); }} style={{ padding: '8px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', cursor: 'pointer', fontSize: 12 }}>🗑️</Box>
+                                {can('hr_attendance.create') && (
+                                    <Box component="button" onClick={() => handleSync(device)} disabled={syncing === device.id || !device.is_active}
+                                        style={{ flex: 1, padding: '8px', borderRadius: 8, background: syncing === device.id ? 'var(--c-text-muted)' : '#22C55E', color: '#fff', border: 'none', cursor: device.is_active ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: 13 }}>
+                                        {syncing === device.id ? '⟳ Syncing…' : '⟳ Sync Now'}
+                                    </Box>
+                                )}
+                                {can('hr_attendance.create') && (
+                                    <Box component="button" onClick={() => setModal(device)} style={{ padding: '8px 14px', borderRadius: 8, background: 'transparent', border: `1px solid ${cardBorder}`, color: textSec, cursor: 'pointer', fontSize: 12 }}>✏️</Box>
+                                )}
+                                {can('hr_attendance.create') && (
+                                    <Box component="button" onClick={() => { if (confirm('Remove this device?')) router.delete(`/system/hr/attendance/devices/${device.id}`, { preserveScroll: true }); }} style={{ padding: '8px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', cursor: 'pointer', fontSize: 12 }}>🗑️</Box>
+                                )}
                             </Group>
                         </Box>
                     ))}

@@ -2,10 +2,12 @@ import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { Box, Grid, Text, Group, Select, Button } from '@mantine/core';
 import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { useCan } from '../../../../lib/can';
 
 export default function PurchaseOrdersIndex({ orders, suppliers, statuses, stats, filters }) {
     const [status, setStatus] = useState(filters.status || '');
     const [supplierId, setSupplierId] = useState(filters.supplier_id || '');
+    const can = useCan();
     const fmt = (n) => new Intl.NumberFormat().format(Math.round(n ?? 0));
 
     const apply = (key, val) => {
@@ -47,9 +49,11 @@ export default function PurchaseOrdersIndex({ orders, suppliers, statuses, stats
                         data={[{ value: '', label: 'All Suppliers' }, ...suppliers.map(s => ({ value: String(s.id), label: s.name }))]}
                         style={{ width: 200 }} styles={{ input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' } }} />
                 </Group>
-                <Button component={Link} href="/system/procurement/orders/create" style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 10, fontWeight: 700 }}>
-                    + New PO
-                </Button>
+                {can('procurement_orders.create') && (
+                    <Button component={Link} href="/system/procurement/orders/create" style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 10, fontWeight: 700 }}>
+                        + New PO
+                    </Button>
+                )}
             </Group>
 
             <Box style={{ background: 'var(--c-card)', border: '1px solid var(--c-border-color)', borderRadius: 12, overflow: 'hidden' }}>
@@ -71,10 +75,14 @@ export default function PurchaseOrdersIndex({ orders, suppliers, statuses, stats
                                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                     >
                                         <td style={{ padding: '14px 16px' }}>
-                                            <Box component={Link} href={`/system/procurement/orders/${o.id}`} style={{ color: '#60A5FA', textDecoration: 'none', fontWeight: 800, fontSize: 14 }}>{o.po_number}</Box>
+                                            {can('procurement_orders.view') ? (
+                                                <Box component={Link} href={`/system/procurement/orders/${o.id}`} style={{ color: '#60A5FA', textDecoration: 'none', fontWeight: 800, fontSize: 14 }}>{o.po_number}</Box>
+                                            ) : (
+                                                <Text fw={800} size="sm" style={{ color: '#60A5FA' }}>{o.po_number}</Text>
+                                            )}
                                         </td>
                                         <td style={{ padding: '14px 16px' }}><Text fw={600} size="sm" style={{ color: 'var(--c-text)' }}>{o.supplier?.name}</Text></td>
-                                        <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: '#94A3B8' }}>{o.order_date ? new Date(o.order_date).toLocaleDateString() : '—'}</Text></td>
+                                        <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{o.order_date ? new Date(o.order_date).toLocaleDateString() : '—'}</Text></td>
                                         <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{o.expected_date ? new Date(o.expected_date).toLocaleDateString() : '—'}</Text></td>
                                         <td style={{ padding: '14px 16px' }}><Text fw={700} size="sm" style={{ color: 'var(--c-text)' }}>TZS {fmt(o.total)}</Text></td>
                                         <td style={{ padding: '14px 16px' }}>
@@ -83,7 +91,9 @@ export default function PurchaseOrdersIndex({ orders, suppliers, statuses, stats
                                             </Box>
                                         </td>
                                         <td style={{ padding: '14px 16px' }}>
-                                            <Box component={Link} href={`/system/procurement/orders/${o.id}`} style={{ color: '#60A5FA', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>View →</Box>
+                                            {can('procurement_orders.view') && (
+                                                <Box component={Link} href={`/system/procurement/orders/${o.id}`} style={{ color: '#60A5FA', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>View →</Box>
+                                            )}
                                         </td>
                                     </tr>
                                 );

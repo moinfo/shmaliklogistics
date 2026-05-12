@@ -4,8 +4,9 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { printPaymentsReport } from '../../../../utils/billingPrint';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 const fmt = (n) => new Intl.NumberFormat('en-TZ').format(Math.round(Number(n) || 0));
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
@@ -19,6 +20,7 @@ export default function PaymentsIndex({ payments, stats, methods, filters, compa
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [method, setMethod] = useState(filters.method ?? '');
+    const can = useCan();
 
     const applyFilters = (overrides = {}) =>
         router.get('/system/billing/payments', { search, method, ...overrides }, { preserveState: true, replace: true });
@@ -130,7 +132,7 @@ export default function PaymentsIndex({ payments, stats, methods, filters, compa
                                         <Text size="sm" fw={600} style={{ color: textPri }}>{fmtDate(pay.payment_date)}</Text>
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
-                                        {pay.invoice ? (
+                                        {pay.invoice && can('billing_payments.view') ? (
                                             <Box
                                                 component={Link}
                                                 href={`/system/billing/invoices/${pay.invoice.id}`}
@@ -138,6 +140,8 @@ export default function PaymentsIndex({ payments, stats, methods, filters, compa
                                             >
                                                 {pay.invoice.document_number}
                                             </Box>
+                                        ) : pay.invoice ? (
+                                            <Text size="sm" fw={700} style={{ color: '#22C55E', fontFamily: 'monospace' }}>{pay.invoice.document_number}</Text>
                                         ) : <Text size="sm" style={{ color: textSec }}>—</Text>}
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
@@ -169,14 +173,16 @@ export default function PaymentsIndex({ payments, stats, methods, filters, compa
                                         </Text>
                                     </td>
                                     <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                                        <ActionIcon
-                                            variant="subtle"
-                                            size="sm"
-                                            style={{ color: '#EF4444' }}
-                                            onClick={() => handleDelete(pay.id)}
-                                        >
-                                            🗑
-                                        </ActionIcon>
+                                        {can('billing_payments.delete') && (
+                                            <ActionIcon
+                                                variant="subtle"
+                                                size="sm"
+                                                style={{ color: '#EF4444' }}
+                                                onClick={() => handleDelete(pay.id)}
+                                            >
+                                                🗑
+                                            </ActionIcon>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

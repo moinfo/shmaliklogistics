@@ -4,8 +4,9 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 const fmt = (n, cur = 'TZS') => `${cur} ${new Intl.NumberFormat('en-TZ').format(Math.round(Number(n) || 0))}`;
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
@@ -19,6 +20,7 @@ export default function QuotesIndex({ quotes, stats, statuses, filters }) {
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
+    const can = useCan();
 
     const applyFilters = (overrides = {}) =>
         router.get('/system/billing/quotes', { search, status, ...overrides }, { preserveState: true, replace: true });
@@ -32,11 +34,13 @@ export default function QuotesIndex({ quotes, stats, statuses, filters }) {
                     <Text fw={800} size="xl" style={{ color: textPri }}>Quotes</Text>
                     <Text size="sm" style={{ color: textSec }}>Price proposals sent to clients</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box component={Link} href="/system/billing/quotes/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                        + New Quote
-                    </Box>
-                </motion.div>
+                {can('billing_quotes.create') && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box component={Link} href="/system/billing/quotes/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
+                            + New Quote
+                        </Box>
+                    </motion.div>
+                )}
             </Group>
 
             <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="xl">
@@ -103,8 +107,12 @@ export default function QuotesIndex({ quotes, stats, statuses, filters }) {
                                     </td>
                                     <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                                         <Group gap={6} justify="flex-end">
-                                            <ActionIcon component={Link} href={`/system/billing/quotes/${q.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
-                                            <ActionIcon component={Link} href={`/system/billing/quotes/${q.id}/edit`} variant="subtle" size="sm" style={{ color: textSec }}>✏️</ActionIcon>
+                                            {can('billing_quotes.view') && (
+                                                <ActionIcon component={Link} href={`/system/billing/quotes/${q.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
+                                            )}
+                                            {can('billing_quotes.edit') && (
+                                                <ActionIcon component={Link} href={`/system/billing/quotes/${q.id}/edit`} variant="subtle" size="sm" style={{ color: textSec }}>✏️</ActionIcon>
+                                            )}
                                         </Group>
                                     </td>
                                 </tr>

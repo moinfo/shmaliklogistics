@@ -2,8 +2,9 @@ import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { Box, Grid, Text, Group, TextInput, Select, Button, Modal, Stack, Textarea, Switch } from '@mantine/core';
 import { router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import { useCan } from '../../../../lib/can';
 
-const inp = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: '#94A3B8', marginBottom: 6 } };
+const inp = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: 'var(--c-text-secondary)', marginBottom: 6 } };
 
 function SupplierForm({ categories, initial = {}, onSubmit, processing }) {
     const { data, setData, errors } = useForm({
@@ -40,6 +41,7 @@ export default function SuppliersIndex({ suppliers, categories, stats, filters }
     const [category, setCategory] = useState(filters.category || '');
     const [createOpen, setCreateOpen] = useState(false);
     const [editTarget, setEditTarget] = useState(null);
+    const can = useCan();
 
     const createForm = useForm({ name: '', contact_name: '', phone: '', email: '', address: '', tin_number: '', category: '', notes: '' });
     const editForm = useForm({});
@@ -100,9 +102,11 @@ export default function SuppliersIndex({ suppliers, categories, stats, filters }
                         data={[{ value: '', label: 'All' }, ...Object.entries(categories).map(([v, c]) => ({ value: v, label: c.label }))]}
                         style={{ width: 160 }} styles={{ input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' } }} />
                 </Group>
-                <Button onClick={() => setCreateOpen(true)} style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 10, fontWeight: 700 }}>
-                    + Add Supplier
-                </Button>
+                {can('procurement_suppliers.create') && (
+                    <Button onClick={() => setCreateOpen(true)} style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 10, fontWeight: 700 }}>
+                        + Add Supplier
+                    </Button>
+                )}
             </Group>
 
             <Box style={{ background: 'var(--c-card)', border: '1px solid var(--c-border-color)', borderRadius: 12, overflow: 'hidden' }}>
@@ -125,21 +129,25 @@ export default function SuppliersIndex({ suppliers, categories, stats, filters }
                                     >
                                         <td style={{ padding: '14px 16px' }}>
                                             <Text fw={700} size="sm" style={{ color: 'var(--c-text)' }}>{s.name}</Text>
-                                            {!s.is_active && <Text size="xs" style={{ color: '#475569' }}>Inactive</Text>}
+                                            {!s.is_active && <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>Inactive</Text>}
                                         </td>
                                         <td style={{ padding: '14px 16px' }}>
-                                            {cat ? <Box style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 8, background: `${cat.color}22`, border: `1px solid ${cat.color}44` }}><Text size="xs" fw={700} style={{ color: cat.color }}>{cat.label}</Text></Box> : <Text size="sm" style={{ color: '#475569' }}>—</Text>}
+                                            {cat ? <Box style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 8, background: `${cat.color}22`, border: `1px solid ${cat.color}44` }}><Text size="xs" fw={700} style={{ color: cat.color }}>{cat.label}</Text></Box> : <Text size="sm" style={{ color: 'var(--c-text-muted)' }}>—</Text>}
                                         </td>
-                                        <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: '#94A3B8' }}>{s.contact_name || '—'}</Text></td>
+                                        <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{s.contact_name || '—'}</Text></td>
                                         <td style={{ padding: '14px 16px' }}>
-                                            <Text size="sm" style={{ color: '#94A3B8' }}>{s.phone || '—'}</Text>
-                                            <Text size="xs" style={{ color: '#475569' }}>{s.email || ''}</Text>
+                                            <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{s.phone || '—'}</Text>
+                                            <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>{s.email || ''}</Text>
                                         </td>
                                         <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{s.purchase_orders_count}</Text></td>
                                         <td style={{ padding: '14px 16px' }}>
                                             <Group gap="sm">
-                                                <Box component="button" onClick={() => setEditTarget(s)} style={{ background: 'none', border: 'none', color: '#60A5FA', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Edit</Box>
-                                                <Box component="button" onClick={() => del(s)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: 13 }}>Del</Box>
+                                                {can('procurement_suppliers.edit') && (
+                                                    <Box component="button" onClick={() => setEditTarget(s)} style={{ background: 'none', border: 'none', color: '#60A5FA', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Edit</Box>
+                                                )}
+                                                {can('procurement_suppliers.delete') && (
+                                                    <Box component="button" onClick={() => del(s)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: 13 }}>Del</Box>
+                                                )}
                                             </Group>
                                         </td>
                                     </tr>

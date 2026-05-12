@@ -25,15 +25,18 @@ class UserController extends Controller
         $data = $request->validate([
             'name'                  => 'required|string|max:100',
             'email'                 => 'required|email|unique:users,email',
-            'role_id'               => 'nullable|exists:roles,id',
+            'role_id'               => 'required|exists:roles,id',
             'password'              => 'required|string|min:8|confirmed',
             'password_confirmation' => 'required',
+        ], [
+            'role_id.required' => 'Please select a role for this user.',
+            'role_id.exists'   => 'The selected role is invalid.',
         ]);
 
         User::create([
             'name'     => $data['name'],
             'email'    => $data['email'],
-            'role_id'  => $data['role_id'] ?? null,
+            'role_id'  => $data['role_id'],
             'password' => Hash::make($data['password']),
         ]);
 
@@ -45,14 +48,17 @@ class UserController extends Controller
         $data = $request->validate([
             'name'                  => 'required|string|max:100',
             'email'                 => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'role_id'               => 'nullable|exists:roles,id',
+            'role_id'               => 'required|exists:roles,id',
             'password'              => 'nullable|string|min:8|confirmed',
             'password_confirmation' => 'nullable',
+        ], [
+            'role_id.required' => 'Please select a role for this user.',
+            'role_id.exists'   => 'The selected role is invalid.',
         ]);
 
         $user->name    = $data['name'];
         $user->email   = $data['email'];
-        $user->role_id = $data['role_id'] ?? null;
+        $user->role_id = $data['role_id'];
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }

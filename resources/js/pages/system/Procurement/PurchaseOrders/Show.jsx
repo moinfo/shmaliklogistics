@@ -2,8 +2,9 @@ import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { Box, Grid, Text, Group, Button, Modal, Stack, NumberInput, Badge } from '@mantine/core';
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
+import { useCan } from '../../../../lib/can';
 
-const inp = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: '#94A3B8', marginBottom: 4 } };
+const inp = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: 'var(--c-text-secondary)', marginBottom: 4 } };
 
 export default function ShowPurchaseOrder({ order, statuses }) {
     const [receiveOpen, setReceiveOpen] = useState(false);
@@ -11,6 +12,7 @@ export default function ShowPurchaseOrder({ order, statuses }) {
         Object.fromEntries(order.items.map(i => [i.id, parseFloat(i.quantity) - parseFloat(i.received_qty)]))
     );
     const [submitting, setSubmitting] = useState(false);
+    const can = useCan();
 
     const fmt = (n) => new Intl.NumberFormat().format(Math.round(n ?? 0));
     const st = statuses[order.status] || { label: order.status, color: '#94A3B8' };
@@ -53,10 +55,10 @@ export default function ShowPurchaseOrder({ order, statuses }) {
                     </Box>
                 </Group>
                 <Group gap="sm" wrap="wrap">
-                    {canSend && <Button onClick={() => updateStatus('sent')} size="sm" variant="outline" style={{ borderColor: '#2196F3', color: '#60A5FA' }}>Mark Sent</Button>}
-                    {canReceive && <Button onClick={() => setReceiveOpen(true)} size="sm" style={{ background: 'linear-gradient(135deg, #166534, #22C55E)', border: 'none', borderRadius: 8 }}>Receive Goods</Button>}
-                    {canCancel && <Button onClick={() => updateStatus('cancelled')} size="sm" variant="outline" style={{ borderColor: '#EF4444', color: '#EF4444' }}>Cancel PO</Button>}
-                    {order.status === 'draft' && <Button onClick={destroy} size="sm" variant="subtle" style={{ color: '#475569' }}>Delete</Button>}
+                    {can('procurement_orders.edit') && canSend && <Button onClick={() => updateStatus('sent')} size="sm" variant="outline" style={{ borderColor: '#2196F3', color: '#60A5FA' }}>Mark Sent</Button>}
+                    {can('procurement_orders.edit') && canReceive && <Button onClick={() => setReceiveOpen(true)} size="sm" style={{ background: 'linear-gradient(135deg, #166534, #22C55E)', border: 'none', borderRadius: 8 }}>Receive Goods</Button>}
+                    {can('procurement_orders.edit') && canCancel && <Button onClick={() => updateStatus('cancelled')} size="sm" variant="outline" style={{ borderColor: '#EF4444', color: '#EF4444' }}>Cancel PO</Button>}
+                    {can('procurement_orders.delete') && order.status === 'draft' && <Button onClick={destroy} size="sm" variant="subtle" style={{ color: 'var(--c-text-muted)' }}>Delete</Button>}
                 </Group>
             </Group>
 
@@ -74,14 +76,14 @@ export default function ShowPurchaseOrder({ order, statuses }) {
                                 ['Expected Date', order.expected_date ? new Date(order.expected_date).toLocaleDateString() : '—'],
                             ].map(([l, v]) => (
                                 <Grid.Col key={l} span={6}>
-                                    <Text size="xs" style={{ color: '#475569', textTransform: 'uppercase', letterSpacing: 0.5 }}>{l}</Text>
+                                    <Text size="xs" style={{ color: 'var(--c-text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>{l}</Text>
                                     <Text fw={600} size="sm" style={{ color: 'var(--c-text)', marginTop: 2 }}>{v}</Text>
                                 </Grid.Col>
                             ))}
                             {order.notes && (
                                 <Grid.Col span={12}>
-                                    <Text size="xs" style={{ color: '#475569', textTransform: 'uppercase', letterSpacing: 0.5 }}>Notes</Text>
-                                    <Text size="sm" style={{ color: '#94A3B8', marginTop: 2 }}>{order.notes}</Text>
+                                    <Text size="xs" style={{ color: 'var(--c-text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Notes</Text>
+                                    <Text size="sm" style={{ color: 'var(--c-text-secondary)', marginTop: 2 }}>{order.notes}</Text>
                                 </Grid.Col>
                             )}
                         </Grid>
@@ -96,7 +98,7 @@ export default function ShowPurchaseOrder({ order, statuses }) {
                             {[['Subtotal', order.subtotal], ['VAT (18%)', order.tax_amount]].map(([l, v]) => (
                                 <Group key={l} justify="space-between">
                                     <Text size="sm" style={{ color: '#64748B' }}>{l}</Text>
-                                    <Text size="sm" style={{ color: '#94A3B8' }}>TZS {fmt(v)}</Text>
+                                    <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>TZS {fmt(v)}</Text>
                                 </Group>
                             ))}
                             <Box style={{ borderTop: '1px solid var(--c-border-strong)', paddingTop: 10 }}>
@@ -132,17 +134,17 @@ export default function ShowPurchaseOrder({ order, statuses }) {
                                     <tr key={item.id} style={{ borderBottom: '1px solid var(--c-border-row)' }}>
                                         <td style={{ padding: '12px 16px' }}>
                                             <Text fw={600} size="sm" style={{ color: 'var(--c-text)' }}>{item.description}</Text>
-                                            {item.inventory_item && <Text size="xs" style={{ color: '#475569' }}>→ {item.inventory_item.name}</Text>}
+                                            {item.inventory_item && <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>→ {item.inventory_item.name}</Text>}
                                         </td>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{item.unit}</Text></td>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: 'var(--c-text)' }}>{item.quantity}</Text></td>
                                         <td style={{ padding: '12px 16px' }}>
-                                            <Text size="sm" fw={600} style={{ color: fullyReceived ? '#22C55E' : partlyReceived ? '#F59E0B' : '#475569' }}>
+                                            <Text size="sm" fw={600} style={{ color: fullyReceived ? '#22C55E' : partlyReceived ? '#F59E0B' : 'var(--c-text-muted)' }}>
                                                 {item.received_qty}
                                                 {fullyReceived && ' ✓'}
                                             </Text>
                                         </td>
-                                        <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#94A3B8' }}>TZS {fmt(item.unit_price)}</Text></td>
+                                        <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>TZS {fmt(item.unit_price)}</Text></td>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" fw={700} style={{ color: 'var(--c-text)' }}>TZS {fmt(item.total)}</Text></td>
                                     </tr>
                                 );
@@ -165,7 +167,7 @@ export default function ShowPurchaseOrder({ order, statuses }) {
                                 <Box key={item.id} style={{ background: 'var(--c-input)', border: '1px solid var(--c-border-subtle)', borderRadius: 8, padding: '12px 16px' }}>
                                     <Group justify="space-between" mb={8}>
                                         <Text fw={600} size="sm" style={{ color: 'var(--c-text)' }}>{item.description}</Text>
-                                        <Text size="xs" style={{ color: '#475569' }}>Remaining: {remaining} {item.unit}</Text>
+                                        <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>Remaining: {remaining} {item.unit}</Text>
                                     </Group>
                                     <NumberInput
                                         label="Qty Receiving"

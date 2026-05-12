@@ -88,7 +88,7 @@ export default function InventoryMovements({ movements, items, movTypes, filters
                     </table>
                     {movements.data.length === 0 && (
                         <Box style={{ textAlign: 'center', padding: '48px 0' }}>
-                            <Text size="sm" style={{ color: '#475569' }}>No movements found</Text>
+                            <Text size="sm" style={{ color: 'var(--c-text-muted)' }}>No movements found</Text>
                         </Box>
                     )}
                 </Box>

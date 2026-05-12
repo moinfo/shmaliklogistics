@@ -3,7 +3,7 @@ import { Box, Grid, Text, Group, Select, Button, TextInput, NumberInput, Textare
 import { router, useForm } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 
-const inp = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: '#94A3B8', marginBottom: 4 } };
+const inp = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: 'var(--c-text-secondary)', marginBottom: 4 } };
 
 const emptyRow = () => ({ inventory_item_id: '', description: '', quantity: 1, unit: 'pcs', unit_price: 0, total: 0 });
 
@@ -102,7 +102,7 @@ export default function CreatePurchaseOrder({ suppliers, inventoryItems }) {
                                 {[['Subtotal', subtotal], ['VAT (18%)', tax]].map(([l, v]) => (
                                     <Group key={l} justify="space-between">
                                         <Text size="sm" style={{ color: '#64748B' }}>{l}</Text>
-                                        <Text size="sm" style={{ color: '#94A3B8' }}>TZS {fmt(v)}</Text>
+                                        <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>TZS {fmt(v)}</Text>
                                     </Group>
                                 ))}
                                 <Box style={{ borderTop: '1px solid var(--c-border-strong)', paddingTop: 8, marginTop: 4 }}>

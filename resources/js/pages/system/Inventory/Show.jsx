@@ -2,8 +2,9 @@ import DashboardLayout from '../../../layouts/DashboardLayout';
 import { Box, Grid, Text, Group, Select, TextInput, NumberInput, Textarea, Button, Stack, Switch, Modal } from '@mantine/core';
 import { Link, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { useCan } from '../../../lib/can';
 
-const inputStyle = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: '#94A3B8', marginBottom: 6 } };
+const inputStyle = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: 'var(--c-text-secondary)', marginBottom: 6 } };
 
 function StockModal({ opened, onClose, item, type, vehicles }) {
     const { data, setData, post, processing, reset, errors } = useForm({
@@ -47,6 +48,7 @@ function StockModal({ opened, onClose, item, type, vehicles }) {
 export default function InventoryShow({ item, movements, vehicles, movTypes }) {
     const [editing, setEditing] = useState(false);
     const [stockModal, setStockModal] = useState(null);
+    const can = useCan();
 
     const { data, setData, put, processing } = useForm({
         name: item.name, category_id: item.category_id ? String(item.category_id) : '',
@@ -66,12 +68,20 @@ export default function InventoryShow({ item, movements, vehicles, movTypes }) {
             <Group justify="space-between" mb="lg">
                 <Box component={Link} href="/system/inventory" style={{ color: '#60A5FA', textDecoration: 'none', fontSize: 14 }}>← Inventory</Box>
                 <Group gap="sm">
-                    <Button onClick={() => setStockModal('in')} style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#22C55E', borderRadius: 8 }}>+ Stock In</Button>
-                    <Button onClick={() => setStockModal('out')} style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', color: '#EF4444', borderRadius: 8 }}>− Stock Out</Button>
-                    <Button variant="default" onClick={() => setEditing(!editing)} style={{ borderColor: 'rgba(33,150,243,0.3)', color: '#94A3B8', background: 'transparent' }}>
-                        {editing ? 'Cancel' : '✏️ Edit'}
-                    </Button>
-                    <Button onClick={del} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444' }}>Delete</Button>
+                    {can('inventory.edit') && (
+                        <Button onClick={() => setStockModal('in')} style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#22C55E', borderRadius: 8 }}>+ Stock In</Button>
+                    )}
+                    {can('inventory.edit') && (
+                        <Button onClick={() => setStockModal('out')} style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', color: '#EF4444', borderRadius: 8 }}>− Stock Out</Button>
+                    )}
+                    {can('inventory.edit') && (
+                        <Button variant="default" onClick={() => setEditing(!editing)} style={{ borderColor: 'rgba(33,150,243,0.3)', color: 'var(--c-text-secondary)', background: 'transparent' }}>
+                            {editing ? 'Cancel' : '✏️ Edit'}
+                        </Button>
+                    )}
+                    {can('inventory.delete') && (
+                        <Button onClick={del} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444' }}>Delete</Button>
+                    )}
                 </Group>
             </Group>
 
@@ -94,10 +104,10 @@ export default function InventoryShow({ item, movements, vehicles, movTypes }) {
                     </Box>
                 </Group>
                 <Grid gutter="md">
-                    <Grid.Col span={{ base: 6, sm: 3 }}><Box><Text size="xs" style={{ color: '#475569', marginBottom: 3 }}>Reorder Level</Text><Text fw={600} style={{ color: '#F59E0B' }}>{fmt(item.reorder_level, 1)} {item.unit}</Text></Box></Grid.Col>
-                    <Grid.Col span={{ base: 6, sm: 3 }}><Box><Text size="xs" style={{ color: '#475569', marginBottom: 3 }}>Unit Cost</Text><Text fw={600} style={{ color: 'var(--c-text)' }}>{item.unit_cost ? `TZS ${fmt(item.unit_cost)}` : '—'}</Text></Box></Grid.Col>
-                    <Grid.Col span={{ base: 6, sm: 3 }}><Box><Text size="xs" style={{ color: '#475569', marginBottom: 3 }}>Location</Text><Text fw={600} style={{ color: 'var(--c-text)' }}>{item.location || '—'}</Text></Box></Grid.Col>
-                    <Grid.Col span={{ base: 6, sm: 3 }}><Box><Text size="xs" style={{ color: '#475569', marginBottom: 3 }}>Stock Value</Text><Text fw={600} style={{ color: '#22C55E' }}>{item.unit_cost ? `TZS ${fmt(Number(item.current_stock) * Number(item.unit_cost))}` : '—'}</Text></Box></Grid.Col>
+                    <Grid.Col span={{ base: 6, sm: 3 }}><Box><Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 3 }}>Reorder Level</Text><Text fw={600} style={{ color: '#F59E0B' }}>{fmt(item.reorder_level, 1)} {item.unit}</Text></Box></Grid.Col>
+                    <Grid.Col span={{ base: 6, sm: 3 }}><Box><Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 3 }}>Unit Cost</Text><Text fw={600} style={{ color: 'var(--c-text)' }}>{item.unit_cost ? `TZS ${fmt(item.unit_cost)}` : '—'}</Text></Box></Grid.Col>
+                    <Grid.Col span={{ base: 6, sm: 3 }}><Box><Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 3 }}>Location</Text><Text fw={600} style={{ color: 'var(--c-text)' }}>{item.location || '—'}</Text></Box></Grid.Col>
+                    <Grid.Col span={{ base: 6, sm: 3 }}><Box><Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 3 }}>Stock Value</Text><Text fw={600} style={{ color: '#22C55E' }}>{item.unit_cost ? `TZS ${fmt(Number(item.current_stock) * Number(item.unit_cost))}` : '—'}</Text></Box></Grid.Col>
                 </Grid>
             </Box>
 
@@ -156,7 +166,7 @@ export default function InventoryShow({ item, movements, vehicles, movTypes }) {
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{m.reference || '—'}</Text></td>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{m.vehicle?.registration_number || '—'}</Text></td>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{m.creator?.name || '—'}</Text></td>
-                                        <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#475569' }}>{m.notes || '—'}</Text></td>
+                                        <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: 'var(--c-text-muted)' }}>{m.notes || '—'}</Text></td>
                                     </tr>
                                 );
                             })}
@@ -164,7 +174,7 @@ export default function InventoryShow({ item, movements, vehicles, movTypes }) {
                     </table>
                     {movements.data.length === 0 && (
                         <Box style={{ textAlign: 'center', padding: '32px 0' }}>
-                            <Text size="sm" style={{ color: '#475569' }}>No movements recorded yet</Text>
+                            <Text size="sm" style={{ color: 'var(--c-text-muted)' }}>No movements recorded yet</Text>
                         </Box>
                     )}
                 </Box>

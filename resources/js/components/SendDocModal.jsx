@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Box, Text, Group } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 
-const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'rgba(33,150,243,0.12)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 const fmt = n => new Intl.NumberFormat('en-TZ').format(Math.round(Number(n) || 0));
 
 function buildDefaultMessage(doc, company, tab) {
@@ -217,7 +217,7 @@ export default function SendDocModal({ doc, docType, opened, onClose, company })
                                     Cancel
                                 </Box>
                                 <Box component="button" onClick={openWhatsApp} disabled={!waPhone.trim()}
-                                    style={{ padding: '8px 22px', borderRadius: 8, background: waPhone.trim() ? 'linear-gradient(135deg,#059669,#10B981)' : '#94A3B8', color: '#fff', border: 'none', cursor: waPhone.trim() ? 'pointer' : 'not-allowed', fontWeight: 700, fontSize: 13 }}>
+                                    style={{ padding: '8px 22px', borderRadius: 8, background: waPhone.trim() ? 'linear-gradient(135deg,#059669,#10B981)' : 'var(--c-text-secondary)', color: '#fff', border: 'none', cursor: waPhone.trim() ? 'pointer' : 'not-allowed', fontWeight: 700, fontSize: 13 }}>
                                     💬 Open WhatsApp →
                                 </Box>
                             </Group>

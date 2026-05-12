@@ -4,8 +4,9 @@ import { Box, Text, Group, Stack, SimpleGrid, TextInput, Select } from '@mantine
 import { useMantineColorScheme } from '@mantine/core';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
 const ROLE_COLORS = {
     administrator: '#EF4444',
@@ -39,10 +40,11 @@ function UserModal({ title, onClose, onSubmit, data, setData, errors, processing
                     <Stack gap="md">
                         <TextInput label="Full Name" required value={data.name} onChange={e => setData(p => ({ ...p, name: e.target.value }))} error={errors?.name} styles={inputStyles} />
                         <TextInput label="Email Address" type="email" required value={data.email} onChange={e => setData(p => ({ ...p, email: e.target.value }))} error={errors?.email} styles={inputStyles} />
-                        <Select label="Role" placeholder="Select role…" value={data.role_id ? String(data.role_id) : null}
+                        <Select label="Role" placeholder="Select role…" required value={data.role_id ? String(data.role_id) : null}
                             onChange={v => setData(p => ({ ...p, role_id: v }))}
-                            clearable
                             data={roles.map(r => ({ value: String(r.id), label: r.name }))}
+                            error={errors?.role_id}
+                            comboboxProps={{ zIndex: 1100, withinPortal: true }}
                             styles={{ ...inputStyles, dropdown: { background: isDark ? '#07111F' : '#fff', border: `1px solid ${cardBorder}` } }}
                         />
                         <TextInput label={data._isEdit ? 'New Password (leave blank to keep)' : 'Password'} type="password"
@@ -82,7 +84,7 @@ export default function UsersIndex({ users, roles }) {
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const textPri    = isDark ? dk.textPri : '#1E293B';
     const textSec    = isDark ? dk.textSec : '#64748B';
-    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
     const divider    = isDark ? dk.divider : '#E2E8F0';
     const theadBg    = isDark ? 'rgba(33,150,243,0.06)' : '#F8FAFC';
 
@@ -91,6 +93,8 @@ export default function UsersIndex({ users, roles }) {
     const [formData, setFormData]     = useState(blank);
     const [errors, setErrors]         = useState({});
     const [processing, setProcessing] = useState(false);
+    const can = useCan();
+    const canManage = can('settings.edit');
 
     const openCreate = () => { setFormData({ ...blank }); setErrors({}); setCreateOpen(true); };
     const openEdit   = (u) => {
@@ -144,12 +148,14 @@ export default function UsersIndex({ users, roles }) {
                     <Text fw={800} size="xl" style={{ color: textPri }}>User Management</Text>
                     <Text size="sm" style={{ color: textSec }}>{users.length} system user{users.length !== 1 ? 's' : ''}</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box component="button" type="button" onClick={openCreate}
-                        style={{ padding: '10px 22px', borderRadius: 10, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                        + Add User
-                    </Box>
-                </motion.div>
+                {canManage && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box component="button" type="button" onClick={openCreate}
+                            style={{ padding: '10px 22px', borderRadius: 10, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
+                            + Add User
+                        </Box>
+                    </motion.div>
+                )}
             </Group>
 
             <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden' }}>
@@ -164,7 +170,7 @@ export default function UsersIndex({ users, roles }) {
                     <Text size="sm" style={{ color: textMut, padding: '32px 20px', textAlign: 'center' }}>No users yet.</Text>
                 ) : (
                     users.map(u => {
-                        const roleColor = ROLE_COLORS[u.role?.slug] ?? '#94A3B8';
+                        const roleColor = ROLE_COLORS[u.role?.slug] ?? 'var(--c-text-secondary)';
                         const isSelf    = u.id === currentUserId;
                         return (
                             <Box key={u.id} style={{ display: 'grid', gridTemplateColumns: '1fr 200px 160px 120px', padding: '12px 20px', borderBottom: `1px solid ${divider}`, alignItems: 'center' }}>
@@ -202,15 +208,20 @@ export default function UsersIndex({ users, roles }) {
 
                                 {/* Actions */}
                                 <Group gap="sm">
-                                    <Box component="button" type="button" onClick={() => openEdit(u)}
-                                        style={{ background: 'none', border: `1px solid ${cardBorder}`, borderRadius: 7, padding: '5px 12px', cursor: 'pointer', color: textSec, fontSize: 12, fontWeight: 600 }}>
-                                        Edit
-                                    </Box>
-                                    {!isSelf && (
+                                    {canManage && (
+                                        <Box component="button" type="button" onClick={() => openEdit(u)}
+                                            style={{ background: 'none', border: `1px solid ${cardBorder}`, borderRadius: 7, padding: '5px 12px', cursor: 'pointer', color: textSec, fontSize: 12, fontWeight: 600 }}>
+                                            Edit
+                                        </Box>
+                                    )}
+                                    {canManage && !isSelf && (
                                         <Box component="button" type="button" onClick={() => handleDelete(u)}
                                             style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 7, padding: '5px 12px', cursor: 'pointer', color: '#EF4444', fontSize: 12, fontWeight: 600 }}>
                                             ✕
                                         </Box>
+                                    )}
+                                    {!canManage && (
+                                        <Text size="xs" style={{ color: textMut }}>—</Text>
                                     )}
                                 </Group>
                             </Box>

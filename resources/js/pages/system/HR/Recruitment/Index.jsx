@@ -2,8 +2,9 @@ import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { Box, Grid, Text, Group, Select, Button, Modal, Stack, TextInput, Textarea, NumberInput } from '@mantine/core';
 import { Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import { useCan } from '../../../../lib/can';
 
-const inp = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: '#94A3B8', marginBottom: 4 } };
+const inp = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: 'var(--c-text-secondary)', marginBottom: 4 } };
 
 function VacancyForm({ initial = {}, onSubmit, processing }) {
     const { data, setData } = useForm({
@@ -44,6 +45,7 @@ export default function RecruitmentIndex({ vacancies, statuses, stats, filters }
     const [status, setStatus] = useState(filters.status || '');
     const [createOpen, setCreateOpen] = useState(false);
     const [editTarget, setEditTarget] = useState(null);
+    const can = useCan();
 
     const applyFilter = (v) => {
         setStatus(v || '');
@@ -95,9 +97,11 @@ export default function RecruitmentIndex({ vacancies, statuses, stats, filters }
                 <Select placeholder="All statuses" value={status} onChange={applyFilter}
                     data={[{ value: '', label: 'All' }, ...Object.entries(statuses).map(([v, s]) => ({ value: v, label: s.label }))]}
                     style={{ width: 160 }} styles={{ input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' } }} />
-                <Button onClick={() => setCreateOpen(true)} style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 10, fontWeight: 700 }}>
-                    + New Vacancy
-                </Button>
+                {can('hr_recruitment.create') && (
+                    <Button onClick={() => setCreateOpen(true)} style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 10, fontWeight: 700 }}>
+                        + New Vacancy
+                    </Button>
+                )}
             </Group>
 
             {/* Vacancies table */}
@@ -119,10 +123,14 @@ export default function RecruitmentIndex({ vacancies, statuses, stats, filters }
                                         onMouseEnter={e => e.currentTarget.style.background = 'var(--c-hover)'}
                                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                         <td style={{ padding: '14px 16px' }}>
-                                            <Box component={Link} href={`/system/hr/recruitment/vacancies/${v.id}`}
-                                                style={{ color: '#60A5FA', textDecoration: 'none', fontWeight: 700, fontSize: 14 }}>{v.title}</Box>
+                                            {can('hr_recruitment.view') ? (
+                                                <Box component={Link} href={`/system/hr/recruitment/vacancies/${v.id}`}
+                                                    style={{ color: '#60A5FA', textDecoration: 'none', fontWeight: 700, fontSize: 14 }}>{v.title}</Box>
+                                            ) : (
+                                                <Text fw={700} size="sm" style={{ color: '#60A5FA' }}>{v.title}</Text>
+                                            )}
                                         </td>
-                                        <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: '#94A3B8' }}>{v.department || '—'}</Text></td>
+                                        <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{v.department || '—'}</Text></td>
                                         <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: 'var(--c-text)' }}>{v.openings ?? 1}</Text></td>
                                         <td style={{ padding: '14px 16px' }}><Text size="sm" fw={700} style={{ color: '#2196F3' }}>{v.applications_count}</Text></td>
                                         <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{v.closing_date ? new Date(v.closing_date).toLocaleDateString() : '—'}</Text></td>
@@ -133,12 +141,18 @@ export default function RecruitmentIndex({ vacancies, statuses, stats, filters }
                                         </td>
                                         <td style={{ padding: '14px 16px' }}>
                                             <Group gap="sm">
-                                                <Box component={Link} href={`/system/hr/recruitment/vacancies/${v.id}`}
-                                                    style={{ color: '#60A5FA', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>View →</Box>
-                                                <Box component="button" onClick={() => setEditTarget(v)}
-                                                    style={{ background: 'none', border: 'none', color: '#60A5FA', cursor: 'pointer', fontSize: 13 }}>Edit</Box>
-                                                <Box component="button" onClick={() => del(v)}
-                                                    style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: 13 }}>Del</Box>
+                                                {can('hr_recruitment.view') && (
+                                                    <Box component={Link} href={`/system/hr/recruitment/vacancies/${v.id}`}
+                                                        style={{ color: '#60A5FA', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>View →</Box>
+                                                )}
+                                                {can('hr_recruitment.edit') && (
+                                                    <Box component="button" onClick={() => setEditTarget(v)}
+                                                        style={{ background: 'none', border: 'none', color: '#60A5FA', cursor: 'pointer', fontSize: 13 }}>Edit</Box>
+                                                )}
+                                                {can('hr_recruitment.delete') && (
+                                                    <Box component="button" onClick={() => del(v)}
+                                                        style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: 13 }}>Del</Box>
+                                                )}
                                             </Group>
                                         </td>
                                     </tr>

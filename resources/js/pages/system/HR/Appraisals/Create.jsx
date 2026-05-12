@@ -2,11 +2,11 @@ import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { Box, Grid, Text, Group, Select, NumberInput, Textarea, Button, Stack, SegmentedControl } from '@mantine/core';
 import { useForm, Link } from '@inertiajs/react';
 
-const inputStyle = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: '#94A3B8', marginBottom: 6 } };
+const inputStyle = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: 'var(--c-text-secondary)', marginBottom: 6 } };
 
 const StarRating = ({ label, value, onChange }) => (
     <Box>
-        <Text size="sm" style={{ color: '#94A3B8', marginBottom: 8 }}>{label}</Text>
+        <Text size="sm" style={{ color: 'var(--c-text-secondary)', marginBottom: 8 }}>{label}</Text>
         <Group gap="xs">
             {[1, 2, 3, 4, 5].map(n => (
                 <Box
@@ -76,7 +76,7 @@ export default function AppraisalCreate({ employees, statuses }) {
                                 </Grid.Col>
                                 <Grid.Col span={{ base: 12, sm: 6 }}>
                                     <Box>
-                                        <Text size="sm" style={{ color: '#94A3B8', marginBottom: 6 }}>Period From</Text>
+                                        <Text size="sm" style={{ color: 'var(--c-text-secondary)', marginBottom: 6 }}>Period From</Text>
                                         <input type="date" value={data.period_from} onChange={e => setData('period_from', e.target.value)}
                                             style={{ width: '100%', background: 'var(--c-input)', border: '1px solid var(--c-border-input)', borderRadius: 8, padding: '10px 14px', color: 'var(--c-text)', fontSize: 14 }} required />
                                         {err('period_from')}
@@ -84,7 +84,7 @@ export default function AppraisalCreate({ employees, statuses }) {
                                 </Grid.Col>
                                 <Grid.Col span={{ base: 12, sm: 6 }}>
                                     <Box>
-                                        <Text size="sm" style={{ color: '#94A3B8', marginBottom: 6 }}>Period To</Text>
+                                        <Text size="sm" style={{ color: 'var(--c-text-secondary)', marginBottom: 6 }}>Period To</Text>
                                         <input type="date" value={data.period_to} onChange={e => setData('period_to', e.target.value)}
                                             style={{ width: '100%', background: 'var(--c-input)', border: '1px solid var(--c-border-input)', borderRadius: 8, padding: '10px 14px', color: 'var(--c-text)', fontSize: 14 }} required />
                                         {err('period_to')}
@@ -141,13 +141,13 @@ export default function AppraisalCreate({ employees, statuses }) {
                             <Text fw={700} style={{ color: 'var(--c-text)', marginBottom: 20 }}>Status & Notes</Text>
                             <Stack gap="md">
                                 <Box>
-                                    <Text size="sm" style={{ color: '#94A3B8', marginBottom: 8 }}>Status</Text>
+                                    <Text size="sm" style={{ color: 'var(--c-text-secondary)', marginBottom: 8 }}>Status</Text>
                                     <SegmentedControl
                                         value={data.status}
                                         onChange={v => setData('status', v)}
                                         data={Object.entries(statuses).map(([v, s]) => ({ value: v, label: s.label }))}
                                         fullWidth
-                                        styles={{ root: { background: 'var(--c-input)' }, label: { color: '#94A3B8' } }}
+                                        styles={{ root: { background: 'var(--c-input)' }, label: { color: 'var(--c-text-secondary)' } }}
                                     />
                                 </Box>
                                 <Textarea

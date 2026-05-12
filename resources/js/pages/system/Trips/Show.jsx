@@ -4,14 +4,16 @@ import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useCan } from '../../../lib/can';
+import { formatDate } from '../../../lib/date';
 
 const dk = {
     card:    '#0F1E32',
     border:  'var(--c-border-color)',
     divider: 'rgba(255,255,255,0.06)',
     textPri: '#E2E8F0',
-    textSec: '#94A3B8',
-    textMut: '#475569',
+    textSec: 'var(--c-text-secondary)',
+    textMut: 'var(--c-text-muted)',
 };
 
 function fmt(n) {
@@ -55,7 +57,7 @@ export default function ShowTrip({ trip, statuses, expenses = [], expenseCategor
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const textPri    = isDark ? dk.textPri : '#1E293B';
     const textSec    = isDark ? dk.textSec : '#64748B';
-    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
 
     const meta = statuses[trip.status] ?? { label: trip.status, color: '#94A3B8' };
 
@@ -64,6 +66,7 @@ export default function ShowTrip({ trip, statuses, expenses = [], expenseCategor
 
     const [expForm, setExpForm] = useState({ category: 'fuel', description: '', amount: '', currency: 'TZS', expense_date: new Date().toISOString().slice(0, 10), receipt_number: '', notes: '' });
     const [showExpForm, setShowExpForm] = useState(false);
+    const can = useCan();
 
     const addExpense = (e) => {
         e.preventDefault();
@@ -112,26 +115,32 @@ export default function ShowTrip({ trip, statuses, expenses = [], expenseCategor
                 </Stack>
                 <Group gap="sm">
                     {/* Quick status update */}
-                    <Select
-                        value={trip.status}
-                        onChange={handleStatusChange}
-                        data={Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))}
-                        size="sm"
-                        styles={{
-                            input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8, width: 150 },
-                            dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` },
-                        }}
-                    />
-                    <Box
-                        component={Link}
-                        href={`/system/trips/${trip.id}/edit`}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}
-                    >
-                        ✏️ Edit
-                    </Box>
-                    <Tooltip label="Delete trip">
-                        <ActionIcon onClick={confirmDelete} size={36} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, color: '#EF4444' }}>🗑️</ActionIcon>
-                    </Tooltip>
+                    {can('trips.edit') && (
+                        <Select
+                            value={trip.status}
+                            onChange={handleStatusChange}
+                            data={Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))}
+                            size="sm"
+                            styles={{
+                                input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8, width: 150 },
+                                dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` },
+                            }}
+                        />
+                    )}
+                    {can('trips.edit') && (
+                        <Box
+                            component={Link}
+                            href={`/system/trips/${trip.id}/edit`}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}
+                        >
+                            ✏️ Edit
+                        </Box>
+                    )}
+                    {can('trips.delete') && (
+                        <Tooltip label="Delete trip">
+                            <ActionIcon onClick={confirmDelete} size={36} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, color: '#EF4444' }}>🗑️</ActionIcon>
+                        </Tooltip>
+                    )}
                 </Group>
             </Group>
 
@@ -141,8 +150,8 @@ export default function ShowTrip({ trip, statuses, expenses = [], expenseCategor
                     <DataRow label="Status"      value={meta.label}          isDark={isDark} />
                     <DataRow label="From"        value={trip.route_from}     isDark={isDark} />
                     <DataRow label="To"          value={trip.route_to}       isDark={isDark} />
-                    <DataRow label="Departure"   value={trip.departure_date} isDark={isDark} />
-                    <DataRow label="Arrival"     value={trip.arrival_date}   isDark={isDark} />
+                    <DataRow label="Departure"   value={formatDate(trip.departure_date)} isDark={isDark} />
+                    <DataRow label="Arrival"     value={formatDate(trip.arrival_date)}   isDark={isDark} />
                 </Card>
 
                 <Card title="Driver & Vehicle" isDark={isDark} accent={['#0E4FA0', '#3B82F6']}>

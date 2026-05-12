@@ -4,7 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DatePicker from '../../../components/DatePicker';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8', textMut: '#475569' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
 function Section({ icon, title, children, isDark }) {
     const cardBg     = isDark ? dk.card : '#ffffff';
@@ -27,7 +27,7 @@ function Section({ icon, title, children, isDark }) {
 // Visual toggle grid for licence classes
 function LicenceClassToggle({ classes, selected, onToggle, isDark }) {
     const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
 
     return (
         <Box>

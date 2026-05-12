@@ -4,8 +4,10 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import DatePicker from '../../../../components/DatePicker';
+import { useCan } from '../../../../lib/can';
+import { formatDate } from '../../../../lib/date';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: '#94A3B8' };
+const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 function ManualEntryModal({ employees, onClose, isDark, cardBorder }) {
     const { data, setData, post, processing, errors } = useForm({ employee_id: '', punch_time: '', punch_type: 'in', notes: '' });
@@ -50,6 +52,7 @@ export default function AttendanceIndex({ logs, summary, employees, filters }) {
     const [dateFrom, setDateFrom] = useState(filters.dateFrom ?? '');
     const [dateTo, setDateTo] = useState(filters.dateTo ?? '');
     const [modal, setModal] = useState(false);
+    const can = useCan();
     const iS = { input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 }, dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` } };
 
     const applyFilters = (o = {}) => router.get('/system/hr/attendance', { employee_id: empId, date_from: dateFrom, date_to: dateTo, ...o }, { preserveState: true, replace: true });
@@ -86,7 +89,9 @@ export default function AttendanceIndex({ logs, summary, employees, filters }) {
                 </Stack>
                 <Group gap="sm">
                     <Box component={Link} href="/system/hr/attendance/devices" style={{ padding: '9px 18px', borderRadius: 9, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>📡 Devices</Box>
-                    <Box component="button" onClick={() => setModal(true)} style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>+ Manual Entry</Box>
+                    {can('hr_attendance.create') && (
+                        <Box component="button" onClick={() => setModal(true)} style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>+ Manual Entry</Box>
+                    )}
                 </Group>
             </Group>
 
@@ -128,7 +133,7 @@ export default function AttendanceIndex({ logs, summary, employees, filters }) {
                                     <tr key={i} style={{ borderBottom: `1px solid ${isDark ? dk.divider : '#F1F5F9'}` }}
                                         onMouseEnter={e => e.currentTarget.style.background = rowHover}
                                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                                        <td style={{ padding: '10px 14px' }}><Text size="sm" fw={600} style={{ color: textPri }}>{s.date}</Text></td>
+                                        <td style={{ padding: '10px 14px' }}><Text size="sm" fw={600} style={{ color: textPri }}>{formatDate(s.date)}</Text></td>
                                         <td style={{ padding: '10px 14px' }}><Text size="sm" style={{ color: textPri }}>{s.employee?.name}</Text></td>
                                         <td style={{ padding: '10px 14px' }}><Text size="sm" style={{ color: '#22C55E' }}>{s.check_in ? new Date(s.check_in).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '—'}</Text></td>
                                         <td style={{ padding: '10px 14px' }}><Text size="sm" style={{ color: '#3B82F6' }}>{s.check_out ? new Date(s.check_out).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '—'}</Text></td>
@@ -171,7 +176,7 @@ export default function AttendanceIndex({ logs, summary, employees, filters }) {
                                     <td style={{ padding: '10px 14px' }}><Text size="xs" fw={600} style={{ color: sourceColors[log.source] ?? textSec, textTransform: 'uppercase' }}>{log.source}</Text></td>
                                     <td style={{ padding: '10px 14px' }}><Text size="sm" style={{ color: textSec }}>{log.device?.name ?? (log.source === 'manual' ? 'Manual' : '—')}</Text></td>
                                     <td style={{ padding: '10px 14px', textAlign: 'right' }}>
-                                        {log.source === 'manual' && (
+                                        {can('hr_attendance.delete') && log.source === 'manual' && (
                                             <Box component="button" onClick={() => { if (confirm('Delete this record?')) router.delete(`/system/hr/attendance/${log.id}`, { preserveScroll: true }); }} style={{ padding: '4px 10px', borderRadius: 6, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', cursor: 'pointer', fontSize: 12 }}>🗑️</Box>
                                         )}
                                     </td>

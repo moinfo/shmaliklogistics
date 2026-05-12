@@ -4,6 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useCan } from '../../../lib/can';
 
 const dk = {
     card:    '#0F1E32',
@@ -11,8 +12,8 @@ const dk = {
     border:  'var(--c-border-color)',
     divider: 'rgba(255,255,255,0.06)',
     textPri: '#E2E8F0',
-    textSec: '#94A3B8',
-    textMut: '#475569',
+    textSec: 'var(--c-text-secondary)',
+    textMut: 'var(--c-text-muted)',
 };
 
 function StatusPill({ status, statuses }) {
@@ -26,7 +27,7 @@ function StatusPill({ status, statuses }) {
 }
 
 function DocBadge({ label, date, isDark }) {
-    if (!date) return <Text size="xs" style={{ color: isDark ? dk.textMut : '#94A3B8' }}>—</Text>;
+    if (!date) return <Text size="xs" style={{ color: isDark ? dk.textMut : 'var(--c-text-secondary)' }}>—</Text>;
     const days = Math.floor((new Date(date) - new Date()) / 86400000);
     const color = days < 0 ? '#EF4444' : days <= 30 ? '#F59E0B' : '#22C55E';
     return (
@@ -60,7 +61,7 @@ function FleetMap({ gpsVehicles, statuses, isDark }) {
             const bounds = [];
 
             gpsVehicles.forEach(v => {
-                const color = statuses[v.status]?.color ?? '#94A3B8';
+                const color = statuses[v.status]?.color ?? 'var(--c-text-secondary)';
                 const icon = L.divIcon({
                     html: `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;">🚛</div>`,
                     className: '',
@@ -126,12 +127,13 @@ export default function FleetIndex({ vehicles, gpsVehicles = [], stats, statuses
     const cardBorder = isDark ? dk.border : '#E2E8F0';
     const textPri    = isDark ? dk.textPri : '#1E293B';
     const textSec    = isDark ? dk.textSec : '#64748B';
-    const textMut    = isDark ? dk.textMut : '#94A3B8';
+    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
     const rowHov     = isDark ? dk.cardHov : '#F8FAFC';
     const divider    = isDark ? dk.divider : '#E2E8F0';
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
+    const can = useCan();
 
     const applyFilters = (s, st) => {
         router.get('/system/fleet', { search: s, status: st }, { preserveState: true, replace: true });
@@ -153,15 +155,17 @@ export default function FleetIndex({ vehicles, gpsVehicles = [], stats, statuses
                     <Text fw={800} size="xl" style={{ color: textPri }}>Fleet Management</Text>
                     <Text size="sm" style={{ color: textSec }}>All registered vehicles — track, manage and maintain</Text>
                 </Stack>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box
-                        component={Link}
-                        href="/system/fleet/create"
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, padding: '10px 20px', borderRadius: 10, textDecoration: 'none', boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}
-                    >
-                        <Text size="sm">＋</Text> Add Vehicle
-                    </Box>
-                </motion.div>
+                {can('fleet.create') && (
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box
+                            component={Link}
+                            href="/system/fleet/create"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, padding: '10px 20px', borderRadius: 10, textDecoration: 'none', boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}
+                        >
+                            <Text size="sm">＋</Text> Add Vehicle
+                        </Box>
+                    </motion.div>
+                )}
             </Group>
 
             {/* Stats */}
@@ -281,9 +285,11 @@ export default function FleetIndex({ vehicles, gpsVehicles = [], stats, statuses
                                 <DocBadge label="Insurance" date={v.insurance_expiry} isDark={isDark} />
                                 <StatusPill status={v.status} statuses={statuses} />
                                 <Group gap={4} onClick={e => e.stopPropagation()}>
-                                    <Tooltip label="Edit">
-                                        <ActionIcon component={Link} href={`/system/fleet/${v.id}/edit`} variant="subtle" size="sm" style={{ color: textMut }}>✏️</ActionIcon>
-                                    </Tooltip>
+                                    {can('fleet.edit') && (
+                                        <Tooltip label="Edit">
+                                            <ActionIcon component={Link} href={`/system/fleet/${v.id}/edit`} variant="subtle" size="sm" style={{ color: textMut }}>✏️</ActionIcon>
+                                        </Tooltip>
+                                    )}
                                 </Group>
                             </Box>
                         </motion.div>

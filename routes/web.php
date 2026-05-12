@@ -142,14 +142,14 @@ Route::middleware('auth')->prefix('system')->name('system.')->group(function () 
     $permResource('cargo', CargoController::class, 'cargo');
     Route::patch('cargo/{cargo}/status', [CargoController::class, 'updateStatus'])->name('cargo.update-status')->middleware('permission:cargo.edit');
 
-    // Fleet
+    // Fleet — static sub-routes must come before the resource to avoid {vehicle} wildcard capturing them
+    Route::get('fleet/fuel-logs',              [FuelLogController::class, 'index'])->name('fleet.fuel-logs.index')->middleware('permission:fleet_fuel_logs.view');
+    Route::post('fleet/fuel-logs',             [FuelLogController::class, 'store'])->name('fleet.fuel-logs.store')->middleware('permission:fleet_fuel_logs.create');
+    Route::delete('fleet/fuel-logs/{fuelLog}', [FuelLogController::class, 'destroy'])->name('fleet.fuel-logs.destroy')->middleware('permission:fleet_fuel_logs.delete');
     $permResource('fleet', VehicleController::class, 'fleet');
     Route::patch('fleet/{vehicle}/status', [VehicleController::class, 'updateStatus'])->name('fleet.update-status')->middleware('permission:fleet.edit');
     Route::patch('fleet/{vehicle}/driver', [VehicleController::class, 'assignDriver'])->name('fleet.assign-driver')->middleware('permission:fleet.edit');
     Route::patch('fleet/{vehicle}/gps', [VehicleController::class, 'updateGps'])->name('fleet.update-gps')->middleware('permission:fleet.edit');
-    Route::get('fleet/fuel-logs',            [FuelLogController::class, 'index'])->name('fleet.fuel-logs.index')->middleware('permission:fleet_fuel_logs.view');
-    Route::post('fleet/fuel-logs',           [FuelLogController::class, 'store'])->name('fleet.fuel-logs.store')->middleware('permission:fleet_fuel_logs.create');
-    Route::delete('fleet/fuel-logs/{fuelLog}', [FuelLogController::class, 'destroy'])->name('fleet.fuel-logs.destroy')->middleware('permission:fleet_fuel_logs.delete');
 
     // Drivers
     $permResource('drivers', DriverController::class, 'drivers');

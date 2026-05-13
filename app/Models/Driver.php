@@ -11,7 +11,7 @@ class Driver extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'name', 'status',
+        'user_id', 'name', 'status',
         'phone', 'phone_alt', 'email',
         'national_id', 'address',
         'license_number', 'license_class', 'license_classes', 'license_expiry',
@@ -25,6 +25,11 @@ class Driver extends Model
         'visa_expiry'     => 'date',
         'license_classes' => 'array',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function vehicle()
     {

@@ -159,6 +159,8 @@ Route::middleware('auth')->prefix('system')->name('system.')->group(function () 
     $permResource('drivers', DriverController::class, 'drivers');
     Route::patch('drivers/{driver}/status', [DriverController::class, 'updateStatus'])->name('drivers.update-status')->middleware('permission:drivers.edit');
     Route::patch('drivers/{driver}/vehicle', [DriverController::class, 'assignVehicle'])->name('drivers.assign-vehicle')->middleware('permission:drivers.edit');
+    Route::post('drivers/{driver}/account',   [DriverController::class, 'createAccount'])->name('drivers.account.create')->middleware('permission:drivers.edit');
+    Route::delete('drivers/{driver}/account', [DriverController::class, 'revokeAccount'])->name('drivers.account.revoke')->middleware('permission:drivers.edit');
     Route::post('drivers/{driver}/documents/license', [DriverController::class, 'uploadLicenseDoc'])->name('drivers.documents.license')->middleware('permission:drivers.edit');
     Route::post('drivers/{driver}/documents/visa', [DriverController::class, 'uploadVisaDoc'])->name('drivers.documents.visa')->middleware('permission:drivers.edit');
     Route::delete('drivers/{driver}/documents/{type}', [DriverController::class, 'deleteDocument'])->name('drivers.documents.delete')->middleware('permission:drivers.delete');

@@ -22,6 +22,8 @@ class User extends Authenticatable
 
     public function role() { return $this->belongsTo(Role::class); }
 
+    public function driver() { return $this->hasOne(Driver::class); }
+
     public function getAvatarUrlAttribute(): ?string
     {
         return $this->avatar ? Storage::disk('public')->url($this->avatar) : null;

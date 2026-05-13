@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Box, Text, Group, Stack, SimpleGrid, Select, Tooltip, ActionIcon } from '@mantine/core';
+import { Box, Text, Group, Stack, SimpleGrid, Select, Tooltip, ActionIcon, TextInput, PasswordInput } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../layouts/DashboardLayout';
@@ -93,6 +93,26 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
 
     const doAssignVehicle = () => {
         router.patch(`/system/drivers/${driver.id}/vehicle`, { vehicle_id: assignVehicleId ?? null });
+    };
+
+    const [accountEmail, setAccountEmail] = useState(driver.email ?? '');
+    const [accountPassword, setAccountPassword] = useState('');
+    const [accountErrors, setAccountErrors] = useState({});
+    const [accountProcessing, setAccountProcessing] = useState(false);
+
+    const createAccount = () => {
+        setAccountProcessing(true);
+        router.post(`/system/drivers/${driver.id}/account`, { email: accountEmail, password: accountPassword }, {
+            preserveScroll: true,
+            onSuccess: () => { setAccountErrors({}); setAccountPassword(''); },
+            onError:   (err) => { setAccountErrors(err); },
+            onFinish:  () => { setAccountProcessing(false); },
+        });
+    };
+
+    const revokeAccount = () => {
+        if (!window.confirm(`Revoke ${driver.user?.email}'s login access? The user account will be deleted.`)) return;
+        router.delete(`/system/drivers/${driver.id}/account`, { preserveScroll: true });
     };
 
     return (
@@ -228,6 +248,53 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
                     )}
                 </Card>
             </Box>
+
+            {/* Account Access */}
+            {can('drivers.edit') && (
+                <Box mb="md">
+                    <Card title="System Login Access" isDark={isDark} accent={['#7C2D12', '#F59E0B']}>
+                        {driver.user ? (
+                            <Group justify="space-between" align="center" wrap="wrap" gap="md" style={{ padding: '12px 0 4px' }}>
+                                <Group gap="md" align="center">
+                                    <Box style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>✓</Box>
+                                    <Stack gap={2}>
+                                        <Text size="sm" fw={700} style={{ color: textPri }}>{driver.user.email}</Text>
+                                        <Text size="xs" style={{ color: textSec }}>Driver portal account · can sign in with the password set on creation</Text>
+                                    </Stack>
+                                </Group>
+                                <Box component="button" type="button" onClick={revokeAccount}
+                                    style={{ padding: '8px 16px', borderRadius: 8, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                                    Revoke access
+                                </Box>
+                            </Group>
+                        ) : (
+                            <Stack gap="md" style={{ padding: '10px 0 4px' }}>
+                                <Text size="sm" style={{ color: textSec }}>No login account. Create one so this driver can sign in to the system.</Text>
+                                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+                                    <TextInput label="Email" type="email" value={accountEmail} onChange={e => setAccountEmail(e.target.value)} error={accountErrors.email}
+                                        styles={{
+                                            label: { color: textSec, fontSize: 13, marginBottom: 4 },
+                                            input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 },
+                                        }} />
+                                    <PasswordInput label="Initial Password" value={accountPassword} onChange={e => setAccountPassword(e.target.value)} error={accountErrors.password}
+                                        placeholder="Min 8 characters"
+                                        styles={{
+                                            label:   { color: textSec, fontSize: 13, marginBottom: 4 },
+                                            input:   { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 },
+                                            innerInput: { color: textPri },
+                                        }} />
+                                </SimpleGrid>
+                                <Group justify="flex-end">
+                                    <Box component="button" type="button" onClick={createAccount} disabled={accountProcessing}
+                                        style={{ padding: '9px 22px', borderRadius: 8, border: 'none', cursor: accountProcessing ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 12px rgba(33,150,243,0.25)', opacity: accountProcessing ? 0.7 : 1 }}>
+                                        {accountProcessing ? 'Creating…' : 'Create login account'}
+                                    </Box>
+                                </Group>
+                            </Stack>
+                        )}
+                    </Card>
+                </Box>
+            )}
 
             {/* Documents */}
             <Box mb="md">

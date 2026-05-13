@@ -5,11 +5,14 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Controller;
 use App\Models\Driver;
 use App\Models\LicenseClass;
+use App\Models\Role;
 use App\Models\Trip;
+use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class DriverController extends Controller
@@ -94,7 +97,7 @@ class DriverController extends Controller
 
     public function show(Driver $driver)
     {
-        $driver->load('vehicle');
+        $driver->load(['vehicle', 'user:id,name,email,avatar,role_id']);
 
         $trips = Trip::where('driver_name', $driver->name)
             ->latest('departure_date')
@@ -115,6 +118,49 @@ class DriverController extends Controller
             'vehicleTypeIcons'  => Vehicle::$typeIcons,
             'availableVehicles' => $availableVehicles,
         ]);
+    }
+
+    public function createAccount(Request $request, Driver $driver)
+    {
+        if ($driver->user_id) {
+            return back()->with('error', 'Driver already has a login account.');
+        }
+
+        $data = $request->validate([
+            'email'    => ['required', 'email', Rule::unique('users', 'email')],
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        $role = Role::where('slug', 'driver')->first();
+        if (! $role) {
+            return back()->with('error', 'The "driver" role does not exist. Create it under Settings → Roles first.');
+        }
+
+        $user = User::create([
+            'name'     => $driver->name,
+            'email'    => $data['email'],
+            'password' => Hash::make($data['password']),
+            'role_id'  => $role->id,
+        ]);
+
+        $driver->update(['user_id' => $user->id]);
+
+        return back()->with('success', "Login account created for {$driver->name}.");
+    }
+
+    public function revokeAccount(Driver $driver)
+    {
+        if (! $driver->user_id) {
+            return back()->with('error', 'Driver has no login account.');
+        }
+
+        $userId = $driver->user_id;
+        $driver->update(['user_id' => null]);
+        // Hard-delete the user — drivers without portal access shouldn't leave
+        // dangling auth rows. Driver record itself is unaffected.
+        User::where('id', $userId)->delete();
+
+        return back()->with('success', 'Login access revoked.');
     }
 
     public function edit(Driver $driver)

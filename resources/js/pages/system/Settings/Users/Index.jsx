@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import { Box, Text, Group, Stack, SimpleGrid, TextInput, Select } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
@@ -125,6 +125,15 @@ export default function UsersIndex({ users, roles }) {
         router.delete(`/system/settings/users/${u.id}`);
     };
 
+    const fileInputRefs = useRef({});
+    const handleAvatarUpload = (u, file) => {
+        if (!file) return;
+        router.post(`/system/settings/users/${u.id}/avatar`, { avatar: file, _method: 'post' }, {
+            forceFormData: true,
+            preserveScroll: true,
+        });
+    };
+
     const currentUserId = props.auth?.user?.id;
 
     return (
@@ -176,8 +185,32 @@ export default function UsersIndex({ users, roles }) {
                             <Box key={u.id} style={{ display: 'grid', gridTemplateColumns: '1fr 200px 160px 120px', padding: '12px 20px', borderBottom: `1px solid ${divider}`, alignItems: 'center' }}>
                                 {/* User */}
                                 <Group gap="md">
-                                    <Box style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #1565C0, #2196F3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                        <Text c="white" fw={800} size="sm">{u.name.charAt(0).toUpperCase()}</Text>
+                                    <Box style={{ position: 'relative', width: 36, height: 36, flexShrink: 0 }}>
+                                        {u.avatar_url ? (
+                                            <Box component="img" src={u.avatar_url} alt={u.name} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+                                        ) : (
+                                            <Box style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #1565C0, #2196F3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Text c="white" fw={800} size="sm">{u.name.charAt(0).toUpperCase()}</Text>
+                                            </Box>
+                                        )}
+                                        {canManage && (
+                                            <>
+                                                <input
+                                                    ref={el => fileInputRefs.current[u.id] = el}
+                                                    type="file"
+                                                    accept="image/jpeg,image/png,image/webp"
+                                                    style={{ display: 'none' }}
+                                                    onChange={e => { handleAvatarUpload(u, e.target.files?.[0]); e.target.value = ''; }}
+                                                />
+                                                <Box
+                                                    component="button"
+                                                    type="button"
+                                                    onClick={() => fileInputRefs.current[u.id]?.click()}
+                                                    title="Upload photo"
+                                                    style={{ position: 'absolute', bottom: -2, right: -2, width: 16, height: 16, borderRadius: '50%', background: '#2196F3', border: `2px solid ${cardBg}`, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 9, lineHeight: 1 }}
+                                                >📷</Box>
+                                            </>
+                                        )}
                                     </Box>
                                     <Stack gap={2}>
                                         <Group gap="xs">

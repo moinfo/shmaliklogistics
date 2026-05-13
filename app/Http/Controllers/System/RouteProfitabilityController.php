@@ -25,8 +25,10 @@ class RouteProfitabilityController extends Controller
             $query->whereMonth('departure_date', $month);
         }
 
-        // Group by route
-        $routes = $query
+        // Group by route — clone so selectRaw/orderBy don't leak into the
+        // summary aggregates below (count/sum would inherit the order-by
+        // alias and fail with "Unknown column 'total_revenue'").
+        $routes = (clone $query)
             ->selectRaw("
                 route_from,
                 route_to,
@@ -44,10 +46,10 @@ class RouteProfitabilityController extends Controller
 
         // Overall summary
         $summary = [
-            'total_trips'   => $query->count(),
-            'total_revenue' => $query->sum('freight_amount'),
-            'total_costs'   => $query->sum(DB::raw('fuel_cost + driver_allowance + border_costs + other_costs')),
-            'total_profit'  => $query->sum(DB::raw('freight_amount - fuel_cost - driver_allowance - border_costs - other_costs')),
+            'total_trips'   => (clone $query)->count(),
+            'total_revenue' => (clone $query)->sum('freight_amount'),
+            'total_costs'   => (clone $query)->sum(DB::raw('fuel_cost + driver_allowance + border_costs + other_costs')),
+            'total_profit'  => (clone $query)->sum(DB::raw('freight_amount - fuel_cost - driver_allowance - border_costs - other_costs')),
         ];
         $summary['margin'] = $summary['total_revenue'] > 0
             ? round($summary['total_profit'] / $summary['total_revenue'] * 100, 1)

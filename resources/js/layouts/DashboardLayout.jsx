@@ -368,9 +368,20 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
                             borderRadius: 10, padding: '10px 12px',
                             border: `1px solid ${isDark ? dk.divider : lk.divider}`,
                             marginBottom: 10,
+                            display: 'flex', alignItems: 'center', gap: 10,
                         }}>
-                            <Text size="xs" style={{ color: isDark ? dk.textMut : lk.textMut }} mb={2}>Logged in as</Text>
-                            <Text size="sm" fw={600} style={{ color: isDark ? dk.textSec : lk.textPri }}>{user?.name || 'Admin'}</Text>
+                            {user?.avatar_url ? (
+                                <Box component="img" src={user.avatar_url} alt={user.name}
+                                    style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                            ) : (
+                                <Box style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg, #1565C0, #2196F3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                    <Text c="white" fw={800} size="sm">{(user?.name || 'A').charAt(0).toUpperCase()}</Text>
+                                </Box>
+                            )}
+                            <Box style={{ minWidth: 0 }}>
+                                <Text size="xs" style={{ color: isDark ? dk.textMut : lk.textMut }} mb={2}>Logged in as</Text>
+                                <Text size="sm" fw={600} style={{ color: isDark ? dk.textSec : lk.textPri, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.name || 'Admin'}</Text>
+                            </Box>
                         </Box>
                         <Anchor component={Link} href="/account/password" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                             <Text size="sm">🔑</Text>

@@ -139,6 +139,12 @@ export default function FleetIndex({ vehicles, gpsVehicles = [], stats, statuses
         router.get('/system/fleet', { search: s, status: st }, { preserveState: true, replace: true });
     };
 
+    const handleDelete = (v) => {
+        if (window.confirm(`Remove ${v.plate} from fleet?`)) {
+            router.delete(`/system/fleet/${v.id}`, { preserveScroll: true });
+        }
+    };
+
     const statCards = [
         { icon: '🚛', label: 'Total Vehicles',  value: stats.total,       accent: ['#1565C0', '#2196F3'] },
         { icon: '🟢', label: 'Active / On Road', value: stats.active,      accent: ['#065F46', '#059669'] },
@@ -288,6 +294,11 @@ export default function FleetIndex({ vehicles, gpsVehicles = [], stats, statuses
                                     {can('fleet.edit') && (
                                         <Tooltip label="Edit">
                                             <ActionIcon component={Link} href={`/system/fleet/${v.id}/edit`} variant="subtle" size="sm" style={{ color: textMut }}>✏️</ActionIcon>
+                                        </Tooltip>
+                                    )}
+                                    {can('fleet.delete') && (
+                                        <Tooltip label="Delete">
+                                            <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(v)}>🗑️</ActionIcon>
                                         </Tooltip>
                                     )}
                                 </Group>

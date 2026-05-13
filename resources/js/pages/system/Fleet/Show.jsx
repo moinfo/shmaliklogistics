@@ -138,12 +138,6 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons, avail
     const dMeta   = driver ? (driverStatuses?.[driver.status] ?? { label: driver.status, color: '#94A3B8' }) : null;
     const dInitials = driver ? driver.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() : '';
 
-    const confirmDelete = () => {
-        if (window.confirm(`Remove ${vehicle.plate} from fleet?`)) {
-            router.delete(`/system/fleet/${vehicle.id}`);
-        }
-    };
-
     const doAssignDriver = () => {
         router.patch(`/system/fleet/${vehicle.id}/driver`, { driver_id: assignDriverId ?? null });
     };
@@ -188,11 +182,6 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons, avail
                         <Box component={Link} href={`/system/fleet/${vehicle.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
                             ✏️ Edit
                         </Box>
-                    )}
-                    {can('fleet.delete') && (
-                        <Tooltip label="Remove from fleet">
-                            <ActionIcon onClick={confirmDelete} size={36} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, color: '#EF4444' }}>🗑️</ActionIcon>
-                        </Tooltip>
                     )}
                 </Group>
             </Group>

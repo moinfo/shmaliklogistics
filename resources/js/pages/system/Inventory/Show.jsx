@@ -31,7 +31,7 @@ function StockModal({ opened, onClose, item, type, vehicles }) {
                         <NumberInput label="Unit Cost (TZS)" value={data.unit_cost} onChange={v => setData('unit_cost', v)} min={0} decimalScale={2} styles={inputStyle} placeholder={`Current: ${item.unit_cost || '—'}`} />
                     )}
                     <TextInput label="Reference" placeholder="PO number, job ID..." value={data.reference} onChange={e => setData('reference', e.target.value)} styles={inputStyle} />
-                    <Select label="Vehicle (optional)" placeholder="Link to vehicle..." value={data.vehicle_id} onChange={v => setData('vehicle_id', v || '')} data={[{ value: '', label: 'None' }, ...vehicles.map(v => ({ value: String(v.id), label: `${v.registration_number} — ${v.make} ${v.model}` }))]} clearable styles={inputStyle} />
+                    <Select label="Vehicle (optional)" placeholder="Link to vehicle..." value={data.vehicle_id} onChange={v => setData('vehicle_id', v || '')} data={[{ value: '', label: 'None' }, ...vehicles.map(v => ({ value: String(v.id), label: `${v.plate} — ${v.make} ${v.model_name}` }))]} clearable styles={inputStyle} />
                     <Textarea label="Notes" rows={2} value={data.notes} onChange={e => setData('notes', e.target.value)} styles={inputStyle} />
                     <Group justify="flex-end" gap="sm">
                         <Button variant="default" onClick={onClose} style={{ background: 'transparent', borderColor: 'rgba(255,255,255,0.1)', color: '#94A3B8' }}>Cancel</Button>
@@ -164,7 +164,7 @@ export default function InventoryShow({ item, movements, vehicles, movTypes }) {
                                         <td style={{ padding: '12px 16px' }}><Text fw={700} size="sm" style={{ color: qtyColor }}>{qtySign}{fmt(m.quantity, 2)} {item.unit}</Text></td>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: 'var(--c-text)' }}>{fmt(m.balance_after, 2)}</Text></td>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{m.reference || '—'}</Text></td>
-                                        <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{m.vehicle?.registration_number || '—'}</Text></td>
+                                        <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{m.vehicle?.plate || '—'}</Text></td>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{m.creator?.name || '—'}</Text></td>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: 'var(--c-text-muted)' }}>{m.notes || '—'}</Text></td>
                                     </tr>

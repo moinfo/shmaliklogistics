@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -76,5 +77,21 @@ class UserController extends Controller
         $user->delete();
 
         return back()->with('success', 'User removed.');
+    }
+
+    public function uploadAvatar(Request $request, User $user)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
+        ]);
+
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $user->avatar = $request->file('avatar')->store('avatars', 'public');
+        $user->save();
+
+        return back()->with('success', "Profile picture for {$user->name} updated.");
     }
 }

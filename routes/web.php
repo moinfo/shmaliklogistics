@@ -99,6 +99,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 Route::middleware('auth')->group(function () {
     Route::get('/account/password',   [ProfileController::class, 'showChangePassword'])->name('account.password');
     Route::patch('/account/password', [ProfileController::class, 'changePassword'])->name('account.password.update');
+    Route::post('/account/avatar',    [ProfileController::class, 'updateAvatar'])->name('account.avatar.update');
 });
 
 // ── System (protected) ──────────────────────────────────────────────────────
@@ -146,7 +147,10 @@ Route::middleware('auth')->prefix('system')->name('system.')->group(function () 
     Route::get('fleet/fuel-logs',              [FuelLogController::class, 'index'])->name('fleet.fuel-logs.index')->middleware('permission:fleet_fuel_logs.view');
     Route::post('fleet/fuel-logs',             [FuelLogController::class, 'store'])->name('fleet.fuel-logs.store')->middleware('permission:fleet_fuel_logs.create');
     Route::delete('fleet/fuel-logs/{fuelLog}', [FuelLogController::class, 'destroy'])->name('fleet.fuel-logs.destroy')->middleware('permission:fleet_fuel_logs.delete');
-    $permResource('fleet', VehicleController::class, 'fleet');
+    // Map the resource URL param to {vehicle} so implicit binding matches the
+    // controller signature Vehicle $vehicle — without this Laravel skips the
+    // bind silently and destroy/show/edit receive an empty model.
+    $permResource('fleet', VehicleController::class, 'fleet', ['parameters' => ['fleet' => 'vehicle']]);
     Route::patch('fleet/{vehicle}/status', [VehicleController::class, 'updateStatus'])->name('fleet.update-status')->middleware('permission:fleet.edit');
     Route::patch('fleet/{vehicle}/driver', [VehicleController::class, 'assignDriver'])->name('fleet.assign-driver')->middleware('permission:fleet.edit');
     Route::patch('fleet/{vehicle}/gps', [VehicleController::class, 'updateGps'])->name('fleet.update-gps')->middleware('permission:fleet.edit');
@@ -320,10 +324,11 @@ Route::middleware('auth')->prefix('system')->name('system.')->group(function () 
             'parameters' => ['roles' => 'role'],
         ]);
 
-        Route::get('users',           [UserController::class, 'index'])->name('users.index')->middleware('permission:settings.view');
-        Route::post('users',          [UserController::class, 'store'])->name('users.store')->middleware('permission:settings.edit');
-        Route::put('users/{user}',    [UserController::class, 'update'])->name('users.update')->middleware('permission:settings.edit');
-        Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy')->middleware('permission:settings.edit');
+        Route::get('users',                  [UserController::class, 'index'])->name('users.index')->middleware('permission:settings.view');
+        Route::post('users',                 [UserController::class, 'store'])->name('users.store')->middleware('permission:settings.edit');
+        Route::put('users/{user}',           [UserController::class, 'update'])->name('users.update')->middleware('permission:settings.edit');
+        Route::post('users/{user}/avatar',   [UserController::class, 'uploadAvatar'])->name('users.avatar.update')->middleware('permission:settings.edit');
+        Route::delete('users/{user}',        [UserController::class, 'destroy'])->name('users.destroy')->middleware('permission:settings.edit');
     });
 });
 

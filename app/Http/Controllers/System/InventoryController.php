@@ -86,7 +86,7 @@ class InventoryController extends Controller
         return Inertia::render('system/Inventory/Show', [
             'item'       => $item,
             'movements'  => $movements,
-            'vehicles'   => Vehicle::where('status', 'active')->orderBy('registration_number')->get(['id', 'registration_number', 'make', 'model']),
+            'vehicles'   => Vehicle::where('status', 'active')->orderBy('plate')->get(['id', 'plate', 'make', 'model_name']),
             'movTypes'   => InventoryMovement::$types,
         ]);
     }

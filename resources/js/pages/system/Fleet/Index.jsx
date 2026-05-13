@@ -256,7 +256,7 @@ export default function FleetIndex({ vehicles, gpsVehicles = [], stats, statuses
 
             {/* Table */}
             <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden' }}>
-                <Box style={{ display: 'grid', gridTemplateColumns: '110px 1fr 130px 100px 90px 110px 110px 60px', borderBottom: `1px solid ${divider}`, padding: '10px 20px' }}>
+                <Box style={{ display: 'grid', gridTemplateColumns: '110px 1fr 130px 100px 90px 110px 110px 110px', borderBottom: `1px solid ${divider}`, padding: '10px 20px' }}>
                     {['Plate', 'Make / Model', 'Driver', 'Type', 'Year', 'Insurance', 'Status', ''].map(h => (
                         <Text key={h} size="10px" fw={700} style={{ color: textMut, textTransform: 'uppercase', letterSpacing: 1 }}>{h}</Text>
                     ))}
@@ -272,7 +272,7 @@ export default function FleetIndex({ vehicles, gpsVehicles = [], stats, statuses
                     vehicles.data.map((v, i) => (
                         <motion.div key={v.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.04 }}>
                             <Box
-                                style={{ display: 'grid', gridTemplateColumns: '110px 1fr 130px 100px 90px 110px 110px 60px', padding: '14px 20px', borderBottom: `1px solid ${divider}`, cursor: 'pointer', transition: 'background 0.15s' }}
+                                style={{ display: 'grid', gridTemplateColumns: '110px 1fr 130px 100px 90px 110px 110px 110px', padding: '14px 20px', borderBottom: `1px solid ${divider}`, cursor: 'pointer', transition: 'background 0.15s' }}
                                 onMouseEnter={e => e.currentTarget.style.background = rowHov}
                                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                 onClick={() => router.visit(`/system/fleet/${v.id}`)}
@@ -291,6 +291,9 @@ export default function FleetIndex({ vehicles, gpsVehicles = [], stats, statuses
                                 <DocBadge label="Insurance" date={v.insurance_expiry} isDark={isDark} />
                                 <StatusPill status={v.status} statuses={statuses} />
                                 <Group gap={4} onClick={e => e.stopPropagation()}>
+                                    <Tooltip label="View">
+                                        <ActionIcon component={Link} href={`/system/fleet/${v.id}`} variant="subtle" size="sm" style={{ color: textMut }}>👁️</ActionIcon>
+                                    </Tooltip>
                                     {can('fleet.edit') && (
                                         <Tooltip label="Edit">
                                             <ActionIcon component={Link} href={`/system/fleet/${v.id}/edit`} variant="subtle" size="sm" style={{ color: textMut }}>✏️</ActionIcon>

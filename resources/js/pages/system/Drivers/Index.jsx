@@ -34,7 +34,10 @@ function LicenceBadge({ expiry, isDark }) {
     );
 }
 
-function Avatar({ name, size = 36 }) {
+function Avatar({ name, photoUrl, size = 36 }) {
+    if (photoUrl) {
+        return <Box component="img" src={photoUrl} alt={name} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, boxShadow: '0 2px 8px rgba(33,150,243,0.3)' }} />;
+    }
     const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
     return (
         <Box style={{ width: size, height: size, borderRadius: '50%', background: 'linear-gradient(135deg, #1565C0, #2196F3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 8px rgba(33,150,243,0.3)' }}>
@@ -135,7 +138,7 @@ export default function DriversIndex({ drivers, stats, statuses, filters }) {
 
             {/* Table */}
             <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden' }}>
-                <Box style={{ display: 'grid', gridTemplateColumns: '40px 1fr 140px 120px 130px 130px 60px', borderBottom: `1px solid ${divider}`, padding: '10px 20px' }}>
+                <Box style={{ display: 'grid', gridTemplateColumns: '40px 1fr 140px 120px 130px 130px 90px', borderBottom: `1px solid ${divider}`, padding: '10px 20px' }}>
                     {['', 'Name', 'Phone', 'Licence #', 'Licence Exp.', 'Status', ''].map((h, i) => (
                         <Text key={i} size="10px" fw={700} style={{ color: textMut, textTransform: 'uppercase', letterSpacing: 1 }}>{h}</Text>
                     ))}
@@ -151,12 +154,12 @@ export default function DriversIndex({ drivers, stats, statuses, filters }) {
                     drivers.data.map((d, i) => (
                         <motion.div key={d.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.04 }}>
                             <Box
-                                style={{ display: 'grid', gridTemplateColumns: '40px 1fr 140px 120px 130px 130px 60px', padding: '12px 20px', borderBottom: `1px solid ${divider}`, cursor: 'pointer', transition: 'background 0.15s' }}
+                                style={{ display: 'grid', gridTemplateColumns: '40px 1fr 140px 120px 130px 130px 90px', padding: '12px 20px', borderBottom: `1px solid ${divider}`, cursor: 'pointer', transition: 'background 0.15s' }}
                                 onMouseEnter={e => e.currentTarget.style.background = rowHov}
                                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                 onClick={() => router.visit(`/system/drivers/${d.id}`)}
                             >
-                                <Box style={{ display: 'flex', alignItems: 'center' }}><Avatar name={d.name} size={30} /></Box>
+                                <Box style={{ display: 'flex', alignItems: 'center' }}><Avatar name={d.name} photoUrl={d.photo_url} size={30} /></Box>
                                 <Stack gap={2}>
                                     <Text size="sm" fw={600} style={{ color: textPri }}>{d.name}</Text>
                                     {(d.license_classes ?? []).length > 0 ? (
@@ -176,6 +179,9 @@ export default function DriversIndex({ drivers, stats, statuses, filters }) {
                                 <LicenceBadge expiry={d.license_expiry} isDark={isDark} />
                                 <StatusPill status={d.status} statuses={statuses} />
                                 <Group gap={4} onClick={e => e.stopPropagation()}>
+                                    <Tooltip label="View">
+                                        <ActionIcon component={Link} href={`/system/drivers/${d.id}`} variant="subtle" size="sm" style={{ color: textMut }}>👁️</ActionIcon>
+                                    </Tooltip>
                                     {can('drivers.edit') && (
                                         <Tooltip label="Edit">
                                             <ActionIcon component={Link} href={`/system/drivers/${d.id}/edit`} variant="subtle" size="sm" style={{ color: textMut }}>✏️</ActionIcon>

@@ -54,7 +54,10 @@ function Card({ title, children, isDark, accent }) {
     );
 }
 
-function Avatar({ name, size = 56 }) {
+function Avatar({ name, photoUrl, size = 56 }) {
+    if (photoUrl) {
+        return <Box component="img" src={photoUrl} alt={name} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, boxShadow: '0 4px 12px rgba(33,150,243,0.4)' }} />;
+    }
     const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
     return (
         <Box style={{ width: size, height: size, borderRadius: '50%', background: 'linear-gradient(135deg, #1565C0, #2196F3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 12px rgba(33,150,243,0.4)' }}>
@@ -128,7 +131,7 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
             {/* Header */}
             <Group justify="space-between" mb="xl" align="flex-start" wrap="wrap" gap="md">
                 <Group gap="md">
-                    <Avatar name={driver.name} />
+                    <Avatar name={driver.name} photoUrl={driver.photo_url} />
                     <Stack gap={4}>
                         <Group gap="sm">
                             <Text fw={800} size="xl" style={{ color: textPri }}>{driver.name}</Text>

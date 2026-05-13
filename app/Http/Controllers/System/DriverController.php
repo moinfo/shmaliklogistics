@@ -216,6 +216,22 @@ class DriverController extends Controller
         return back()->with('success', 'Status updated.');
     }
 
+    public function uploadPhoto(Request $request, Driver $driver)
+    {
+        $request->validate([
+            'photo' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
+        ]);
+
+        if ($driver->photo_path) {
+            Storage::disk('public')->delete($driver->photo_path);
+        }
+
+        $path = $request->file('photo')->store("drivers/{$driver->id}", 'public');
+        $driver->update(['photo_path' => $path]);
+
+        return back()->with('success', 'Profile picture updated.');
+    }
+
     public function uploadLicenseDoc(Request $request, Driver $driver)
     {
         $request->validate([

@@ -136,7 +136,7 @@ export default function TripsIndex({ trips, stats, statuses, filters }) {
             {/* Table */}
             <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden' }}>
                 {/* Head */}
-                <Box style={{ display: 'grid', gridTemplateColumns: '120px 1fr 160px 120px 140px 120px 60px', gap: 0, borderBottom: `1px solid ${divider}`, padding: '10px 20px' }}>
+                <Box style={{ display: 'grid', gridTemplateColumns: '120px 1fr 160px 120px 140px 120px 90px', gap: 0, borderBottom: `1px solid ${divider}`, padding: '10px 20px' }}>
                     {['Trip #', 'Route', 'Driver / Vehicle', 'Departure', 'Status', 'Freight (TZS)', ''].map(h => (
                         <Text key={h} size="10px" fw={700} style={{ color: textMut, textTransform: 'uppercase', letterSpacing: 1 }}>{h}</Text>
                     ))}
@@ -154,7 +154,7 @@ export default function TripsIndex({ trips, stats, statuses, filters }) {
                         return (
                             <motion.div key={trip.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.04 }}>
                                 <Box
-                                    style={{ display: 'grid', gridTemplateColumns: '120px 1fr 160px 120px 140px 120px 60px', gap: 0, padding: '14px 20px', borderBottom: `1px solid ${divider}`, cursor: 'pointer', transition: 'background 0.15s' }}
+                                    style={{ display: 'grid', gridTemplateColumns: '120px 1fr 160px 120px 140px 120px 90px', gap: 0, padding: '14px 20px', borderBottom: `1px solid ${divider}`, cursor: 'pointer', transition: 'background 0.15s' }}
                                     onMouseEnter={e => e.currentTarget.style.background = rowHov}
                                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                     onClick={() => router.visit(`/system/trips/${trip.id}`)}
@@ -172,6 +172,9 @@ export default function TripsIndex({ trips, stats, statuses, filters }) {
                                     <StatusPill status={trip.status} statuses={statuses} />
                                     <Text size="sm" fw={600} style={{ color: textPri }}>{fmt(trip.freight_amount)}</Text>
                                     <Group gap={4} onClick={e => e.stopPropagation()}>
+                                        <Tooltip label="View">
+                                            <ActionIcon component={Link} href={`/system/trips/${trip.id}`} variant="subtle" size="sm" style={{ color: textMut }}>👁️</ActionIcon>
+                                        </Tooltip>
                                         {can('trips.edit') && (
                                             <Tooltip label="Edit">
                                                 <ActionIcon component={Link} href={`/system/trips/${trip.id}/edit`} variant="subtle" size="sm" style={{ color: textMut }}>✏️</ActionIcon>

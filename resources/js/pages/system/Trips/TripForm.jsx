@@ -85,6 +85,8 @@ export default function TripForm({ data, setData, errors, statuses, drivers = []
     const totalCosts = (Number(data.fuel_cost) || 0)
         + (Number(data.driver_allowance) || 0)
         + (Number(data.border_costs) || 0)
+        + (Number(data.road_fines) || 0)
+        + (Number(data.guard_fees) || 0)
         + (Number(data.other_costs) || 0);
     const profit = (Number(data.freight_amount) || 0) - totalCosts;
 
@@ -182,6 +184,8 @@ export default function TripForm({ data, setData, errors, statuses, drivers = []
                     <NumberInput label="Fuel Cost" placeholder="8,000,000" min={0} required value={data.fuel_cost} onChange={v => setData('fuel_cost', v)} error={errors.fuel_cost} styles={numStyles} thousandSeparator="," />
                     <NumberInput label="Driver Allowance" placeholder="1,500,000" min={0} required value={data.driver_allowance} onChange={v => setData('driver_allowance', v)} error={errors.driver_allowance} styles={numStyles} thousandSeparator="," />
                     <NumberInput label="Border Costs" placeholder="2,000,000" min={0} required value={data.border_costs} onChange={v => setData('border_costs', v)} error={errors.border_costs} styles={numStyles} thousandSeparator="," />
+                    <NumberInput label="Road Fines" placeholder="0" min={0} value={data.road_fines ?? 0} onChange={v => setData('road_fines', v)} error={errors.road_fines} styles={numStyles} thousandSeparator="," />
+                    <NumberInput label="Guard Fees (Mlinzi)" placeholder="0" min={0} value={data.guard_fees ?? 0} onChange={v => setData('guard_fees', v)} error={errors.guard_fees} styles={numStyles} thousandSeparator="," />
                     <NumberInput label="Other Costs" placeholder="500,000" min={0} required value={data.other_costs} onChange={v => setData('other_costs', v)} error={errors.other_costs} styles={numStyles} thousandSeparator="," />
                 </SimpleGrid>
 

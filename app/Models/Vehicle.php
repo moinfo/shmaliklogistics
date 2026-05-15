@@ -56,6 +56,16 @@ class Vehicle extends Model
         return $this->morphMany(Document::class, 'documentable');
     }
 
+    public function inspections()
+    {
+        return $this->hasMany(VehicleInspection::class)->latest('inspected_at');
+    }
+
+    public function trips()
+    {
+        return $this->hasMany(Trip::class);
+    }
+
     public static array $statuses = [
         'active'      => ['label' => 'Active',      'color' => '#22C55E'],
         'on_road'     => ['label' => 'On Road',      'color' => '#3B82F6'],

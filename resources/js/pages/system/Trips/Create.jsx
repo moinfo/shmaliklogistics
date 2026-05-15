@@ -27,6 +27,8 @@ export default function CreateTrip({ statuses, nextNumber, drivers = [], vehicle
         fuel_cost:         '',
         driver_allowance:  '',
         border_costs:      '',
+        road_fines:        0,
+        guard_fees:        0,
         other_costs:       '',
         notes:             '',
     });

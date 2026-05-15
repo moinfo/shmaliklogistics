@@ -26,6 +26,8 @@ export default function EditTrip({ trip, statuses, drivers = [], vehicles = [] }
         fuel_cost:         trip.fuel_cost,
         driver_allowance:  trip.driver_allowance,
         border_costs:      trip.border_costs,
+        road_fines:        trip.road_fines ?? 0,
+        guard_fees:        trip.guard_fees ?? 0,
         other_costs:       trip.other_costs,
         notes:             trip.notes ?? '',
     });

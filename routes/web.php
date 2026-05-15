@@ -102,6 +102,23 @@ Route::middleware('auth')->group(function () {
     Route::post('/account/avatar',    [ProfileController::class, 'updateAvatar'])->name('account.avatar.update');
 });
 
+// ── Driver Portal ───────────────────────────────────────────────────────────
+Route::middleware(['auth', 'driver'])->prefix('driver')->name('driver.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Driver\DriverPortalController::class, 'dashboard'])->name('dashboard');
+
+    Route::get('/trips',                  [\App\Http\Controllers\Driver\DriverPortalController::class, 'trips'])->name('trips.index');
+    Route::get('/trips/{trip}',           [\App\Http\Controllers\Driver\DriverPortalController::class, 'tripShow'])->name('trips.show');
+    Route::patch('/trips/{trip}/expenses', [\App\Http\Controllers\Driver\DriverTripExpenseController::class, 'update'])->name('trips.expenses.update');
+
+    Route::get('/inspections',         [\App\Http\Controllers\Driver\DriverInspectionController::class, 'index'])->name('inspections.index');
+    Route::get('/inspections/create',  [\App\Http\Controllers\Driver\DriverInspectionController::class, 'create'])->name('inspections.create');
+    Route::post('/inspections',        [\App\Http\Controllers\Driver\DriverInspectionController::class, 'store'])->name('inspections.store');
+
+    Route::get('/check-ins',          [\App\Http\Controllers\Driver\DriverCheckInController::class, 'index'])->name('check-ins.index');
+    Route::get('/check-ins/create',   [\App\Http\Controllers\Driver\DriverCheckInController::class, 'create'])->name('check-ins.create');
+    Route::post('/check-ins',         [\App\Http\Controllers\Driver\DriverCheckInController::class, 'store'])->name('check-ins.store');
+});
+
 // ── System (protected) ──────────────────────────────────────────────────────
 //
 // Permission helper: split a Laravel resource into per-action permission groups.
@@ -134,6 +151,13 @@ $permResource = function (string $name, string $controller, string $module, arra
 Route::middleware('auth')->prefix('system')->name('system.')->group(function () use ($permResource) {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/notifications', NotificationsController::class)->name('notifications');
+
+    // Vehicle inspections (read-only admin view of driver-submitted reports)
+    Route::get('/inspections',                [\App\Http\Controllers\System\VehicleInspectionController::class, 'index'])->name('inspections.index')->middleware('permission:inspections.view');
+    Route::get('/inspections/{inspection}',   [\App\Http\Controllers\System\VehicleInspectionController::class, 'show'])->name('inspections.show')->middleware('permission:inspections.view');
+
+    // Trip check-ins (admin view)
+    Route::get('/check-ins',                  [\App\Http\Controllers\System\TripCheckInController::class, 'index'])->name('check-ins.index')->middleware('permission:trip_check_ins.view');
 
     // Trips
     $permResource('trips', TripController::class, 'trips');

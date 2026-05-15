@@ -13,9 +13,10 @@ class Trip extends Model
     protected $fillable = [
         'trip_number', 'status',
         'route_from', 'route_to', 'departure_date', 'arrival_date',
-        'driver_name', 'vehicle_plate',
+        'driver_name', 'vehicle_plate', 'driver_id', 'vehicle_id',
         'cargo_description', 'cargo_weight_tons',
-        'freight_amount', 'fuel_cost', 'driver_allowance', 'border_costs', 'other_costs',
+        'freight_amount', 'fuel_cost', 'driver_allowance',
+        'border_costs', 'road_fines', 'guard_fees', 'other_costs',
         'notes', 'created_by',
     ];
 
@@ -26,6 +27,8 @@ class Trip extends Model
         'fuel_cost'         => 'decimal:2',
         'driver_allowance'  => 'decimal:2',
         'border_costs'      => 'decimal:2',
+        'road_fines'        => 'decimal:2',
+        'guard_fees'        => 'decimal:2',
         'other_costs'       => 'decimal:2',
         'cargo_weight_tons' => 'decimal:2',
     ];
@@ -33,6 +36,26 @@ class Trip extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function driver()
+    {
+        return $this->belongsTo(Driver::class);
+    }
+
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class);
+    }
+
+    public function inspections()
+    {
+        return $this->hasMany(VehicleInspection::class);
+    }
+
+    public function checkIns()
+    {
+        return $this->hasMany(TripCheckIn::class)->latest('checked_in_at');
     }
 
     public function documents()
@@ -50,6 +73,8 @@ class Trip extends Model
         return (float) $this->fuel_cost
             + (float) $this->driver_allowance
             + (float) $this->border_costs
+            + (float) $this->road_fines
+            + (float) $this->guard_fees
             + (float) $this->other_costs;
     }
 

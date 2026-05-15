@@ -12,7 +12,7 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            return redirect($this->landingFor(Auth::user()));
         }
         return Inertia::render('Auth/Login');
     }
@@ -26,12 +26,19 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended(route('dashboard'));
+            return redirect()->intended($this->landingFor(Auth::user()));
         }
 
         return back()->withErrors([
             'email' => 'These credentials do not match our records.',
         ])->onlyInput('email');
+    }
+
+    private function landingFor($user): string
+    {
+        return $user?->role?->slug === 'driver'
+            ? route('driver.dashboard')
+            : route('dashboard');
     }
 
     public function logout(Request $request)

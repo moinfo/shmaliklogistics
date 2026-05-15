@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Services\AlertService;
+use App\Services\DriverAlertService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -62,6 +63,13 @@ class HandleInertiaRequests extends Middleware
                 'error'   => $request->session()->get('error'),
             ],
             'alert_count' => fn () => $request->user() ? AlertService::count() : 0,
+            'driverAlerts' => function () use ($request) {
+                $user = $request->user();
+                if (! $user || $user->role?->slug !== 'driver' || ! $user->driver) {
+                    return null;
+                }
+                return DriverAlertService::for($user->driver);
+            },
         ];
     }
 }

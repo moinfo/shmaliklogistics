@@ -53,6 +53,16 @@ class Driver extends Model
         return $this->morphMany(Document::class, 'documentable');
     }
 
+    public function inspections()
+    {
+        return $this->hasMany(VehicleInspection::class)->latest('inspected_at');
+    }
+
+    public function trips()
+    {
+        return $this->hasMany(Trip::class)->latest('departure_date');
+    }
+
     public function getLicenseDaysAttribute(): ?int
     {
         return $this->license_expiry

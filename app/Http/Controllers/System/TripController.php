@@ -85,23 +85,8 @@ class TripController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'status'             => 'required|in:' . implode(',', array_keys(Trip::$statuses)),
-            'route_from'         => 'required|string|max:100',
-            'route_to'           => 'required|string|max:100',
-            'departure_date'     => 'required|date',
-            'arrival_date'       => 'nullable|date|after_or_equal:departure_date',
-            'driver_name'        => 'required|string|max:100',
-            'vehicle_plate'      => 'required|string|max:20',
-            'cargo_description'  => 'nullable|string|max:200',
-            'cargo_weight_tons'  => 'nullable|numeric|min:0',
-            'freight_amount'     => 'required|numeric|min:0',
-            'fuel_cost'          => 'required|numeric|min:0',
-            'driver_allowance'   => 'required|numeric|min:0',
-            'border_costs'       => 'required|numeric|min:0',
-            'other_costs'        => 'required|numeric|min:0',
-            'notes'              => 'nullable|string',
-        ]);
+        $data = $this->validateTrip($request);
+        $this->syncLegacyFields($data);
 
         $data['trip_number'] = Trip::nextNumber();
         $data['created_by']  = $request->user()->id;
@@ -112,8 +97,56 @@ class TripController extends Controller
             ->with('success', "Trip {$trip->trip_number} created successfully.");
     }
 
+    private function validateTrip(Request $request): array
+    {
+        return $request->validate([
+            'status'             => 'required|in:' . implode(',', array_keys(Trip::$statuses)),
+            'route_from'         => 'required|string|max:100',
+            'route_to'           => 'required|string|max:100',
+            'departure_date'     => 'required|date',
+            'arrival_date'       => 'nullable|date|after_or_equal:departure_date',
+            'driver_id'          => 'nullable|exists:drivers,id',
+            'vehicle_id'         => 'nullable|exists:vehicles,id',
+            'driver_name'        => 'required|string|max:100',
+            'vehicle_plate'      => 'required|string|max:20',
+            'cargo_description'  => 'nullable|string|max:200',
+            'cargo_weight_tons'  => 'nullable|numeric|min:0',
+            'freight_amount'     => 'required|numeric|min:0',
+            'fuel_cost'          => 'required|numeric|min:0',
+            'driver_allowance'   => 'required|numeric|min:0',
+            'border_costs'       => 'required|numeric|min:0',
+            'road_fines'         => 'nullable|numeric|min:0',
+            'guard_fees'         => 'nullable|numeric|min:0',
+            'other_costs'        => 'required|numeric|min:0',
+            'notes'              => 'nullable|string',
+        ]);
+    }
+
+    // Keep FK and legacy plain-text columns in sync. Form may submit either
+    // driver_id/vehicle_id (preferred) or driver_name/vehicle_plate (legacy)
+    // — fill in whichever side is missing.
+    private function syncLegacyFields(array &$data): void
+    {
+        if (!empty($data['driver_id'])) {
+            $driver = Driver::find($data['driver_id']);
+            if ($driver) $data['driver_name'] = $driver->name;
+        } elseif (!empty($data['driver_name'])) {
+            $driver = Driver::where('name', $data['driver_name'])->first();
+            if ($driver) $data['driver_id'] = $driver->id;
+        }
+
+        if (!empty($data['vehicle_id'])) {
+            $vehicle = Vehicle::find($data['vehicle_id']);
+            if ($vehicle) $data['vehicle_plate'] = $vehicle->plate;
+        } elseif (!empty($data['vehicle_plate'])) {
+            $vehicle = Vehicle::where('plate', $data['vehicle_plate'])->first();
+            if ($vehicle) $data['vehicle_id'] = $vehicle->id;
+        }
+    }
+
     public function show(Trip $trip)
     {
+        $trip->load(['driver:id,name,phone,photo_path', 'vehicle:id,plate,make,model_name,type']);
         $trip->append(['total_costs', 'profit']);
 
         $expenses = Expense::where('trip_id', $trip->id)
@@ -140,23 +173,8 @@ class TripController extends Controller
 
     public function update(Request $request, Trip $trip)
     {
-        $data = $request->validate([
-            'status'             => 'required|in:' . implode(',', array_keys(Trip::$statuses)),
-            'route_from'         => 'required|string|max:100',
-            'route_to'           => 'required|string|max:100',
-            'departure_date'     => 'required|date',
-            'arrival_date'       => 'nullable|date|after_or_equal:departure_date',
-            'driver_name'        => 'required|string|max:100',
-            'vehicle_plate'      => 'required|string|max:20',
-            'cargo_description'  => 'nullable|string|max:200',
-            'cargo_weight_tons'  => 'nullable|numeric|min:0',
-            'freight_amount'     => 'required|numeric|min:0',
-            'fuel_cost'          => 'required|numeric|min:0',
-            'driver_allowance'   => 'required|numeric|min:0',
-            'border_costs'       => 'required|numeric|min:0',
-            'other_costs'        => 'required|numeric|min:0',
-            'notes'              => 'nullable|string',
-        ]);
+        $data = $this->validateTrip($request);
+        $this->syncLegacyFields($data);
 
         $trip->update($data);
 

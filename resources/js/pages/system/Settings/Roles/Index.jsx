@@ -12,6 +12,8 @@ const MODULES = [
     { key: 'fleet',                       label: 'Fleet — Vehicles',          actions: ['view', 'create', 'edit', 'delete'] },
     { key: 'fleet_fuel_logs',             label: 'Fleet — Fuel Logs',         actions: ['view', 'create', 'delete'] },
     { key: 'drivers',                     label: 'Drivers',                   actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'inspections',                 label: 'Vehicle Inspections',       actions: ['view'] },
+    { key: 'trip_check_ins',              label: 'Trip Check-Ins',            actions: ['view'] },
     { key: 'permits',                     label: 'Permits',                   actions: ['view', 'create', 'edit', 'delete'] },
     { key: 'clients',                     label: 'Clients',                   actions: ['view', 'create', 'edit', 'delete'] },
     { key: 'cargo',                       label: 'Cargo',                     actions: ['view', 'create', 'edit', 'delete'] },

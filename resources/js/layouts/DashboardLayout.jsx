@@ -13,10 +13,12 @@ const navItems = [
     { icon: '🚛', label: 'Trips',     href: '/system/trips', perm: 'trips.view' },
     {
         icon: '🚗', label: 'Fleet', href: '/system/fleet',
-        anyPerm: ['fleet.view', 'fleet_fuel_logs.view'],
+        anyPerm: ['fleet.view', 'fleet_fuel_logs.view', 'inspections.view', 'trip_check_ins.view'],
         children: [
             { icon: '🚗', label: 'All Vehicles',  href: '/system/fleet',           perm: 'fleet.view' },
             { icon: '⛽', label: 'Fuel Logs',     href: '/system/fleet/fuel-logs', perm: 'fleet_fuel_logs.view' },
+            { icon: '🔧', label: 'Inspections',   href: '/system/inspections',     perm: 'inspections.view' },
+            { icon: '📍', label: 'Check-Ins',     href: '/system/check-ins',       perm: 'trip_check_ins.view' },
         ],
     },
     { icon: '👤', label: 'Drivers',   href: '/system/drivers', perm: 'drivers.view' },

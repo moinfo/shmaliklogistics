@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\InventoryCategory;
 use App\Models\InventoryItem;
 use App\Models\InventoryMovement;
+use App\Models\InventorySerial;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class InventoryController extends Controller
@@ -57,15 +59,16 @@ class InventoryController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'          => 'required|string|max:255',
-            'category_id'   => 'nullable|exists:inventory_categories,id',
-            'part_number'   => 'nullable|string|max:100',
-            'unit'          => 'required|string|max:30',
-            'reorder_level' => 'nullable|numeric|min:0',
-            'unit_cost'     => 'nullable|numeric|min:0',
-            'location'      => 'nullable|string|max:100',
-            'notes'         => 'nullable|string',
-            'is_active'     => 'boolean',
+            'name'           => 'required|string|max:255',
+            'category_id'    => 'nullable|exists:inventory_categories,id',
+            'part_number'    => 'nullable|string|max:100',
+            'unit'           => 'required|string|max:30',
+            'tracks_serials' => 'boolean',
+            'reorder_level'  => 'nullable|numeric|min:0',
+            'unit_cost'      => 'nullable|numeric|min:0',
+            'location'       => 'nullable|string|max:100',
+            'notes'          => 'nullable|string',
+            'is_active'      => 'boolean',
         ]);
 
         $data['created_by'] = $request->user()->id;
@@ -83,27 +86,48 @@ class InventoryController extends Controller
             ->latest()
             ->paginate(20);
 
+        $serials = $item->tracks_serials
+            ? InventorySerial::where('item_id', $item->id)
+                ->with(['vehicle', 'issuedMovement'])
+                ->orderByRaw("CASE WHEN status='in_stock' THEN 0 ELSE 1 END")
+                ->orderByDesc('created_at')
+                ->get()
+            : collect();
+
         return Inertia::render('system/Inventory/Show', [
-            'item'       => $item,
-            'movements'  => $movements,
-            'vehicles'   => Vehicle::where('status', 'active')->orderBy('plate')->get(['id', 'plate', 'make', 'model_name']),
-            'movTypes'   => InventoryMovement::$types,
+            'item'         => $item,
+            'movements'    => $movements,
+            'serials'      => $serials,
+            'inStockCount' => $item->tracks_serials
+                ? InventorySerial::where('item_id', $item->id)->where('status', 'in_stock')->count()
+                : null,
+            'vehicles'     => Vehicle::where('status', 'active')->orderBy('plate')->get(['id', 'plate', 'make', 'model_name']),
+            'movTypes'     => InventoryMovement::$types,
         ]);
     }
 
     public function update(Request $request, InventoryItem $item)
     {
         $data = $request->validate([
-            'name'          => 'required|string|max:255',
-            'category_id'   => 'nullable|exists:inventory_categories,id',
-            'part_number'   => 'nullable|string|max:100',
-            'unit'          => 'required|string|max:30',
-            'reorder_level' => 'nullable|numeric|min:0',
-            'unit_cost'     => 'nullable|numeric|min:0',
-            'location'      => 'nullable|string|max:100',
-            'notes'         => 'nullable|string',
-            'is_active'     => 'boolean',
+            'name'           => 'required|string|max:255',
+            'category_id'    => 'nullable|exists:inventory_categories,id',
+            'part_number'    => 'nullable|string|max:100',
+            'unit'           => 'required|string|max:30',
+            'tracks_serials' => 'boolean',
+            'reorder_level'  => 'nullable|numeric|min:0',
+            'unit_cost'      => 'nullable|numeric|min:0',
+            'location'       => 'nullable|string|max:100',
+            'notes'          => 'nullable|string',
+            'is_active'      => 'boolean',
         ]);
+
+        // Block disabling serial tracking once any serial exists for this item.
+        if ($item->tracks_serials && empty($data['tracks_serials'])
+            && InventorySerial::where('item_id', $item->id)->exists()) {
+            return back()->withErrors([
+                'tracks_serials' => 'Cannot disable serial tracking — this item already has serial records.',
+            ]);
+        }
 
         $item->update($data);
         return back()->with('success', 'Item updated.');
@@ -119,6 +143,10 @@ class InventoryController extends Controller
 
     public function stockIn(Request $request, InventoryItem $item)
     {
+        if ($item->tracks_serials) {
+            return $this->stockInBySerial($request, $item);
+        }
+
         $data = $request->validate([
             'quantity'   => 'required|numeric|min:0.001',
             'unit_cost'  => 'nullable|numeric|min:0',
@@ -148,8 +176,81 @@ class InventoryController extends Controller
         return back()->with('success', "Stock in recorded. New balance: {$newStock} {$item->unit}.");
     }
 
+    private function stockInBySerial(Request $request, InventoryItem $item)
+    {
+        $data = $request->validate([
+            'serials'     => 'required|array|min:1',
+            'serials.*'   => 'required|string|max:120',
+            'unit_cost'   => 'nullable|numeric|min:0',
+            'reference'   => 'nullable|string|max:100',
+            'vehicle_id'  => 'nullable|exists:vehicles,id',
+            'notes'       => 'nullable|string',
+        ]);
+
+        $serials = collect($data['serials'])
+            ->map(fn($s) => trim($s))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($serials->isEmpty()) {
+            return back()->withErrors(['serials' => 'Enter at least one serial number.']);
+        }
+
+        // Block duplicates already on file for this item.
+        $existing = InventorySerial::where('item_id', $item->id)
+            ->whereIn('serial', $serials)
+            ->pluck('serial')
+            ->all();
+
+        if (!empty($existing)) {
+            return back()->withErrors([
+                'serials' => 'Already on file: ' . implode(', ', $existing),
+            ]);
+        }
+
+        DB::transaction(function () use ($item, $serials, $data, $request) {
+            $qty      = $serials->count();
+            $newStock = $item->current_stock + $qty;
+            $updates  = ['current_stock' => $newStock];
+            if (isset($data['unit_cost'])) {
+                $updates['unit_cost'] = $data['unit_cost'];
+            }
+            $item->update($updates);
+
+            $movement = InventoryMovement::create([
+                'item_id'       => $item->id,
+                'type'          => 'in',
+                'quantity'      => $qty,
+                'unit_cost'     => $data['unit_cost'] ?? $item->unit_cost,
+                'balance_after' => $newStock,
+                'reference'     => $data['reference'] ?? null,
+                'vehicle_id'    => $data['vehicle_id'] ?? null,
+                'notes'         => $data['notes'] ?? null,
+                'serials'       => $serials->all(),
+                'created_by'    => $request->user()->id,
+            ]);
+
+            foreach ($serials as $serial) {
+                InventorySerial::create([
+                    'item_id'              => $item->id,
+                    'serial'               => $serial,
+                    'status'               => 'in_stock',
+                    'received_movement_id' => $movement->id,
+                    'received_at'          => now(),
+                ]);
+            }
+        });
+
+        return back()->with('success', "Received {$serials->count()} serial(s).");
+    }
+
     public function stockOut(Request $request, InventoryItem $item)
     {
+        if ($item->tracks_serials) {
+            return $this->stockOutBySerial($request, $item);
+        }
+
         $data = $request->validate([
             'quantity'   => 'required|numeric|min:0.001',
             'reference'  => 'nullable|string|max:100',
@@ -177,6 +278,76 @@ class InventoryController extends Controller
         ]);
 
         return back()->with('success', "Stock out recorded. New balance: {$newStock} {$item->unit}.");
+    }
+
+    private function stockOutBySerial(Request $request, InventoryItem $item)
+    {
+        $data = $request->validate([
+            'serials'     => 'required|array|min:1',
+            'serials.*'   => 'required|string|max:120',
+            'reference'   => 'nullable|string|max:100',
+            'vehicle_id'  => 'nullable|exists:vehicles,id',
+            'notes'       => 'nullable|string',
+        ]);
+
+        $serials = collect($data['serials'])
+            ->map(fn($s) => trim($s))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($serials->isEmpty()) {
+            return back()->withErrors(['serials' => 'Select at least one serial number to issue.']);
+        }
+
+        $records = InventorySerial::where('item_id', $item->id)
+            ->whereIn('serial', $serials)
+            ->get();
+
+        $foundMap = $records->keyBy('serial');
+        $missing  = $serials->reject(fn($s) => $foundMap->has($s))->values();
+        if ($missing->isNotEmpty()) {
+            return back()->withErrors([
+                'serials' => 'Unknown serial(s): ' . $missing->implode(', '),
+            ]);
+        }
+
+        $alreadyIssued = $records->where('status', '!=', 'in_stock')->pluck('serial')->all();
+        if (!empty($alreadyIssued)) {
+            return back()->withErrors([
+                'serials' => 'Already issued: ' . implode(', ', $alreadyIssued),
+            ]);
+        }
+
+        DB::transaction(function () use ($item, $serials, $records, $data, $request) {
+            $qty      = $serials->count();
+            $newStock = $item->current_stock - $qty;
+            $item->update(['current_stock' => $newStock]);
+
+            $movement = InventoryMovement::create([
+                'item_id'       => $item->id,
+                'type'          => 'out',
+                'quantity'      => $qty,
+                'unit_cost'     => $item->unit_cost,
+                'balance_after' => $newStock,
+                'reference'     => $data['reference'] ?? null,
+                'vehicle_id'    => $data['vehicle_id'] ?? null,
+                'notes'         => $data['notes'] ?? null,
+                'serials'       => $serials->all(),
+                'created_by'    => $request->user()->id,
+            ]);
+
+            foreach ($records as $serial) {
+                $serial->update([
+                    'status'             => 'issued',
+                    'issued_movement_id' => $movement->id,
+                    'issued_at'          => now(),
+                    'vehicle_id'         => $data['vehicle_id'] ?? null,
+                ]);
+            }
+        });
+
+        return back()->with('success', "Issued {$serials->count()} serial(s).");
     }
 
     public function movements(Request $request)

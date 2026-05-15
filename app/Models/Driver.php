@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
 
 class Driver extends Model
 {
@@ -14,7 +13,7 @@ class Driver extends Model
     protected $fillable = [
         'user_id', 'name', 'status',
         'phone', 'phone_alt', 'email',
-        'national_id', 'address', 'photo_path',
+        'national_id', 'address', 'birth_region', 'birth_district', 'photo_path',
         'license_number', 'license_class', 'license_classes', 'license_expiry',
         'license_doc_path', 'visa_doc_path', 'visa_expiry',
         'emergency_contact_name', 'emergency_contact_phone',
@@ -31,7 +30,7 @@ class Driver extends Model
 
     public function getPhotoUrlAttribute(): ?string
     {
-        return $this->photo_path ? Storage::disk('public')->url($this->photo_path) : null;
+        return $this->photo_path ? '/storage/' . ltrim($this->photo_path, '/') : null;
     }
 
     public function user()

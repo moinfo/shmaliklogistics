@@ -47,6 +47,16 @@ function UserModal({ title, onClose, onSubmit, data, setData, errors, processing
                             comboboxProps={{ zIndex: 1100, withinPortal: true }}
                             styles={{ ...inputStyles, dropdown: { background: isDark ? '#07111F' : '#fff', border: `1px solid ${cardBorder}` } }}
                         />
+                        <Group grow gap="md">
+                            <TextInput label="Birth Region" placeholder="e.g. Kilimanjaro"
+                                value={data.birth_region ?? ''}
+                                onChange={e => setData(p => ({ ...p, birth_region: e.target.value }))}
+                                error={errors?.birth_region} styles={inputStyles} />
+                            <TextInput label="Birth District" placeholder="e.g. Moshi Rural"
+                                value={data.birth_district ?? ''}
+                                onChange={e => setData(p => ({ ...p, birth_district: e.target.value }))}
+                                error={errors?.birth_district} styles={inputStyles} />
+                        </Group>
                         <TextInput label={data._isEdit ? 'New Password (leave blank to keep)' : 'Password'} type="password"
                             required={!data._isEdit}
                             value={data.password}
@@ -73,7 +83,7 @@ function UserModal({ title, onClose, onSubmit, data, setData, errors, processing
     );
 }
 
-const blank = { name: '', email: '', role_id: null, password: '', password_confirmation: '' };
+const blank = { name: '', email: '', role_id: null, birth_region: '', birth_district: '', password: '', password_confirmation: '' };
 
 export default function UsersIndex({ users, roles }) {
     const { colorScheme } = useMantineColorScheme();
@@ -98,7 +108,7 @@ export default function UsersIndex({ users, roles }) {
 
     const openCreate = () => { setFormData({ ...blank }); setErrors({}); setCreateOpen(true); };
     const openEdit   = (u) => {
-        setFormData({ _isEdit: true, name: u.name, email: u.email, role_id: u.role_id ? String(u.role_id) : null, password: '', password_confirmation: '' });
+        setFormData({ _isEdit: true, name: u.name, email: u.email, role_id: u.role_id ? String(u.role_id) : null, birth_region: u.birth_region ?? '', birth_district: u.birth_district ?? '', password: '', password_confirmation: '' });
         setErrors({}); setEditUser(u);
     };
 
@@ -133,6 +143,8 @@ export default function UsersIndex({ users, roles }) {
             preserveScroll: true,
         });
     };
+
+    const [lightbox, setLightbox] = useState(null); // { src, alt } | null
 
     const currentUserId = props.auth?.user?.id;
 
@@ -187,7 +199,14 @@ export default function UsersIndex({ users, roles }) {
                                 <Group gap="md">
                                     <Box style={{ position: 'relative', width: 36, height: 36, flexShrink: 0 }}>
                                         {u.avatar_url ? (
-                                            <Box component="img" src={u.avatar_url} alt={u.name} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+                                            <Box
+                                                component="img"
+                                                src={u.avatar_url}
+                                                alt={u.name}
+                                                onClick={() => setLightbox({ src: u.avatar_url, alt: u.name })}
+                                                title="Click to view full image"
+                                                style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', display: 'block', cursor: 'zoom-in' }}
+                                            />
                                         ) : (
                                             <Box style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #1565C0, #2196F3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 <Text c="white" fw={800} size="sm">{u.name.charAt(0).toUpperCase()}</Text>
@@ -262,6 +281,25 @@ export default function UsersIndex({ users, roles }) {
                     })
                 )}
             </Box>
+
+            {lightbox && (
+                <Box
+                    onClick={() => setLightbox(null)}
+                    style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, cursor: 'zoom-out', backdropFilter: 'blur(4px)' }}
+                >
+                    <Box
+                        component="img"
+                        src={lightbox.src}
+                        alt={lightbox.alt}
+                        onClick={e => e.stopPropagation()}
+                        style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 12, boxShadow: '0 20px 60px rgba(0,0,0,0.6)', cursor: 'default' }}
+                    />
+                    <Box
+                        onClick={() => setLightbox(null)}
+                        style={{ position: 'absolute', top: 20, right: 24, width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 22, fontWeight: 700, cursor: 'pointer' }}
+                    >×</Box>
+                </Box>
+            )}
         </DashboardLayout>
     );
 }

@@ -36,7 +36,7 @@ function LicenceBadge({ expiry, isDark }) {
 
 function Avatar({ name, photoUrl, size = 36 }) {
     if (photoUrl) {
-        return <Box component="img" src={photoUrl} alt={name} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, boxShadow: '0 2px 8px rgba(33,150,243,0.3)' }} />;
+        return <Box component="img" src={photoUrl} alt={name} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', flexShrink: 0, boxShadow: '0 2px 8px rgba(33,150,243,0.3)' }} />;
     }
     const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
     return (

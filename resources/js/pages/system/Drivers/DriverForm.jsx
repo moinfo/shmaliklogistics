@@ -125,6 +125,8 @@ export default function DriverForm({ data, setData, errors, statuses, licenseCla
                     <TextInput label="Email" type="email" placeholder="driver@example.com" value={data.email ?? ''} onChange={e => setData('email', e.target.value)} error={errors.email} styles={inputStyles} />
                     <TextInput label="National ID" placeholder="19XXXXXXXXX" value={data.national_id ?? ''} onChange={e => setData('national_id', e.target.value)} error={errors.national_id} styles={inputStyles} />
                     <TextInput label="Address" placeholder="Dar es Salaam, Tanzania" value={data.address ?? ''} onChange={e => setData('address', e.target.value)} error={errors.address} styles={inputStyles} />
+                    <TextInput label="Birth Region" placeholder="e.g. Kilimanjaro" value={data.birth_region ?? ''} onChange={e => setData('birth_region', e.target.value)} error={errors.birth_region} styles={inputStyles} />
+                    <TextInput label="Birth District" placeholder="e.g. Moshi Rural" value={data.birth_district ?? ''} onChange={e => setData('birth_district', e.target.value)} error={errors.birth_district} styles={inputStyles} />
                 </SimpleGrid>
             </Section>
 

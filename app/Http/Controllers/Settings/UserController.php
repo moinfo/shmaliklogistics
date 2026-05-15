@@ -27,6 +27,8 @@ class UserController extends Controller
             'name'                  => 'required|string|max:100',
             'email'                 => 'required|email|unique:users,email',
             'role_id'               => 'required|exists:roles,id',
+            'birth_region'          => 'nullable|string|max:100',
+            'birth_district'        => 'nullable|string|max:100',
             'password'              => 'required|string|min:8|confirmed',
             'password_confirmation' => 'required',
         ], [
@@ -35,10 +37,12 @@ class UserController extends Controller
         ]);
 
         User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'role_id'  => $data['role_id'],
-            'password' => Hash::make($data['password']),
+            'name'           => $data['name'],
+            'email'          => $data['email'],
+            'role_id'        => $data['role_id'],
+            'birth_region'   => $data['birth_region'] ?? null,
+            'birth_district' => $data['birth_district'] ?? null,
+            'password'       => Hash::make($data['password']),
         ]);
 
         return back()->with('success', "User {$data['name']} created.");
@@ -50,6 +54,8 @@ class UserController extends Controller
             'name'                  => 'required|string|max:100',
             'email'                 => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'role_id'               => 'required|exists:roles,id',
+            'birth_region'          => 'nullable|string|max:100',
+            'birth_district'        => 'nullable|string|max:100',
             'password'              => 'nullable|string|min:8|confirmed',
             'password_confirmation' => 'nullable',
         ], [
@@ -57,9 +63,11 @@ class UserController extends Controller
             'role_id.exists'   => 'The selected role is invalid.',
         ]);
 
-        $user->name    = $data['name'];
-        $user->email   = $data['email'];
-        $user->role_id = $data['role_id'];
+        $user->name           = $data['name'];
+        $user->email          = $data['email'];
+        $user->role_id        = $data['role_id'];
+        $user->birth_region   = $data['birth_region'] ?? null;
+        $user->birth_district = $data['birth_district'] ?? null;
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }

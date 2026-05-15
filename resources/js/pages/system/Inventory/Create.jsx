@@ -27,6 +27,7 @@ export default function InventoryCreate({ categories }) {
         category_id: '',
         part_number: '',
         unit: 'pcs',
+        tracks_serials: false,
         reorder_level: '',
         unit_cost: '',
         location: '',
@@ -91,6 +92,14 @@ export default function InventoryCreate({ categories }) {
                                     </Box>
                                     <Switch checked={data.is_active} onChange={e => setData('is_active', e.currentTarget.checked)} />
                                 </Box>
+                                <Box style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: inputBg, borderRadius: 10, border: `1px solid ${inputBorder}` }}>
+                                    <Box style={{ flex: 1, paddingRight: 12 }}>
+                                        <Text size="sm" fw={600} style={{ color: textPri }}>Track by serial number</Text>
+                                        <Text size="xs" style={{ color: textMut }}>Receive & issue must capture unique serials</Text>
+                                    </Box>
+                                    <Switch checked={data.tracks_serials} onChange={e => setData('tracks_serials', e.currentTarget.checked)} />
+                                </Box>
+                                {errors.tracks_serials && <Text size="xs" style={{ color: '#EF4444', marginTop: -8 }}>{errors.tracks_serials}</Text>}
                                 <Box style={{ padding: '12px 16px', background: tipBg, borderRadius: 10, border: `1px solid ${tipBorder}` }}>
                                     <Text size="xs" style={{ color: isDark ? '#60A5FA' : '#1565C0', lineHeight: 1.5 }}>💡 Initial stock is 0. Use “Stock In” on the item page to add opening stock.</Text>
                                 </Box>

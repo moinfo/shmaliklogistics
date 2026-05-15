@@ -11,13 +11,14 @@ class InventoryMovement extends Model
 
     protected $fillable = [
         'item_id', 'type', 'quantity', 'unit_cost', 'balance_after',
-        'reference', 'vehicle_id', 'notes', 'created_by',
+        'reference', 'vehicle_id', 'notes', 'serials', 'created_by',
     ];
 
     protected $casts = [
-        'quantity'     => 'decimal:3',
-        'unit_cost'    => 'decimal:2',
-        'balance_after'=> 'decimal:3',
+        'quantity'      => 'decimal:3',
+        'unit_cost'     => 'decimal:2',
+        'balance_after' => 'decimal:3',
+        'serials'       => 'array',
     ];
 
     public function item()

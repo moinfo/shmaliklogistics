@@ -10,16 +10,17 @@ class InventoryItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'category_id', 'name', 'part_number', 'unit',
+        'category_id', 'name', 'part_number', 'unit', 'tracks_serials',
         'current_stock', 'reorder_level', 'unit_cost',
         'location', 'notes', 'is_active', 'created_by',
     ];
 
     protected $casts = [
-        'current_stock' => 'decimal:3',
-        'reorder_level' => 'decimal:3',
-        'unit_cost'     => 'decimal:2',
-        'is_active'     => 'boolean',
+        'current_stock'  => 'decimal:3',
+        'reorder_level'  => 'decimal:3',
+        'unit_cost'      => 'decimal:2',
+        'is_active'      => 'boolean',
+        'tracks_serials' => 'boolean',
     ];
 
     public function category()
@@ -30,6 +31,11 @@ class InventoryItem extends Model
     public function movements()
     {
         return $this->hasMany(InventoryMovement::class, 'item_id');
+    }
+
+    public function serials()
+    {
+        return $this->hasMany(InventorySerial::class, 'item_id');
     }
 
     public function creator()

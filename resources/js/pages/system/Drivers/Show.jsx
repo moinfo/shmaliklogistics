@@ -54,14 +54,71 @@ function Card({ title, children, isDark, accent }) {
     );
 }
 
-function Avatar({ name, photoUrl, size = 56 }) {
+function Avatar({ name, photoUrl, size = 96, onClick }) {
     if (photoUrl) {
-        return <Box component="img" src={photoUrl} alt={name} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, boxShadow: '0 4px 12px rgba(33,150,243,0.4)' }} />;
+        return (
+            <Box
+                component="img"
+                src={photoUrl}
+                alt={name}
+                onClick={onClick}
+                title="Click to view full image"
+                style={{
+                    width: size, height: size, borderRadius: '50%',
+                    objectFit: 'cover', objectPosition: 'center top',
+                    flexShrink: 0,
+                    border: '3px solid rgba(33,150,243,0.5)',
+                    boxShadow: '0 6px 20px rgba(33,150,243,0.45)',
+                    cursor: onClick ? 'zoom-in' : 'default',
+                    transition: 'transform 0.15s ease',
+                }}
+                onMouseEnter={e => { if (onClick) e.currentTarget.style.transform = 'scale(1.04)'; }}
+                onMouseLeave={e => { if (onClick) e.currentTarget.style.transform = 'scale(1)'; }}
+            />
+        );
     }
     const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
     return (
-        <Box style={{ width: size, height: size, borderRadius: '50%', background: 'linear-gradient(135deg, #1565C0, #2196F3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 12px rgba(33,150,243,0.4)' }}>
-            <Text c="white" fw={900} size="lg">{initials}</Text>
+        <Box style={{ width: size, height: size, borderRadius: '50%', background: 'linear-gradient(135deg, #1565C0, #2196F3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 6px 20px rgba(33,150,243,0.45)' }}>
+            <Text c="white" fw={900} size="28px">{initials}</Text>
+        </Box>
+    );
+}
+
+function PhotoLightbox({ src, alt, onClose }) {
+    if (!src) return null;
+    return (
+        <Box
+            onClick={onClose}
+            style={{
+                position: 'fixed', inset: 0, zIndex: 9999,
+                background: 'rgba(0,0,0,0.85)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: 20, cursor: 'zoom-out',
+                backdropFilter: 'blur(4px)',
+            }}
+        >
+            <Box
+                component="img"
+                src={src}
+                alt={alt}
+                onClick={e => e.stopPropagation()}
+                style={{
+                    maxWidth: '90vw', maxHeight: '90vh',
+                    borderRadius: 12, boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+                    cursor: 'default',
+                }}
+            />
+            <Box
+                onClick={onClose}
+                style={{
+                    position: 'absolute', top: 20, right: 24,
+                    width: 40, height: 40, borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.12)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#fff', fontSize: 22, fontWeight: 700, cursor: 'pointer',
+                }}
+            >×</Box>
         </Box>
     );
 }
@@ -98,6 +155,8 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
         router.patch(`/system/drivers/${driver.id}/vehicle`, { vehicle_id: assignVehicleId ?? null });
     };
 
+    const [photoOpen, setPhotoOpen] = useState(false);
+
     const [accountEmail, setAccountEmail] = useState(driver.email ?? '');
     const [accountPassword, setAccountPassword] = useState('');
     const [accountErrors, setAccountErrors] = useState({});
@@ -131,7 +190,11 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
             {/* Header */}
             <Group justify="space-between" mb="xl" align="flex-start" wrap="wrap" gap="md">
                 <Group gap="md">
-                    <Avatar name={driver.name} photoUrl={driver.photo_url} />
+                    <Avatar
+                        name={driver.name}
+                        photoUrl={driver.photo_url}
+                        onClick={driver.photo_url ? () => setPhotoOpen(true) : undefined}
+                    />
                     <Stack gap={4}>
                         <Group gap="sm">
                             <Text fw={800} size="xl" style={{ color: textPri }}>{driver.name}</Text>
@@ -173,6 +236,8 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
                     <DataRow label="Email"       value={driver.email}       isDark={isDark} />
                     <DataRow label="National ID" value={driver.national_id} isDark={isDark} />
                     <DataRow label="Address"     value={driver.address}     isDark={isDark} />
+                    <DataRow label="Birth Region"   value={driver.birth_region}   isDark={isDark} />
+                    <DataRow label="Birth District" value={driver.birth_district} isDark={isDark} />
                 </Card>
 
                 <Card title="Licence & Emergency" isDark={isDark} accent={['#065F46', '#059669']}>
@@ -338,6 +403,10 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
             <Box mt="xl">
                 <Box component={Link} href="/system/drivers" style={{ color: textMut, textDecoration: 'none', fontSize: 13 }}>← Back to Drivers</Box>
             </Box>
+
+            {photoOpen && (
+                <PhotoLightbox src={driver.photo_url} alt={driver.name} onClose={() => setPhotoOpen(false)} />
+            )}
         </DashboardLayout>
     );
 }

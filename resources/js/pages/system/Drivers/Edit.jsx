@@ -26,6 +26,7 @@ export default function EditDriver({ driver, statuses, licenseClasses }) {
         name: driver.name, status: driver.status,
         phone: driver.phone, phone_alt: driver.phone_alt ?? '', email: driver.email ?? '',
         national_id: driver.national_id ?? '', address: driver.address ?? '',
+        birth_region: driver.birth_region ?? '', birth_district: driver.birth_district ?? '',
         license_number: driver.license_number ?? '', license_classes: driver.license_classes ?? [],
         license_expiry: fmt(driver.license_expiry),
         visa_expiry: fmt(driver.visa_expiry),
@@ -50,7 +51,7 @@ export default function EditDriver({ driver, statuses, licenseClasses }) {
                 <Group gap="lg" align="center">
                     {driver.photo_url ? (
                         <Box component="img" src={driver.photo_url} alt={driver.name}
-                            style={{ width: 88, height: 88, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${cardBorder}` }} />
+                            style={{ width: 88, height: 88, borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', border: `2px solid ${cardBorder}` }} />
                     ) : (
                         <Box style={{ width: 88, height: 88, borderRadius: '50%', background: 'linear-gradient(135deg, #1565C0, #2196F3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Text c="white" fw={900} size="28px">{driver.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()}</Text>

@@ -1,41 +1,119 @@
 import DashboardLayout from '../../../layouts/DashboardLayout';
-import { Box, Grid, Text, Group, Select, TextInput, NumberInput, Textarea, Button, Stack, Switch, Modal } from '@mantine/core';
+import { Box, Grid, Text, Group, Select, TextInput, NumberInput, Textarea, Button, Stack, Switch, Modal, MultiSelect } from '@mantine/core';
 import { Link, useForm, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useCan } from '../../../lib/can';
 
 const inputStyle = { input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' }, label: { color: 'var(--c-text-secondary)', marginBottom: 6 } };
 
-function StockModal({ opened, onClose, item, type, vehicles }) {
-    const { data, setData, post, processing, reset, errors } = useForm({
-        quantity: '', unit_cost: '', reference: '', vehicle_id: '', notes: '',
-    });
+function StockModal({ opened, onClose, item, type, vehicles, inStockSerials }) {
+    const tracks = !!item.tracks_serials;
+
+    const { data, setData, post, processing, reset, errors } = useForm(
+        tracks
+            ? { serials_text: '', serials: [], unit_cost: '', reference: '', vehicle_id: '', notes: '' }
+            : { quantity: '', unit_cost: '', reference: '', vehicle_id: '', notes: '' }
+    );
+
+    const parsedSerials = useMemo(() => {
+        if (!tracks || type !== 'in') return [];
+        return (data.serials_text || '')
+            .split(/[\n,]+/)
+            .map(s => s.trim())
+            .filter(Boolean);
+    }, [data.serials_text, tracks, type]);
+
+    const duplicates = useMemo(() => {
+        if (!tracks || type !== 'in') return [];
+        const seen = new Set();
+        const dupes = new Set();
+        parsedSerials.forEach(s => { if (seen.has(s)) dupes.add(s); else seen.add(s); });
+        return [...dupes];
+    }, [parsedSerials, tracks, type]);
 
     const submit = (e) => {
         e.preventDefault();
+        if (tracks && type === 'in') {
+            setData('serials', parsedSerials);
+        }
         post(`/system/inventory/${item.id}/stock-${type}`, {
             onSuccess: () => { reset(); onClose(); },
+            preserveScroll: true,
         });
     };
 
     const typeLabel = type === 'in' ? 'Stock In' : 'Stock Out';
-    const typeColor = type === 'in' ? '#22C55E' : '#EF4444';
 
     return (
-        <Modal opened={opened} onClose={onClose} title={<Text fw={700} style={{ color: 'var(--c-text)' }}>{typeLabel} — {item.name}</Text>} styles={{ content: { background: 'var(--c-card)', border: '1px solid var(--c-border-input)' }, header: { background: 'var(--c-card)', borderBottom: '1px solid var(--c-border-subtle)' } }}>
+        <Modal opened={opened} onClose={onClose} size={tracks ? 'lg' : 'md'} title={<Text fw={700} style={{ color: 'var(--c-text)' }}>{typeLabel} — {item.name}</Text>} styles={{ content: { background: 'var(--c-card)', border: '1px solid var(--c-border-input)' }, header: { background: 'var(--c-card)', borderBottom: '1px solid var(--c-border-subtle)' } }}>
             <form onSubmit={submit}>
                 <Stack gap="md">
                     {errors.quantity && <Text size="sm" style={{ color: '#EF4444' }}>{errors.quantity}</Text>}
-                    <NumberInput label={`Quantity (${item.unit})`} value={data.quantity} onChange={v => setData('quantity', v)} min={0.001} decimalScale={3} required styles={inputStyle} />
-                    {type === 'in' && (
-                        <NumberInput label="Unit Cost (TZS)" value={data.unit_cost} onChange={v => setData('unit_cost', v)} min={0} decimalScale={2} styles={inputStyle} placeholder={`Current: ${item.unit_cost || '—'}`} />
+                    {errors.serials && <Text size="sm" style={{ color: '#EF4444' }}>{errors.serials}</Text>}
+
+                    {tracks && type === 'in' && (
+                        <>
+                            <Textarea
+                                label="Serial Numbers"
+                                description="One per line (or comma-separated). Each must be unique for this item."
+                                placeholder={'SN-001\nSN-002\nSN-003'}
+                                rows={6}
+                                value={data.serials_text}
+                                onChange={e => setData('serials_text', e.target.value)}
+                                styles={inputStyle}
+                                required
+                            />
+                            <Group justify="space-between">
+                                <Text size="xs" style={{ color: '#64748B' }}>
+                                    {parsedSerials.length} serial{parsedSerials.length === 1 ? '' : 's'} • will receive {parsedSerials.length} {item.unit}
+                                </Text>
+                                {duplicates.length > 0 && (
+                                    <Text size="xs" style={{ color: '#EF4444' }}>Duplicates in list: {duplicates.join(', ')}</Text>
+                                )}
+                            </Group>
+                            <NumberInput label="Unit Cost (TZS)" value={data.unit_cost} onChange={v => setData('unit_cost', v)} min={0} decimalScale={2} styles={inputStyle} placeholder={`Current: ${item.unit_cost || '—'}`} />
+                        </>
                     )}
+
+                    {tracks && type === 'out' && (
+                        <>
+                            <MultiSelect
+                                label="Serials to Issue"
+                                description="Pick the unit(s) leaving stock. Quantity is the number of serials selected."
+                                placeholder={inStockSerials.length ? 'Select serial numbers…' : 'No serials currently in stock'}
+                                data={inStockSerials.map(s => ({ value: s, label: s }))}
+                                value={data.serials}
+                                onChange={v => setData('serials', v)}
+                                searchable
+                                clearable
+                                disabled={!inStockSerials.length}
+                                styles={{ ...inputStyle, dropdown: { background: 'var(--c-card)', border: '1px solid var(--c-border-input)' } }}
+                            />
+                            <Text size="xs" style={{ color: '#64748B' }}>
+                                {data.serials.length} selected • {inStockSerials.length} in stock
+                            </Text>
+                        </>
+                    )}
+
+                    {!tracks && (
+                        <>
+                            <NumberInput label={`Quantity (${item.unit})`} value={data.quantity} onChange={v => setData('quantity', v)} min={0.001} decimalScale={3} required styles={inputStyle} />
+                            {type === 'in' && (
+                                <NumberInput label="Unit Cost (TZS)" value={data.unit_cost} onChange={v => setData('unit_cost', v)} min={0} decimalScale={2} styles={inputStyle} placeholder={`Current: ${item.unit_cost || '—'}`} />
+                            )}
+                        </>
+                    )}
+
                     <TextInput label="Reference" placeholder="PO number, job ID..." value={data.reference} onChange={e => setData('reference', e.target.value)} styles={inputStyle} />
                     <Select label="Vehicle (optional)" placeholder="Link to vehicle..." value={data.vehicle_id} onChange={v => setData('vehicle_id', v || '')} data={[{ value: '', label: 'None' }, ...vehicles.map(v => ({ value: String(v.id), label: `${v.plate} — ${v.make} ${v.model_name}` }))]} clearable styles={inputStyle} />
                     <Textarea label="Notes" rows={2} value={data.notes} onChange={e => setData('notes', e.target.value)} styles={inputStyle} />
                     <Group justify="flex-end" gap="sm">
                         <Button variant="default" onClick={onClose} style={{ background: 'transparent', borderColor: 'rgba(255,255,255,0.1)', color: '#94A3B8' }}>Cancel</Button>
-                        <Button type="submit" loading={processing} style={{ background: `linear-gradient(135deg, ${type === 'in' ? '#166534,#22C55E' : '#7F1D1D,#EF4444'})`, border: 'none', borderRadius: 8, fontWeight: 700 }}>
+                        <Button
+                            type="submit"
+                            loading={processing}
+                            disabled={tracks && type === 'in' && (parsedSerials.length === 0 || duplicates.length > 0)}
+                            style={{ background: `linear-gradient(135deg, ${type === 'in' ? '#166534,#22C55E' : '#7F1D1D,#EF4444'})`, border: 'none', borderRadius: 8, fontWeight: 700 }}>
                             {typeLabel}
                         </Button>
                     </Group>
@@ -45,14 +123,16 @@ function StockModal({ opened, onClose, item, type, vehicles }) {
     );
 }
 
-export default function InventoryShow({ item, movements, vehicles, movTypes }) {
+export default function InventoryShow({ item, movements, serials = [], inStockCount, vehicles, movTypes }) {
     const [editing, setEditing] = useState(false);
     const [stockModal, setStockModal] = useState(null);
+    const [serialFilter, setSerialFilter] = useState('all'); // all | in_stock | issued
     const can = useCan();
 
     const { data, setData, put, processing } = useForm({
         name: item.name, category_id: item.category_id ? String(item.category_id) : '',
         part_number: item.part_number || '', unit: item.unit,
+        tracks_serials: !!item.tracks_serials,
         reorder_level: item.reorder_level, unit_cost: item.unit_cost,
         location: item.location || '', notes: item.notes || '', is_active: item.is_active,
     });
@@ -62,6 +142,16 @@ export default function InventoryShow({ item, movements, vehicles, movTypes }) {
 
     const isLow = item.reorder_level > 0 && Number(item.current_stock) <= Number(item.reorder_level);
     const fmt = (n, d = 0) => n != null ? Number(n).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }) : '—';
+
+    const inStockSerials = useMemo(
+        () => (serials || []).filter(s => s.status === 'in_stock').map(s => s.serial),
+        [serials]
+    );
+
+    const filteredSerials = useMemo(() => {
+        if (serialFilter === 'all') return serials;
+        return serials.filter(s => s.status === serialFilter);
+    }, [serials, serialFilter]);
 
     return (
         <DashboardLayout title={item.name}>
@@ -91,11 +181,18 @@ export default function InventoryShow({ item, movements, vehicles, movTypes }) {
                     <Box>
                         <Text fw={800} size="xl" style={{ color: 'var(--c-text)' }}>{item.name}</Text>
                         {item.part_number && <Text size="sm" style={{ color: '#64748B' }}>Part # {item.part_number}</Text>}
-                        {item.category && (
-                            <Box style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 8, background: `${item.category.color}22`, border: `1px solid ${item.category.color}44`, marginTop: 6 }}>
-                                <Text size="xs" fw={600} style={{ color: item.category.color }}>{item.category.name}</Text>
-                            </Box>
-                        )}
+                        <Group gap={8} mt={6}>
+                            {item.category && (
+                                <Box style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 8, background: `${item.category.color}22`, border: `1px solid ${item.category.color}44` }}>
+                                    <Text size="xs" fw={600} style={{ color: item.category.color }}>{item.category.name}</Text>
+                                </Box>
+                            )}
+                            {item.tracks_serials && (
+                                <Box style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 8, background: 'rgba(33,150,243,0.18)', border: '1px solid rgba(33,150,243,0.4)' }}>
+                                    <Text size="xs" fw={700} style={{ color: '#60A5FA' }}>🔖 Serial tracked</Text>
+                                </Box>
+                            )}
+                        </Group>
                     </Box>
                     <Box style={{ textAlign: 'center' }}>
                         <Text fw={900} size="2.5rem" style={{ color: isLow ? '#EF4444' : '#22C55E', lineHeight: 1 }}>{fmt(item.current_stock, 1)}</Text>
@@ -124,6 +221,15 @@ export default function InventoryShow({ item, movements, vehicles, movTypes }) {
                             <Grid.Col span={{ base: 12, sm: 4 }}><TextInput label="Location" value={data.location} onChange={e => setData('location', e.target.value)} styles={inputStyle} /></Grid.Col>
                             <Grid.Col span={12}><Textarea label="Notes" rows={2} value={data.notes} onChange={e => setData('notes', e.target.value)} styles={inputStyle} /></Grid.Col>
                             <Grid.Col span={12}>
+                                <Box style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--c-input)', borderRadius: 10, border: '1px solid var(--c-border-input)' }}>
+                                    <Box style={{ flex: 1, paddingRight: 12 }}>
+                                        <Text size="sm" fw={600} style={{ color: 'var(--c-text)' }}>Track by serial number</Text>
+                                        <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>Receive & issue must capture unique serials. Cannot be turned off once serials are recorded.</Text>
+                                    </Box>
+                                    <Switch checked={data.tracks_serials} onChange={e => setData('tracks_serials', e.currentTarget.checked)} />
+                                </Box>
+                            </Grid.Col>
+                            <Grid.Col span={12}>
                                 <Group gap="sm">
                                     <Button type="submit" loading={processing} style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 8 }}>Save Changes</Button>
                                     <Button type="button" variant="default" onClick={() => setEditing(false)} style={{ background: 'transparent', borderColor: 'rgba(255,255,255,0.1)', color: '#94A3B8' }}>Cancel</Button>
@@ -131,6 +237,72 @@ export default function InventoryShow({ item, movements, vehicles, movTypes }) {
                             </Grid.Col>
                         </Grid>
                     </form>
+                </Box>
+            )}
+
+            {/* Serial list (only when tracked) */}
+            {item.tracks_serials && (
+                <Box style={{ background: 'var(--c-card)', border: '1px solid var(--c-border-color)', borderRadius: 12, overflow: 'hidden', marginBottom: 20 }}>
+                    <Box style={{ padding: '16px 20px', borderBottom: '1px solid var(--c-border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                        <Box>
+                            <Text fw={700} style={{ color: 'var(--c-text)' }}>Serial Numbers</Text>
+                            <Text size="xs" style={{ color: 'var(--c-text-muted)', marginTop: 2 }}>
+                                {inStockCount ?? inStockSerials.length} in stock · {serials.length} total
+                            </Text>
+                        </Box>
+                        <Group gap={6}>
+                            {['all', 'in_stock', 'issued'].map(k => {
+                                const labels = { all: 'All', in_stock: 'In Stock', issued: 'Issued' };
+                                const active = serialFilter === k;
+                                return (
+                                    <Box
+                                        key={k}
+                                        component="button"
+                                        type="button"
+                                        onClick={() => setSerialFilter(k)}
+                                        style={{ background: active ? 'rgba(33,150,243,0.15)' : 'transparent', border: `1px solid ${active ? 'rgba(33,150,243,0.4)' : 'var(--c-border-input)'}`, color: active ? '#60A5FA' : 'var(--c-text-secondary)', borderRadius: 8, padding: '5px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
+                                    >
+                                        {labels[k]}
+                                    </Box>
+                                );
+                            })}
+                        </Group>
+                    </Box>
+                    <Box style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ background: 'var(--c-border-row)', borderBottom: '1px solid var(--c-border-color)' }}>
+                                    {['Serial', 'Status', 'Received', 'Issued', 'Vehicle'].map(h => (
+                                        <th key={h} style={{ padding: '10px 16px', textAlign: 'left', color: '#64748B', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>{h}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredSerials.map(s => {
+                                    const isIn = s.status === 'in_stock';
+                                    const color = isIn ? '#22C55E' : '#94A3B8';
+                                    return (
+                                        <tr key={s.id} style={{ borderBottom: '1px solid var(--c-border-row)' }}>
+                                            <td style={{ padding: '10px 16px' }}><Text fw={700} size="sm" style={{ color: 'var(--c-text)', fontFamily: 'ui-monospace, SFMono-Regular, monospace' }}>{s.serial}</Text></td>
+                                            <td style={{ padding: '10px 16px' }}>
+                                                <Box style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 8, background: `${color}22`, border: `1px solid ${color}44` }}>
+                                                    <Text size="xs" fw={700} style={{ color }}>{isIn ? 'In Stock' : 'Issued'}</Text>
+                                                </Box>
+                                            </td>
+                                            <td style={{ padding: '10px 16px' }}><Text size="xs" style={{ color: '#64748B' }}>{s.received_at ? new Date(s.received_at).toLocaleDateString() : '—'}</Text></td>
+                                            <td style={{ padding: '10px 16px' }}><Text size="xs" style={{ color: '#64748B' }}>{s.issued_at ? new Date(s.issued_at).toLocaleDateString() : '—'}</Text></td>
+                                            <td style={{ padding: '10px 16px' }}><Text size="xs" style={{ color: '#64748B' }}>{s.vehicle?.plate || '—'}</Text></td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                        {filteredSerials.length === 0 && (
+                            <Box style={{ textAlign: 'center', padding: '24px 0' }}>
+                                <Text size="sm" style={{ color: 'var(--c-text-muted)' }}>No serials match this filter</Text>
+                            </Box>
+                        )}
+                    </Box>
                 </Box>
             )}
 
@@ -153,6 +325,7 @@ export default function InventoryShow({ item, movements, vehicles, movTypes }) {
                                 const mt = movTypes[m.type] || { label: m.type, color: '#94A3B8' };
                                 const qtyColor = m.type === 'in' ? '#22C55E' : m.type === 'out' ? '#EF4444' : '#F59E0B';
                                 const qtySign = m.type === 'in' ? '+' : m.type === 'out' ? '−' : '±';
+                                const serialList = Array.isArray(m.serials) ? m.serials : null;
                                 return (
                                     <tr key={m.id} style={{ borderBottom: '1px solid var(--c-border-row)' }}>
                                         <td style={{ padding: '12px 16px' }}><Text size="xs" style={{ color: '#64748B' }}>{new Date(m.created_at).toLocaleDateString()}</Text></td>
@@ -166,7 +339,14 @@ export default function InventoryShow({ item, movements, vehicles, movTypes }) {
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{m.reference || '—'}</Text></td>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{m.vehicle?.plate || '—'}</Text></td>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{m.creator?.name || '—'}</Text></td>
-                                        <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: 'var(--c-text-muted)' }}>{m.notes || '—'}</Text></td>
+                                        <td style={{ padding: '12px 16px' }}>
+                                            <Text size="sm" style={{ color: 'var(--c-text-muted)' }}>{m.notes || '—'}</Text>
+                                            {serialList && serialList.length > 0 && (
+                                                <Text size="10px" style={{ color: '#60A5FA', marginTop: 4, fontFamily: 'ui-monospace, monospace' }}>
+                                                    🔖 {serialList.join(', ')}
+                                                </Text>
+                                            )}
+                                        </td>
                                     </tr>
                                 );
                             })}
@@ -180,7 +360,7 @@ export default function InventoryShow({ item, movements, vehicles, movTypes }) {
                 </Box>
             </Box>
 
-            {stockModal && <StockModal opened={!!stockModal} onClose={() => setStockModal(null)} item={item} type={stockModal} vehicles={vehicles} />}
+            {stockModal && <StockModal opened={!!stockModal} onClose={() => setStockModal(null)} item={item} type={stockModal} vehicles={vehicles} inStockSerials={inStockSerials} />}
         </DashboardLayout>
     );
 }

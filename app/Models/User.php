@@ -7,14 +7,13 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'avatar', 'password', 'role_id'];
+    protected $fillable = ['name', 'email', 'avatar', 'birth_region', 'birth_district', 'password', 'role_id'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -26,7 +25,7 @@ class User extends Authenticatable
 
     public function getAvatarUrlAttribute(): ?string
     {
-        return $this->avatar ? Storage::disk('public')->url($this->avatar) : null;
+        return $this->avatar ? '/storage/' . ltrim($this->avatar, '/') : null;
     }
 
     public function hasPermission(string $permission): bool

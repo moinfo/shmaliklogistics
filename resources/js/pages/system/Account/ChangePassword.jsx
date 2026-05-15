@@ -3,7 +3,7 @@ import { useForm } from '@inertiajs/react';
 import { Box, Stack, Title, Text, PasswordInput, Button, Alert, Group } from '@mantine/core';
 import { usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 
 export default function ChangePassword() {
@@ -28,6 +28,8 @@ export default function ChangePassword() {
         if (!file) return;
         router.post('/account/avatar', { avatar: file }, { forceFormData: true, preserveScroll: true });
     };
+
+    const [lightboxOpen, setLightboxOpen] = useState(false);
 
     return (
         <DashboardLayout>
@@ -60,10 +62,12 @@ export default function ChangePassword() {
                         <Group gap="lg" align="center">
                             {user?.avatar_url ? (
                                 <Box component="img" src={user.avatar_url} alt={user.name}
-                                    style={{ width: 96, height: 96, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--mantine-color-default-border)' }} />
+                                    onClick={() => setLightboxOpen(true)}
+                                    title="Click to view full image"
+                                    style={{ width: 120, height: 120, borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', border: '3px solid rgba(33,150,243,0.5)', boxShadow: '0 6px 20px rgba(33,150,243,0.45)', cursor: 'zoom-in' }} />
                             ) : (
-                                <Box style={{ width: 96, height: 96, borderRadius: '50%', background: 'linear-gradient(135deg, #1565C0, #2196F3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Text c="white" fw={800} size="32px">{(user?.name || 'U').charAt(0).toUpperCase()}</Text>
+                                <Box style={{ width: 120, height: 120, borderRadius: '50%', background: 'linear-gradient(135deg, #1565C0, #2196F3)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 20px rgba(33,150,243,0.45)' }}>
+                                    <Text c="white" fw={800} size="40px">{(user?.name || 'U').charAt(0).toUpperCase()}</Text>
                                 </Box>
                             )}
                             <Stack gap={6}>
@@ -138,6 +142,25 @@ export default function ChangePassword() {
                     </Box>
                 </motion.div>
             </Box>
+
+            {lightboxOpen && user?.avatar_url && (
+                <Box
+                    onClick={() => setLightboxOpen(false)}
+                    style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, cursor: 'zoom-out', backdropFilter: 'blur(4px)' }}
+                >
+                    <Box
+                        component="img"
+                        src={user.avatar_url}
+                        alt={user.name}
+                        onClick={e => e.stopPropagation()}
+                        style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 12, boxShadow: '0 20px 60px rgba(0,0,0,0.6)', cursor: 'default' }}
+                    />
+                    <Box
+                        onClick={() => setLightboxOpen(false)}
+                        style={{ position: 'absolute', top: 20, right: 24, width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 22, fontWeight: 700, cursor: 'pointer' }}
+                    >×</Box>
+                </Box>
+            )}
         </DashboardLayout>
     );
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\System\CargoController;
 use App\Http\Controllers\System\DashboardController;
 use App\Http\Controllers\System\TripController;
 use App\Http\Controllers\System\TripExpenseLineController;
+use App\Http\Controllers\System\TripImportController;
 use App\Http\Controllers\System\VehicleController;
 use App\Http\Controllers\System\FuelLogController;
 use App\Http\Controllers\System\DriverController;
@@ -164,6 +165,9 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
     // Trips
     $permResource('trips', TripController::class, 'trips');
     Route::patch('trips/{trip}/status', [TripController::class, 'updateStatus'])->name('trips.update-status')->middleware('permission:trips.edit');
+    Route::get('trips/import', [TripImportController::class, 'create'])->name('trips.import')->middleware('permission:trips.create');
+    Route::post('trips/import/preview', [TripImportController::class, 'preview'])->name('trips.import.preview')->middleware('permission:trips.create');
+    Route::post('trips/import', [TripImportController::class, 'store'])->name('trips.import.store')->middleware('permission:trips.create');
     Route::post('trips/{trip}/expense-lines', [TripExpenseLineController::class, 'store'])->name('trips.expense-lines.store')->middleware('permission:trips.edit');
     Route::delete('trips/{trip}/expense-lines/{line}', [TripExpenseLineController::class, 'destroy'])->name('trips.expense-lines.destroy')->middleware('permission:trips.edit');
 

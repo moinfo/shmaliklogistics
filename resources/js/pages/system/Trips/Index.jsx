@@ -69,6 +69,15 @@ export default function TripsIndex({ trips, stats, statuses, filters }) {
                     <Text size="sm" style={{ color: textSec }}>All cargo trips — create, track and close</Text>
                 </Stack>
                 {can('trips.create') && (
+                    <Box
+                        component={Link}
+                        href="/system/trips/import"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 10, border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0'}`, color: isDark ? '#94A3B8' : '#64748B', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}
+                    >
+                        📥 Import Excel
+                    </Box>
+                )}
+                {can('trips.create') && (
                     <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                         <Box
                             component={Link}

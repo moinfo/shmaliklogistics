@@ -11,15 +11,7 @@ import { checkPermission } from '../lib/can';
 const navItems = [
     { icon: '📊', label: 'Dashboard', href: '/system/dashboard' },
 
-    // ── Trips ────────────────────────────────────────────────────────────────
-    {
-        icon: '🚛', label: 'Trips', href: '/system/trips',
-        anyPerm: ['trips.view', 'trips.create'],
-        children: [
-            { icon: '🚛', label: 'All Trips',     href: '/system/trips',        perm: 'trips.view' },
-            { icon: '📥', label: 'Import Excel',  href: '/system/trips/import', perm: 'trips.create' },
-        ],
-    },
+    { icon: '🚛', label: 'Trips', href: '/system/trips', perm: 'trips.view' },
 
     // ── Fleet ─────────────────────────────────────────────────────────────────
     {

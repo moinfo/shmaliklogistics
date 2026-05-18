@@ -29,6 +29,7 @@ class DriverInspectionController extends Controller
             'driver'    => $driver,
             'trip'      => $trip,
             'checklist' => VehicleInspection::$defaultChecklist,
+            'sections'  => VehicleInspection::$checklistSections,
             'statuses'  => VehicleInspection::$statuses,
             'types'     => VehicleInspection::$types,
             'recent'    => $recent,

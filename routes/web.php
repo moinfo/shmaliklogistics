@@ -148,7 +148,7 @@ $permResource = function (string $name, string $controller, string $module, arra
     }
 };
 
-Route::middleware('auth')->prefix('system')->name('system.')->group(function () use ($permResource) {
+Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->group(function () use ($permResource) {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/notifications', NotificationsController::class)->name('notifications');
 
@@ -359,5 +359,10 @@ Route::middleware('auth')->prefix('system')->name('system.')->group(function () 
     });
 });
 
-// Redirect /dashboard → /system/dashboard for convenience
-Route::get('/dashboard', fn () => redirect()->route('system.dashboard'))->middleware('auth')->name('dashboard');
+// Redirect /dashboard → role-appropriate landing page
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+    return $user?->role?->slug === 'driver'
+        ? redirect()->route('driver.dashboard')
+        : redirect()->route('system.dashboard');
+})->middleware('auth')->name('dashboard');

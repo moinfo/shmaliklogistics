@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'permission' => \App\Http\Middleware\CheckPermission::class,
             'driver'     => \App\Http\Middleware\EnsureDriver::class,
+            'no.driver'  => \App\Http\Middleware\RedirectDrivers::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

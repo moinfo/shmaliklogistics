@@ -1,6 +1,6 @@
 # Deployment Guide — SH Malik Logistics ERP
 
-**Stack:** Laravel 13 · Inertia.js · React 18 · Mantine v7 · MySQL 8
+**Stack:** Laravel 12 · Inertia.js · React 18 · Mantine v7 · MySQL 8
 
 ---
 
@@ -17,7 +17,9 @@
 | Disk | 5 GB | 20 GB+ |
 
 **Required PHP extensions:**
-`pdo_mysql`, `mbstring`, `xml`, `curl`, `gd`, `zip`, `bcmath`, `tokenizer`, `ctype`, `fileinfo`, `openssl`
+`pdo_mysql`, `mbstring`, `xml`, `curl`, `gd`, `zip`, `bcmath`, `tokenizer`, `ctype`, `fileinfo`, `openssl`, `iconv`, `simplexml`, `xmlreader`, `xmlwriter`, `zlib`
+
+> `iconv`, `simplexml`, `xmlreader`, `xmlwriter`, `zlib` are required by **phpoffice/phpspreadsheet** for Excel import.
 
 ---
 
@@ -114,10 +116,21 @@ This creates all tables and seeds the following lookup data automatically via mi
 
 ---
 
-## 6. Seed Demo Data
+## 6. Import Real Trip Data
 
-> Run this **once** on initial deployment to populate the system with realistic sample data.
-> **WARNING:** This truncates all transactional tables. Do NOT run on a live system with real data.
+To load the actual 2025 and 2026 trip data from the Excel trip sheets:
+
+```bash
+# Copy Excel files to the project root, then:
+php artisan trips:import "TRIP SHEET 2026.xlsx" 2026
+php artisan trips:import "TRIP SHEET.xlsx" 2025
+```
+
+Each run is safe to re-run — existing trip numbers are automatically skipped.
+
+### Optional: Demo Seeder
+
+> **WARNING:** This truncates all transactional tables. Do NOT run on a database with real data.
 
 ```bash
 php artisan db:seed --force
@@ -259,6 +272,7 @@ After the system is live, complete these steps in the admin panel:
 - [ ] **Create real admin user** with your own email — Settings → Users
 - [ ] **Disable the demo admin account** once your own account is ready
 - [ ] **Set up email** — test by sending an invoice from Billing
+- [ ] **Import trip data** — `php artisan trips:import "TRIP SHEET 2026.xlsx" 2026` (and 2025 file)
 - [ ] **Register real vehicles** — Fleet → Add Vehicle
 - [ ] **Register real drivers** — Drivers → Add Driver
 - [ ] **Enable portal access** for clients — Clients → Edit → Portal tab

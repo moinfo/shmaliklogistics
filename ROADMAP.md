@@ -3,7 +3,7 @@
 > Detailed specification for all planned modules not yet implemented.
 > See [README.md](./README.md) for the full list of what is already built.
 
-**Last updated:** April 2026  
+**Last updated:** May 2026  
 **Version target:** 2.0
 
 ---
@@ -436,44 +436,16 @@ php artisan reverb:install
 
 ---
 
-### 🟢 14. Quality / Vehicle Inspection
-
-**Purpose:** Pre-trip safety inspection checklist for each vehicle before departure.
-
-**Key Features:**
-- Customisable checklist template (tyres, lights, brakes, docs, fire extinguisher...)
-- Driver fills checklist on phone before trip
-- Failed items trigger a maintenance alert
-- Inspection history per vehicle
-
-**Database migration:**
-```sql
-CREATE TABLE inspection_templates (
-    id INTEGER PRIMARY KEY, name VARCHAR(255), items JSON, is_active BOOLEAN
-);
-
-CREATE TABLE vehicle_inspections (
-    id INTEGER PRIMARY KEY, vehicle_id INTEGER, trip_id INTEGER NULL,
-    driver_id INTEGER, template_id INTEGER, results JSON,
-    passed BOOLEAN, notes TEXT, inspected_at TIMESTAMP, created_at TIMESTAMP
-);
-```
-
----
-
 ## Implementation Order (Recommended)
 
 ```
-Month 4    Customer Portal         (high client value, no new infra)
+Month 5    Customer Portal         (high client value, no new infra)
            Appraisals              (needed for HR completeness)
-           Inventory               (links to Maintenance)
-
-Month 5    GPS Integration         (requires GPS device in vehicles first)
            Purchase / Procurement  (links to Inventory)
            Recruitment             (nice HR completion)
 
-Month 6    Bulk SMS (BEEM Africa)  (quick integration, high value)
-           Vehicle Inspection      (driver safety compliance)
+Month 6    GPS Integration         (requires GPS device in vehicles first)
+           Bulk SMS (BEEM Africa)  (quick integration, high value)
 
 Month 7+   Internal Chat           (Reverb WebSockets)
            Full Accounting GL      (or external API integration)

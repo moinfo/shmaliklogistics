@@ -19,13 +19,14 @@ A comprehensive, modular logistics ERP designed specifically for Tanzanian freig
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Laravel 13.7 (PHP 8.3) |
+| Backend | Laravel 12 (PHP 8.3) |
 | Frontend | React 18 + Inertia.js |
 | UI Components | Mantine v7 |
 | Animations | Framer Motion |
-| Database | SQLite (dev) — MySQL/PostgreSQL ready |
+| Database | MySQL 8 |
 | Build Tool | Vite 6 |
-| Node | v24.13 |
+| Node | v24 |
+| Excel parsing | phpoffice/phpspreadsheet |
 
 ---
 
@@ -68,6 +69,11 @@ composer run dev             # starts Laravel + Vite concurrently
 |--------|--------|-------|
 | Dashboard | ✅ Live | Real-time KPIs, fleet status, recent trips |
 | Trip Management | ✅ Complete | Full CRUD, status flow, driver/vehicle assignment |
+| USD Invoice + Exchange Rate | ✅ Complete | Invoice USD + rate → auto TZS; shown on trip & billing |
+| Container Number Tracking | ✅ Complete | Per-trip container field, shown on list & detail |
+| Trip Expense Lines | ✅ Complete | 11-category line items with currency conversion |
+| Per-Trip P&L Print | ✅ Complete | Income vs expenses, printable A4 layout |
+| Excel Import (Trip Sheets) | ✅ Complete | UI + artisan command; supports 2025 & 2026 files |
 | Cargo & Load Tracking | ✅ Complete | Clickable status progression, linked to trips |
 | Border & Permit Tracking | ✅ Complete | Expiry alerts (7 / 30 days) |
 | Route Profitability Report | ✅ Complete | Revenue vs costs per route |
@@ -81,8 +87,9 @@ composer run dev             # starts Laravel + Vite concurrently
 | Quotes | ✅ Complete | Auto-numbered QTE-YYYY-NNNN |
 | Proforma Invoices | ✅ Complete | Convert from quote in one click |
 | Tax Invoices | ✅ Complete | Record payments, balance tracking |
-| Payments | ✅ Complete | Payment history, bulk print report |
-| Expenses | ✅ Complete | Per-trip expense tracking |
+| Payments | ✅ Complete | Advance / final stage, cheque number & date, USD amounts |
+| Debtors Report | ✅ Complete | AR aging, per-client accordion, outstanding filter, print |
+| Expenses | ✅ Complete | Per-trip line-item expense tracking |
 | Documents | ✅ Complete | Upload, download, expiry tracking |
 | Financial Summary Report | ✅ Complete | Revenue, expenses, profit by period |
 | Print / PDF Export | ✅ Complete | All billing docs — company logo + A4 layout |
@@ -95,7 +102,9 @@ composer run dev             # starts Laravel + Vite concurrently
 | Module | Status | Notes |
 |--------|--------|-------|
 | Vehicle Management | ✅ Complete | Status, assignment, document tracking |
-| Driver Management | ✅ Complete | License, assignment, status |
+| Driver Management | ✅ Complete | License, assignment, status, photo |
+| Driver Portal | ✅ Complete | Mobile-first portal: inspections, 3-hr check-ins, expense entry, live alerts |
+| Vehicle Inspections | ✅ Complete | 5-section sectioned checklist (Engine, Tyres, Lights, Safety, Cargo/Docs) |
 | Fleet Utilization Report | ✅ Complete | Active vs idle, mileage analysis |
 | Maintenance / Service Records | ✅ Complete | Service history, cost tracking |
 | Clients (CRM) | ✅ Complete | Company, TIN, contact details |
@@ -120,9 +129,8 @@ composer run dev             # starts Laravel + Vite concurrently
 | Module | Status | Notes |
 |--------|--------|-------|
 | Maintenance | ✅ Complete | (see Fleet section above) |
-| Inventory | ❌ Planned | Spare parts stock management |
+| Inventory | ✅ Complete | Serial-number tracking, stock movements |
 | Purchase / Procurement | ❌ Planned | Supplier orders, diesel, spare parts |
-| Quality / Vehicle Inspection | ❌ Planned | Pre-trip safety checklists |
 
 ### Group 6 — Marketing
 
@@ -164,12 +172,14 @@ composer run dev             # starts Laravel + Vite concurrently
 
 | Metric | Count |
 |--------|-------|
-| Database migrations | 39 |
-| Eloquent models | 31 |
-| Controllers | 37 |
-| React pages / components | 107 |
-| API routes (system) | 185 |
-| Demo data rows (seeded) | ~3,500+ |
+| Database migrations | 68 |
+| Eloquent models | 47 |
+| Controllers | 64 |
+| React pages / components | 143 |
+| Artisan commands | 1 (`trips:import`) |
+| Imported trips (2025 + 2026) | 650 |
+| Invoices in DB | 628 |
+| Payments (advance + final) | 817 |
 
 ---
 
@@ -206,18 +216,34 @@ web/
 
 ---
 
-## Demo Data
+## Real Data Import
 
-The seeder (`php artisan db:seed`) loads **realistic Tanzanian data** from Jan 1 – Apr 30, 2026:
+The live database is seeded from the actual **TRIP SHEET** Excel files (2025 & 2026). Use the Artisan command:
+
+```bash
+# Import 2026 trips (207 rows — reads DEBTORS sheet)
+php artisan trips:import "TRIP SHEET 2026.xlsx" 2026
+
+# Import 2025 trips (441 rows)
+php artisan trips:import "TRIP SHEET.xlsx" 2025
+
+# Preview without writing to DB
+php artisan trips:import "TRIP SHEET 2026.xlsx" 2026 --dry-run
+```
+
+Each import creates: `Trip` + `BillingDocument (invoice)` + `Payment` (advance + final) + `Client::firstOrCreate`.  
+Duplicate detection prevents re-importing existing trip numbers.
+
+### Demo Seeder (optional)
+
+The seeder (`php artisan db:seed`) loads **realistic sample data** from Jan–Apr 2026 for local development / staging:
 
 - 1 admin user, 12 vehicles, 12 drivers, 10 clients
-- 33 trips across 7 routes (DSM → LBV, LUN, LLW, MPM, NBI, KLA, BYK)
-- 28 permits, 50 expenses, 26 service records
-- 35 billing documents (quotes, proformas, invoices) with 112 line items
-- 15 employees — full payroll: PAYE, NSSF, NHIF, SDL, WCF, HESLB
-- 4 payroll runs → 60 salary slips
-- 2,428 attendance logs (all working days)
-- 30 cargo records, 6 advances, 4 loans
+- ~39 trips, 30 cargo records, 50 billing documents
+- 15 employees — full payroll (PAYE, NSSF, NHIF, SDL, WCF, HESLB)
+- 4 payroll runs → 60 salary slips, 2,428 attendance logs
+
+> **WARNING:** `db:seed` truncates all transactional tables. Never run it on a production database with real data.
 
 ---
 
@@ -283,4 +309,4 @@ Web: [makutano.co.tz](https://makutano.co.tz) · Email: info@makutano.co.tz
 
 ---
 
-*Version 1.0 · April 2026*
+*Version 1.1 · May 2026*

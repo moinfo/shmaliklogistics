@@ -32,6 +32,7 @@ const navItems = [
             { icon: '📋', label: 'Proforma',        href: '/system/billing/proformas',      perm: 'billing_proformas.view' },
             { icon: '📄', label: 'Invoices',        href: '/system/billing/invoices',       perm: 'billing_invoices.view' },
             { icon: '💳', label: 'Payments',        href: '/system/billing/payments',       perm: 'billing_payments.view' },
+            { icon: '🔴', label: 'Debtors',         href: '/system/billing/debtors',        perm: 'billing_invoices.view' },
             { icon: '📥', label: 'Quote Requests',  href: '/system/billing/quote-requests', perm: 'billing_quote_requests.view' },
         ],
     },

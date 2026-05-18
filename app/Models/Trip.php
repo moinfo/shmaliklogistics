@@ -14,8 +14,9 @@ class Trip extends Model
         'trip_number', 'status',
         'route_from', 'route_to', 'departure_date', 'arrival_date',
         'driver_name', 'vehicle_plate', 'driver_id', 'vehicle_id',
-        'cargo_description', 'cargo_weight_tons',
-        'freight_amount', 'fuel_cost', 'driver_allowance',
+        'cargo_description', 'container_number', 'cargo_weight_tons',
+        'freight_amount', 'invoice_usd', 'exchange_rate', 'invoice_tzs',
+        'fuel_cost', 'driver_allowance',
         'border_costs', 'road_fines', 'guard_fees', 'other_costs',
         'notes', 'created_by',
     ];
@@ -24,6 +25,9 @@ class Trip extends Model
         'departure_date'    => 'date',
         'arrival_date'      => 'date',
         'freight_amount'    => 'decimal:2',
+        'invoice_usd'       => 'decimal:2',
+        'exchange_rate'     => 'decimal:2',
+        'invoice_tzs'       => 'decimal:2',
         'fuel_cost'         => 'decimal:2',
         'driver_allowance'  => 'decimal:2',
         'border_costs'      => 'decimal:2',
@@ -66,6 +70,11 @@ class Trip extends Model
     public function expenses()
     {
         return $this->hasMany(Expense::class);
+    }
+
+    public function expenseLines()
+    {
+        return $this->hasMany(TripExpenseLine::class)->orderBy('sort_order')->orderBy('id');
     }
 
     public function getTotalCostsAttribute(): float

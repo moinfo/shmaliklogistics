@@ -82,6 +82,18 @@ export default function TripForm({ data, setData, errors, statuses, drivers = []
         setData({ ...data, vehicle_plate: plate ?? '', ...(autoDriver ? { driver_name: autoDriver } : {}) });
     };
 
+    // Auto-compute invoice_tzs when usd + rate are both filled
+    const handleInvoiceUsd = (v) => {
+        const usd  = Number(v) || 0;
+        const rate = Number(data.exchange_rate) || 0;
+        setData({ ...data, invoice_usd: v, invoice_tzs: usd && rate ? (usd * rate).toFixed(0) : data.invoice_tzs });
+    };
+    const handleExchangeRate = (v) => {
+        const rate = Number(v) || 0;
+        const usd  = Number(data.invoice_usd) || 0;
+        setData({ ...data, exchange_rate: v, invoice_tzs: usd && rate ? (usd * rate).toFixed(0) : data.invoice_tzs });
+    };
+
     const totalCosts = (Number(data.fuel_cost) || 0)
         + (Number(data.driver_allowance) || 0)
         + (Number(data.border_costs) || 0)
@@ -161,6 +173,7 @@ export default function TripForm({ data, setData, errors, statuses, drivers = []
                     </Stack>
 
                     <TextInput label="Cargo Description" placeholder="Industrial Equipment, FMCG…" value={data.cargo_description ?? ''} onChange={e => setData('cargo_description', e.target.value)} error={errors.cargo_description} styles={inputStyles} />
+                    <TextInput label="Container Number" placeholder="TRHU5515899 or LOOSE CARGO" value={data.container_number ?? ''} onChange={e => setData('container_number', e.target.value.toUpperCase())} error={errors.container_number} styles={inputStyles} maxLength={20} />
                     <NumberInput label="Cargo Weight (tons)" placeholder="28" min={0} step={0.5} value={data.cargo_weight_tons ?? ''} onChange={v => setData('cargo_weight_tons', v)} error={errors.cargo_weight_tons} styles={numStyles} />
                 </SimpleGrid>
 
@@ -180,7 +193,51 @@ export default function TripForm({ data, setData, errors, statuses, drivers = []
 
             <Section title="Financials (TZS)" icon="💰" isDark={isDark}>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" mb="md">
-                    <NumberInput label="Freight Amount (Income)" placeholder="45,000,000" min={0} required value={data.freight_amount} onChange={v => setData('freight_amount', v)} error={errors.freight_amount} styles={numStyles} thousandSeparator="," />
+                    <NumberInput label="Freight Amount / TZS Income" placeholder="45,000,000" min={0} required value={data.freight_amount} onChange={v => setData('freight_amount', v)} error={errors.freight_amount} styles={numStyles} thousandSeparator="," />
+
+                    {/* USD invoice block — spans full row on mobile, side-by-side on sm+ */}
+                    <Box style={{ gridColumn: '1 / -1' }}>
+                        <Box style={{ background: isDark ? 'rgba(59,130,246,0.05)' : '#EFF6FF', borderRadius: 10, padding: '14px 16px', border: `1px solid ${isDark ? 'rgba(59,130,246,0.2)' : '#BFDBFE'}` }}>
+                            <Text size="xs" fw={700} style={{ color: '#3B82F6', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>💵 USD Invoice (optional)</Text>
+                            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
+                                <NumberInput
+                                    label="Invoice Amount (USD)"
+                                    placeholder="15,000"
+                                    min={0}
+                                    value={data.invoice_usd}
+                                    onChange={handleInvoiceUsd}
+                                    error={errors.invoice_usd}
+                                    styles={numStyles}
+                                    thousandSeparator=","
+                                    prefix="$ "
+                                />
+                                <NumberInput
+                                    label="Exchange Rate (TZS per USD)"
+                                    placeholder="2,550"
+                                    min={0}
+                                    value={data.exchange_rate}
+                                    onChange={handleExchangeRate}
+                                    error={errors.exchange_rate}
+                                    styles={numStyles}
+                                    thousandSeparator=","
+                                />
+                                <NumberInput
+                                    label="Invoice TZS (auto-computed)"
+                                    placeholder="38,250,000"
+                                    min={0}
+                                    value={data.invoice_tzs}
+                                    onChange={v => setData('invoice_tzs', v)}
+                                    error={errors.invoice_tzs}
+                                    styles={{
+                                        ...numStyles,
+                                        input: { ...numStyles.input, background: isDark ? 'rgba(59,130,246,0.08)' : '#DBEAFE', fontWeight: 700 },
+                                    }}
+                                    thousandSeparator=","
+                                />
+                            </SimpleGrid>
+                        </Box>
+                    </Box>
+
                     <NumberInput label="Fuel Cost" placeholder="8,000,000" min={0} required value={data.fuel_cost} onChange={v => setData('fuel_cost', v)} error={errors.fuel_cost} styles={numStyles} thousandSeparator="," />
                     <NumberInput label="Driver Allowance" placeholder="1,500,000" min={0} required value={data.driver_allowance} onChange={v => setData('driver_allowance', v)} error={errors.driver_allowance} styles={numStyles} thousandSeparator="," />
                     <NumberInput label="Border Costs" placeholder="2,000,000" min={0} required value={data.border_costs} onChange={v => setData('border_costs', v)} error={errors.border_costs} styles={numStyles} thousandSeparator="," />

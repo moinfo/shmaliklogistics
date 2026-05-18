@@ -7,13 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 class Payment extends Model
 {
     protected $fillable = [
-        'billing_document_id', 'amount', 'payment_date',
-        'payment_method', 'reference_number', 'notes', 'created_by',
+        'billing_document_id', 'amount', 'usd_amount', 'exchange_rate',
+        'payment_date', 'payment_method', 'payment_stage',
+        'reference_number', 'cheque_number', 'cheque_date',
+        'notes', 'created_by',
     ];
 
     protected $casts = [
-        'payment_date' => 'date',
-        'amount'       => 'decimal:2',
+        'payment_date'  => 'date',
+        'cheque_date'   => 'date',
+        'amount'        => 'decimal:2',
+        'usd_amount'    => 'decimal:2',
+        'exchange_rate' => 'decimal:2',
+    ];
+
+    public static array $stages = [
+        'advance' => ['label' => 'Advance',  'color' => '#F59E0B'],
+        'final'   => ['label' => 'Final',    'color' => '#22C55E'],
     ];
 
     public function invoice()

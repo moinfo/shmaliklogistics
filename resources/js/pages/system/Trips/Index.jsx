@@ -163,6 +163,9 @@ export default function TripsIndex({ trips, stats, statuses, filters }) {
                                     <Stack gap={1}>
                                         <Text size="sm" fw={600} style={{ color: textPri }}>{trip.route_from} → {trip.route_to}</Text>
                                         <Text size="xs" style={{ color: textMut }}>{trip.cargo_description || '—'}</Text>
+                                        {trip.container_number && (
+                                            <Text size="xs" fw={600} style={{ color: textMut, fontFamily: 'monospace', letterSpacing: 0.3 }}>{trip.container_number}</Text>
+                                        )}
                                     </Stack>
                                     <Stack gap={1}>
                                         <Text size="sm" style={{ color: textSec }}>{trip.driver_name}</Text>

@@ -96,6 +96,7 @@ class InvoiceController extends Controller
             'invoice'  => $invoice,
             'statuses' => BillingDocument::$invoiceStatuses,
             'methods'  => Payment::$methods,
+            'stages'   => Payment::$stages,
             'company'  => CompanySetting::first(),
         ]);
     }
@@ -159,9 +160,14 @@ class InvoiceController extends Controller
     {
         $data = $request->validate([
             'amount'           => 'required|numeric|min:0.01',
+            'usd_amount'       => 'nullable|numeric|min:0',
+            'exchange_rate'    => 'nullable|numeric|min:0',
             'payment_date'     => 'required|date',
             'payment_method'   => 'required|in:' . implode(',', array_keys(Payment::$methods)),
+            'payment_stage'    => 'nullable|in:' . implode(',', array_keys(Payment::$stages)),
             'reference_number' => 'nullable|string|max:100',
+            'cheque_number'    => 'nullable|string|max:50',
+            'cheque_date'      => 'nullable|date',
             'notes'            => 'nullable|string',
         ]);
 

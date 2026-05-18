@@ -13,7 +13,7 @@ const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(25
 const fmt = (n) => new Intl.NumberFormat('en-TZ').format(Math.round(Number(n) || 0));
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
-export default function ShowInvoice({ invoice, statuses, methods, company }) {
+export default function ShowInvoice({ invoice, statuses, methods, stages, company }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark     = colorScheme === 'dark';
     const textPri    = isDark ? dk.textPri : '#1E293B';
@@ -35,9 +35,14 @@ export default function ShowInvoice({ invoice, statuses, methods, company }) {
     const can = useCan();
     const { data, setData, post, processing, errors, reset } = useForm({
         amount:           invoice.balance_due ?? '',
+        usd_amount:       '',
+        exchange_rate:    '',
         payment_date:     new Date().toISOString().slice(0, 10),
         payment_method:   'bank_transfer',
+        payment_stage:    'final',
         reference_number: '',
+        cheque_number:    '',
+        cheque_date:      '',
         notes:            '',
     });
 
@@ -112,14 +117,55 @@ export default function ShowInvoice({ invoice, statuses, methods, company }) {
                     <Text fw={700} size="sm" style={{ color: '#22C55E', marginBottom: 14 }}>💳 Record Payment</Text>
                     <form onSubmit={submitPayment}>
                         <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-                            <NumberInput label="Amount" required min={0.01} thousandSeparator="," value={data.amount} onChange={v => setData('amount', v)} error={errors.amount} styles={{ ...inputStyles, section: { color: textSec } }} />
+                            <NumberInput label="Amount (TZS)" required min={0.01} thousandSeparator="," value={data.amount} onChange={v => setData('amount', v)} error={errors.amount} styles={{ ...inputStyles, section: { color: textSec } }} />
                             <DatePicker label="Payment Date" required value={data.payment_date} onChange={v => setData('payment_date', v)} error={errors.payment_date} styles={inputStyles} />
-                            <Select label="Payment Method" required value={data.payment_method} onChange={v => setData('payment_method', v)}
+                            <Select
+                                label="Payment Stage"
+                                required
+                                value={data.payment_stage}
+                                onChange={v => setData('payment_stage', v ?? 'final')}
+                                data={Object.entries(stages ?? {}).map(([k, s]) => ({ value: k, label: s.label }))}
+                                error={errors.payment_stage}
+                                styles={{ ...inputStyles, dropdown: dropdownStyle }}
+                            />
+                            <Select label="Payment Method" required value={data.payment_method} onChange={v => setData('payment_method', v ?? 'bank_transfer')}
                                 data={Object.entries(methods).map(([k, v]) => ({ value: k, label: v }))}
                                 error={errors.payment_method} styles={{ ...inputStyles, dropdown: dropdownStyle }} />
                             <TextInput label="Reference #" placeholder="TXN-12345" value={data.reference_number} onChange={e => setData('reference_number', e.target.value)} styles={inputStyles} />
                             <TextInput label="Notes" placeholder="Optional notes" value={data.notes} onChange={e => setData('notes', e.target.value)} styles={inputStyles} />
                         </SimpleGrid>
+
+                        {/* Cheque fields — only shown when method is cheque */}
+                        {data.payment_method === 'cheque' && (
+                            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" mt="md">
+                                <TextInput
+                                    label="Cheque Number"
+                                    placeholder="001234"
+                                    required
+                                    value={data.cheque_number}
+                                    onChange={e => setData('cheque_number', e.target.value)}
+                                    error={errors.cheque_number}
+                                    styles={inputStyles}
+                                />
+                                <DatePicker
+                                    label="Cheque Date"
+                                    value={data.cheque_date}
+                                    onChange={v => setData('cheque_date', v)}
+                                    error={errors.cheque_date}
+                                    styles={inputStyles}
+                                />
+                            </SimpleGrid>
+                        )}
+
+                        {/* USD fields — optional */}
+                        <Box mt="md" style={{ background: isDark ? 'rgba(59,130,246,0.04)' : '#EFF6FF', borderRadius: 10, padding: '12px 16px', border: `1px solid ${isDark ? 'rgba(59,130,246,0.15)' : '#BFDBFE'}` }}>
+                            <Text size="xs" fw={700} style={{ color: '#3B82F6', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.7 }}>💵 USD Payment (optional)</Text>
+                            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                                <NumberInput label="USD Amount" placeholder="5,000" min={0} thousandSeparator="," prefix="$ " value={data.usd_amount} onChange={v => setData('usd_amount', v)} error={errors.usd_amount} styles={{ ...inputStyles, section: { color: textSec } }} />
+                                <NumberInput label="Exchange Rate" placeholder="2,550" min={0} thousandSeparator="," value={data.exchange_rate} onChange={v => setData('exchange_rate', v)} error={errors.exchange_rate} styles={{ ...inputStyles, section: { color: textSec } }} />
+                            </SimpleGrid>
+                        </Box>
+
                         <Group mt="md" gap="sm">
                             <Box component="button" type="submit" disabled={processing} style={{ padding: '8px 20px', borderRadius: 8, background: 'linear-gradient(135deg,#059669,#10B981)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13, opacity: processing ? 0.7 : 1 }}>
                                 {processing ? 'Saving…' : 'Save Payment'}
@@ -203,21 +249,41 @@ export default function ShowInvoice({ invoice, statuses, methods, company }) {
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ background: isDark ? 'rgba(255,255,255,0.02)' : '#F8FAFC' }}>
-                                {['Date', 'Amount', 'Method', 'Reference', 'Notes'].map((h, i) => (
+                                {['Date', 'Stage', 'Amount', 'Method', 'Cheque / Ref', 'Notes'].map((h, i) => (
                                     <th key={i} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, color: textSec }}>{h}</th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody>
-                            {invoice.payments.map((pay, i) => (
-                                <tr key={i} style={{ borderTop: `1px solid ${divider}` }}>
-                                    <td style={{ padding: '10px 16px', fontSize: 14, color: textSec }}>{fmtDate(pay.payment_date)}</td>
-                                    <td style={{ padding: '10px 16px', fontSize: 14, fontWeight: 700, color: '#22C55E' }}>{cur} {fmt(pay.amount)}</td>
-                                    <td style={{ padding: '10px 16px', fontSize: 14, color: textSec }}>{methods[pay.payment_method] ?? pay.payment_method}</td>
-                                    <td style={{ padding: '10px 16px', fontSize: 13, color: textSec, fontFamily: 'monospace' }}>{pay.reference_number ?? '—'}</td>
-                                    <td style={{ padding: '10px 16px', fontSize: 13, color: textSec }}>{pay.notes ?? '—'}</td>
-                                </tr>
-                            ))}
+                            {invoice.payments.map((pay, i) => {
+                                const stageMeta = (stages ?? {})[pay.payment_stage];
+                                return (
+                                    <tr key={i} style={{ borderTop: `1px solid ${divider}` }}>
+                                        <td style={{ padding: '10px 16px', fontSize: 14, color: textSec }}>{fmtDate(pay.payment_date)}</td>
+                                        <td style={{ padding: '10px 16px' }}>
+                                            {stageMeta ? (
+                                                <Box style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: stageMeta.color + '1A', border: `1px solid ${stageMeta.color}44`, borderRadius: 20, padding: '2px 10px' }}>
+                                                    <Text size="xs" fw={700} style={{ color: stageMeta.color }}>{stageMeta.label}</Text>
+                                                </Box>
+                                            ) : <Text size="xs" style={{ color: textSec }}>—</Text>}
+                                        </td>
+                                        <td style={{ padding: '10px 16px', fontSize: 14, fontWeight: 700, color: '#22C55E' }}>
+                                            {cur} {fmt(pay.amount)}
+                                            {pay.usd_amount && <Text size="xs" style={{ color: '#3B82F6' }}>$ {fmt(pay.usd_amount)}</Text>}
+                                        </td>
+                                        <td style={{ padding: '10px 16px', fontSize: 14, color: textSec }}>{methods[pay.payment_method] ?? pay.payment_method}</td>
+                                        <td style={{ padding: '10px 16px', fontSize: 13, color: textSec, fontFamily: 'monospace' }}>
+                                            {pay.cheque_number ? (
+                                                <Stack gap={0}>
+                                                    <Text size="xs" fw={700} style={{ color: textSec, fontFamily: 'monospace' }}>{pay.cheque_number}</Text>
+                                                    {pay.cheque_date && <Text size="xs" style={{ color: textSec }}>{fmtDate(pay.cheque_date)}</Text>}
+                                                </Stack>
+                                            ) : (pay.reference_number ?? '—')}
+                                        </td>
+                                        <td style={{ padding: '10px 16px', fontSize: 13, color: textSec }}>{pay.notes ?? '—'}</td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </Box>

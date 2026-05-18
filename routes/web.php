@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\System\CargoController;
 use App\Http\Controllers\System\DashboardController;
 use App\Http\Controllers\System\TripController;
+use App\Http\Controllers\System\TripExpenseLineController;
 use App\Http\Controllers\System\VehicleController;
 use App\Http\Controllers\System\FuelLogController;
 use App\Http\Controllers\System\DriverController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\System\Billing\QuoteController;
 use App\Http\Controllers\System\Billing\ProformaController;
 use App\Http\Controllers\System\Billing\InvoiceController;
 use App\Http\Controllers\System\Billing\PaymentController;
+use App\Http\Controllers\System\Billing\DebtorsController;
 use App\Http\Controllers\System\ExpenseController;
 use App\Http\Controllers\System\MaintenanceController;
 use App\Http\Controllers\System\DocumentController;
@@ -162,6 +164,8 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
     // Trips
     $permResource('trips', TripController::class, 'trips');
     Route::patch('trips/{trip}/status', [TripController::class, 'updateStatus'])->name('trips.update-status')->middleware('permission:trips.edit');
+    Route::post('trips/{trip}/expense-lines', [TripExpenseLineController::class, 'store'])->name('trips.expense-lines.store')->middleware('permission:trips.edit');
+    Route::delete('trips/{trip}/expense-lines/{line}', [TripExpenseLineController::class, 'destroy'])->name('trips.expense-lines.destroy')->middleware('permission:trips.edit');
 
     // Cargo
     $permResource('cargo', CargoController::class, 'cargo');
@@ -215,6 +219,7 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
         Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'download'])->name('invoices.pdf')->middleware('permission:billing_invoices.view');
 
         Route::get('payments', [PaymentController::class, 'index'])->name('payments.index')->middleware('permission:billing_payments.view');
+        Route::get('debtors', [DebtorsController::class, 'index'])->name('debtors.index')->middleware('permission:billing_invoices.view');
 
         Route::get('quote-requests', [QuoteRequestController::class, 'index'])->name('quote-requests.index')->middleware('permission:billing_quote_requests.view');
         Route::patch('quote-requests/{quoteRequest}', [QuoteRequestController::class, 'update'])->name('quote-requests.update')->middleware('permission:billing_quote_requests.edit');

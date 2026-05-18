@@ -44,6 +44,7 @@ class PaymentController extends Controller
             'payments' => $payments,
             'stats'    => $stats,
             'methods'  => \App\Models\Payment::$methods,
+            'stages'   => \App\Models\Payment::$stages,
             'filters'  => $request->only(['search', 'method']),
             'company'  => CompanySetting::first(),
         ]);

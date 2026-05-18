@@ -5,8 +5,10 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Controller;
 use App\Models\Driver;
 use App\Models\Expense;
+use App\Models\TripExpenseLine;
 use App\Models\Trip;
 use App\Models\Vehicle;
+use App\Models\CompanySetting;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -110,8 +112,12 @@ class TripController extends Controller
             'driver_name'        => 'required|string|max:100',
             'vehicle_plate'      => 'required|string|max:20',
             'cargo_description'  => 'nullable|string|max:200',
+            'container_number'   => 'nullable|string|max:20',
             'cargo_weight_tons'  => 'nullable|numeric|min:0',
             'freight_amount'     => 'required|numeric|min:0',
+            'invoice_usd'        => 'nullable|numeric|min:0',
+            'exchange_rate'      => 'nullable|numeric|min:0',
+            'invoice_tzs'        => 'nullable|numeric|min:0',
             'fuel_cost'          => 'required|numeric|min:0',
             'driver_allowance'   => 'required|numeric|min:0',
             'border_costs'       => 'required|numeric|min:0',
@@ -153,11 +159,18 @@ class TripController extends Controller
             ->orderBy('expense_date')
             ->get();
 
+        $expenseLines = TripExpenseLine::where('trip_id', $trip->id)
+            ->orderBy('sort_order')->orderBy('id')->get();
+
         return Inertia::render('system/Trips/Show', [
-            'trip'              => $trip,
-            'statuses'          => Trip::$statuses,
-            'expenses'          => $expenses,
-            'expenseCategories' => Expense::$categories,
+            'trip'                  => $trip,
+            'statuses'              => Trip::$statuses,
+            'expenses'              => $expenses,
+            'expenseCategories'     => Expense::$categories,
+            'expenseLines'          => $expenseLines,
+            'expenseLineCategories' => TripExpenseLine::$categories,
+            'expenseLineCurrencies' => TripExpenseLine::$currencies,
+            'company'               => CompanySetting::get(),
         ]);
     }
 

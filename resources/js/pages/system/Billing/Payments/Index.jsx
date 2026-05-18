@@ -10,7 +10,7 @@ const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(25
 const fmt = (n) => new Intl.NumberFormat('en-TZ').format(Math.round(Number(n) || 0));
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
-export default function PaymentsIndex({ payments, stats, methods, filters, company }) {
+export default function PaymentsIndex({ payments, stats, methods, stages, filters, company }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark     = colorScheme === 'dark';
     const textPri    = isDark ? dk.textPri : '#1E293B';
@@ -109,7 +109,7 @@ export default function PaymentsIndex({ payments, stats, methods, filters, compa
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ borderBottom: `1px solid ${isDark ? dk.divider : '#E2E8F0'}` }}>
-                                {['Date', 'Invoice', 'Client', 'Amount', 'Method', 'Reference', ''].map((h, i) => (
+                                {['Date', 'Stage', 'Invoice', 'Client', 'Amount', 'Method', 'Cheque / Ref', ''].map((h, i) => (
                                     <th key={i} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, color: textSec, whiteSpace: 'nowrap' }}>{h}</th>
                                 ))}
                             </tr>
@@ -130,6 +130,13 @@ export default function PaymentsIndex({ payments, stats, methods, filters, compa
                                 >
                                     <td style={{ padding: '14px 16px' }}>
                                         <Text size="sm" fw={600} style={{ color: textPri }}>{fmtDate(pay.payment_date)}</Text>
+                                    </td>
+                                    <td style={{ padding: '14px 16px' }}>
+                                        {(() => { const s = (stages ?? {})[pay.payment_stage]; return s ? (
+                                            <Box style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: s.color + '1A', border: `1px solid ${s.color}44`, borderRadius: 20, padding: '2px 10px' }}>
+                                                <Text size="xs" fw={700} style={{ color: s.color }}>{s.label}</Text>
+                                            </Box>
+                                        ) : <Text size="xs" style={{ color: textSec }}>—</Text>; })()}
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         {pay.invoice && can('billing_payments.view') ? (
@@ -168,9 +175,14 @@ export default function PaymentsIndex({ payments, stats, methods, filters, compa
                                         </Badge>
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
-                                        <Text size="xs" style={{ color: textSec, fontFamily: 'monospace' }}>
-                                            {pay.reference_number ?? '—'}
-                                        </Text>
+                                        {pay.cheque_number ? (
+                                            <Stack gap={0}>
+                                                <Text size="xs" fw={700} style={{ color: textSec, fontFamily: 'monospace' }}>{pay.cheque_number}</Text>
+                                                {pay.cheque_date && <Text size="xs" style={{ color: textSec }}>{fmtDate(pay.cheque_date)}</Text>}
+                                            </Stack>
+                                        ) : (
+                                            <Text size="xs" style={{ color: textSec, fontFamily: 'monospace' }}>{pay.reference_number ?? '—'}</Text>
+                                        )}
                                     </td>
                                     <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                                         {can('billing_payments.delete') && (

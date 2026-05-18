@@ -10,44 +10,63 @@ import { checkPermission } from '../lib/can';
 // Items without either are always visible (Dashboard, Notifications).
 const navItems = [
     { icon: '📊', label: 'Dashboard', href: '/system/dashboard' },
-    { icon: '🚛', label: 'Trips',     href: '/system/trips', perm: 'trips.view' },
+
+    // ── Trips ────────────────────────────────────────────────────────────────
+    {
+        icon: '🚛', label: 'Trips', href: '/system/trips',
+        anyPerm: ['trips.view', 'trips.create'],
+        children: [
+            { icon: '🚛', label: 'All Trips',     href: '/system/trips',        perm: 'trips.view' },
+            { icon: '📥', label: 'Import Excel',  href: '/system/trips/import', perm: 'trips.create' },
+        ],
+    },
+
+    // ── Fleet ─────────────────────────────────────────────────────────────────
     {
         icon: '🚗', label: 'Fleet', href: '/system/fleet',
         anyPerm: ['fleet.view', 'fleet_fuel_logs.view', 'inspections.view', 'trip_check_ins.view'],
         children: [
-            { icon: '🚗', label: 'All Vehicles',  href: '/system/fleet',           perm: 'fleet.view' },
-            { icon: '⛽', label: 'Fuel Logs',     href: '/system/fleet/fuel-logs', perm: 'fleet_fuel_logs.view' },
-            { icon: '🔧', label: 'Inspections',   href: '/system/inspections',     perm: 'inspections.view' },
-            { icon: '📍', label: 'Check-Ins',     href: '/system/check-ins',       perm: 'trip_check_ins.view' },
+            { icon: '🚗', label: 'All Vehicles',  href: '/system/fleet',                    perm: 'fleet.view' },
+            { icon: '⛽', label: 'Fuel Logs',     href: '/system/fleet/fuel-logs',          perm: 'fleet_fuel_logs.view' },
+            { icon: '🔧', label: 'Inspections',   href: '/system/inspections',              perm: 'inspections.view' },
+            { icon: '📍', label: 'Check-Ins',     href: '/system/check-ins',                perm: 'trip_check_ins.view' },
+            { icon: '🗺️', label: 'Live Map',      href: '/system/fleet/live-map',           soon: true },
         ],
     },
+
     { icon: '👤', label: 'Drivers',   href: '/system/drivers', perm: 'drivers.view' },
     { icon: '🛂', label: 'Permits',   href: '/system/permits', perm: 'permits.view' },
     { icon: '👥', label: 'Clients',   href: '/system/clients', perm: 'clients.view' },
+
+    // ── Billing ───────────────────────────────────────────────────────────────
     {
         icon: '🧾', label: 'Billing', href: '/system/billing',
         anyPerm: ['billing_quotes.view', 'billing_proformas.view', 'billing_invoices.view', 'billing_payments.view', 'billing_quote_requests.view'],
         children: [
-            { icon: '💬', label: 'Quotes',          href: '/system/billing/quotes',         perm: 'billing_quotes.view' },
-            { icon: '📋', label: 'Proforma',        href: '/system/billing/proformas',      perm: 'billing_proformas.view' },
-            { icon: '📄', label: 'Invoices',        href: '/system/billing/invoices',       perm: 'billing_invoices.view' },
-            { icon: '💳', label: 'Payments',        href: '/system/billing/payments',       perm: 'billing_payments.view' },
-            { icon: '🔴', label: 'Debtors',         href: '/system/billing/debtors',        perm: 'billing_invoices.view' },
-            { icon: '📥', label: 'Quote Requests',  href: '/system/billing/quote-requests', perm: 'billing_quote_requests.view' },
+            { icon: '💬', label: 'Quotes',         href: '/system/billing/quotes',         perm: 'billing_quotes.view' },
+            { icon: '📋', label: 'Proforma',       href: '/system/billing/proformas',      perm: 'billing_proformas.view' },
+            { icon: '📄', label: 'Invoices',       href: '/system/billing/invoices',       perm: 'billing_invoices.view' },
+            { icon: '💳', label: 'Payments',       href: '/system/billing/payments',       perm: 'billing_payments.view' },
+            { icon: '🔴', label: 'Debtors',        href: '/system/billing/debtors',        perm: 'billing_invoices.view' },
+            { icon: '📥', label: 'Quote Requests', href: '/system/billing/quote-requests', perm: 'billing_quote_requests.view' },
         ],
     },
+
     { icon: '💸', label: 'Expenses',    href: '/system/expenses',    perm: 'expenses.view' },
     { icon: '🔧', label: 'Maintenance', href: '/system/maintenance', perm: 'maintenance.view' },
     { icon: '📁', label: 'Documents',   href: '/system/documents',   perm: 'documents.view' },
+    { icon: '📦', label: 'Cargo',       href: '/system/cargo',       perm: 'cargo.view' },
+
+    // ── HR ────────────────────────────────────────────────────────────────────
     {
         icon: '👥', label: 'HR', href: '/system/hr',
         anyPerm: ['hr_employees.view', 'hr_leave.view', 'hr_payroll.view', 'hr_advances.view', 'hr_loans.view', 'hr_allowances.view', 'hr_attendance.view', 'hr_salary_slips.view', 'hr_appraisals.view', 'hr_recruitment.view'],
         children: [
-            { icon: '🧑‍💼', label: 'Employees',  href: '/system/hr/employees',    perm: 'hr_employees.view' },
-            { icon: '🏖️',  label: 'Leave',      href: '/system/hr/leave',        perm: 'hr_leave.view' },
-            { icon: '💰',  label: 'Payroll',    href: '/system/hr/payroll',      perm: 'hr_payroll.view' },
-            { icon: '💵',  label: 'Advances',   href: '/system/hr/advances',     perm: 'hr_advances.view' },
-            { icon: '🏦',  label: 'Loans',      href: '/system/hr/loans',        perm: 'hr_loans.view' },
+            { icon: '🧑‍💼', label: 'Employees',   href: '/system/hr/employees',    perm: 'hr_employees.view' },
+            { icon: '🏖️',  label: 'Leave',       href: '/system/hr/leave',        perm: 'hr_leave.view' },
+            { icon: '💰',  label: 'Payroll',     href: '/system/hr/payroll',      perm: 'hr_payroll.view' },
+            { icon: '💵',  label: 'Advances',    href: '/system/hr/advances',     perm: 'hr_advances.view' },
+            { icon: '🏦',  label: 'Loans',       href: '/system/hr/loans',        perm: 'hr_loans.view' },
             { icon: '🎁',  label: 'Allowances',  href: '/system/hr/allowances',   perm: 'hr_allowances.view' },
             { icon: '🕐',  label: 'Attendance',  href: '/system/hr/attendance',   perm: 'hr_attendance.view' },
             { icon: '📑',  label: 'Salary Slip', href: '/system/hr/salary-slips', perm: 'hr_salary_slips.view' },
@@ -55,6 +74,8 @@ const navItems = [
             { icon: '🎯',  label: 'Recruitment', href: '/system/hr/recruitment',  perm: 'hr_recruitment.view' },
         ],
     },
+
+    // ── Procurement & Inventory ───────────────────────────────────────────────
     {
         icon: '🛒', label: 'Procurement', href: '/system/procurement',
         anyPerm: ['procurement_suppliers.view', 'procurement_orders.view'],
@@ -64,16 +85,30 @@ const navItems = [
         ],
     },
     { icon: '🏗️', label: 'Inventory', href: '/system/inventory', perm: 'inventory.view' },
+
+    // ── Reports ───────────────────────────────────────────────────────────────
     {
         icon: '📈', label: 'Reports', href: '/system/reports',
-        anyPerm: ['reports_route_profitability.view', 'reports_financial_summary.view', 'reports_fleet_utilization.view'],
+        anyPerm: ['reports_route_profitability.view', 'reports_financial_summary.view', 'reports_fleet_utilization.view', 'billing_invoices.view'],
         children: [
             { icon: '📊', label: 'Route Profitability', href: '/system/reports/route-profitability', perm: 'reports_route_profitability.view' },
             { icon: '💹', label: 'Financial Summary',   href: '/system/reports/financial-summary',   perm: 'reports_financial_summary.view' },
             { icon: '🚛', label: 'Fleet Utilization',   href: '/system/reports/fleet-utilization',   perm: 'reports_fleet_utilization.view' },
+            { icon: '🔴', label: 'Debtors / AR',        href: '/system/billing/debtors',             perm: 'billing_invoices.view' },
         ],
     },
-    { icon: '📦', label: 'Cargo', href: '/system/cargo', perm: 'cargo.view' },
+
+    // ── Customer Portal (coming soon) ─────────────────────────────────────────
+    {
+        icon: '🌐', label: 'Customer Portal', href: '/system/portal',
+        children: [
+            { icon: '📊', label: 'Dashboard',   href: '/portal/dashboard', soon: true },
+            { icon: '🚛', label: 'My Shipments', href: '/portal/trips',    soon: true },
+            { icon: '📄', label: 'My Invoices',  href: '/portal/invoices', soon: true },
+        ],
+    },
+
+    // ── Settings ──────────────────────────────────────────────────────────────
     {
         icon: '⚙️', label: 'Settings', href: '/system/settings', perm: 'settings.view',
         children: [
@@ -89,6 +124,7 @@ const navItems = [
             { icon: '👤', label: 'Users',                    href: '/system/settings/users',                  perm: 'settings.view' },
         ],
     },
+
     { icon: '🔔', label: 'Notifications', href: '/system/notifications' },
 ];
 
@@ -330,24 +366,31 @@ export default function DashboardLayout({ title = 'Dashboard', children }) {
                                                 >
                                                     <Stack gap={1} style={{ paddingLeft: 8, marginTop: 2 }}>
                                                         {item.children.map((child) => {
-                                                            const childActive = url.startsWith(child.href);
+                                                            const childActive = !child.soon && url.startsWith(child.href);
                                                             return (
                                                                 <Box
                                                                     key={child.href}
-                                                                    component={Link}
-                                                                    href={child.href}
+                                                                    component={child.soon ? 'div' : Link}
+                                                                    href={child.soon ? undefined : child.href}
                                                                     style={{
                                                                         display: 'flex', alignItems: 'center', gap: 8,
                                                                         padding: '7px 10px 7px 14px', borderRadius: 8,
                                                                         background: childActive ? activeBg : 'transparent',
                                                                         borderLeft: childActive ? '2px solid #2196F3' : '2px solid rgba(33,150,243,0.15)',
                                                                         textDecoration: 'none', transition: 'all 0.15s',
+                                                                        opacity: child.soon ? 0.4 : 1,
+                                                                        cursor: child.soon ? 'default' : 'pointer',
                                                                     }}
-                                                                    onMouseEnter={e => { if (!childActive) e.currentTarget.style.background = hoverBg; }}
+                                                                    onMouseEnter={e => { if (!childActive && !child.soon) e.currentTarget.style.background = hoverBg; }}
                                                                     onMouseLeave={e => { if (!childActive) e.currentTarget.style.background = 'transparent'; }}
                                                                 >
                                                                     <Text style={{ fontSize: '0.85rem', lineHeight: 1, width: 16, textAlign: 'center', opacity: 0.8 }}>{child.icon}</Text>
-                                                                    <Text fw={childActive ? 700 : 500} size="xs" style={{ color: childActive ? activeText : inactiveText }}>{child.label}</Text>
+                                                                    <Text fw={childActive ? 700 : 500} size="xs" style={{ color: childActive ? activeText : inactiveText, flex: 1 }}>{child.label}</Text>
+                                                                    {child.soon && (
+                                                                        <Box style={{ background: soonBg, borderRadius: 4, padding: '1px 5px' }}>
+                                                                            <Text style={{ fontSize: 8, color: soonText, fontWeight: 700, letterSpacing: 0.5 }}>SOON</Text>
+                                                                        </Box>
+                                                                    )}
                                                                     {childActive && (
                                                                         <Box style={{ width: 5, height: 5, borderRadius: '50%', background: '#2196F3', marginLeft: 'auto', flexShrink: 0 }} />
                                                                     )}

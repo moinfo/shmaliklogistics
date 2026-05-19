@@ -38,15 +38,20 @@ class DriverAlertService
             ->whereIn('status', ['loading', 'in_transit', 'at_border'])
             ->get();
 
+        // Fetch last check-in per trip in one query to avoid N+1.
+        $lastCheckIns = TripCheckIn::whereIn('trip_id', $activeTrips->pluck('id'))
+            ->orderBy('checked_in_at', 'desc')
+            ->get()
+            ->groupBy('trip_id')
+            ->map(fn($rows) => $rows->first()->checked_in_at);
+
         foreach ($activeTrips as $trip) {
-            $last = TripCheckIn::where('trip_id', $trip->id)
-                ->latest('checked_in_at')
-                ->value('checked_in_at');
+            $last = $lastCheckIns[$trip->id] ?? null;
 
             $reference   = $last ? Carbon::parse($last) : Carbon::parse($trip->departure_date);
             $dueAt       = $reference->copy()->addHours(TripCheckIn::INTERVAL_HOURS);
             $isOverdue   = now()->greaterThan($dueAt);
-            $minutesLate = $isOverdue ? now()->diffInMinutes($dueAt) : 0;
+            $minutesLate = $isOverdue ? abs(now()->diffInMinutes($dueAt)) : 0;
 
             if ($isOverdue) {
                 $alerts[] = [

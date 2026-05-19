@@ -13,7 +13,7 @@ class Driver extends Model
     protected $fillable = [
         'user_id', 'name', 'status',
         'phone', 'phone_alt', 'email',
-        'national_id', 'address', 'birth_region', 'birth_district', 'photo_path',
+        'national_id', 'card_id', 'address', 'birth_region', 'birth_district', 'photo_path',
         'license_number', 'license_class', 'license_classes', 'license_expiry',
         'license_doc_path', 'visa_doc_path', 'visa_expiry',
         'emergency_contact_name', 'emergency_contact_phone',

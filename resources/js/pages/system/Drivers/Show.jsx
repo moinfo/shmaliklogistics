@@ -156,6 +156,21 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
     };
 
     const [photoOpen, setPhotoOpen] = useState(false);
+    const [photoUploading, setPhotoUploading] = useState(false);
+
+    const handlePhotoUpload = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setPhotoUploading(true);
+        const form = new FormData();
+        form.append('photo', file);
+        form.append('_method', 'POST');
+        router.post(`/system/drivers/${driver.id}/photo`, form, {
+            preserveScroll: true,
+            forceFormData: true,
+            onFinish: () => { setPhotoUploading(false); e.target.value = ''; },
+        });
+    };
 
     const [accountEmail, setAccountEmail] = useState(driver.email ?? '');
     const [accountPassword, setAccountPassword] = useState('');
@@ -190,11 +205,44 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
             {/* Header */}
             <Group justify="space-between" mb="xl" align="flex-start" wrap="wrap" gap="md">
                 <Group gap="md">
-                    <Avatar
-                        name={driver.name}
-                        photoUrl={driver.photo_url}
-                        onClick={driver.photo_url ? () => setPhotoOpen(true) : undefined}
-                    />
+                    <Box style={{ position: 'relative', flexShrink: 0 }}>
+                        <Avatar
+                            name={driver.name}
+                            photoUrl={driver.photo_url}
+                            onClick={driver.photo_url ? () => setPhotoOpen(true) : undefined}
+                        />
+                        {can('drivers.edit') && (
+                            <Tooltip label="Upload photo" position="bottom">
+                                <Box
+                                    component="label"
+                                    htmlFor="driver-photo-input"
+                                    style={{
+                                        position: 'absolute', bottom: 2, right: 2,
+                                        width: 28, height: 28, borderRadius: '50%',
+                                        background: '#1565C0',
+                                        border: '2px solid white',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        cursor: photoUploading ? 'wait' : 'pointer',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                                    }}
+                                >
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                </Box>
+                            </Tooltip>
+                        )}
+                        <input
+                            id="driver-photo-input"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            style={{ display: 'none' }}
+                            onChange={handlePhotoUpload}
+                            disabled={photoUploading}
+                        />
+                    </Box>
                     <Stack gap={4}>
                         <Group gap="sm">
                             <Text fw={800} size="xl" style={{ color: textPri }}>{driver.name}</Text>

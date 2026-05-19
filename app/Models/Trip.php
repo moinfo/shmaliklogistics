@@ -19,7 +19,10 @@ class Trip extends Model
         'fuel_cost', 'driver_allowance',
         'border_costs', 'road_fines', 'guard_fees', 'other_costs',
         'notes', 'created_by',
+        'expense_receipt_path',
     ];
+
+    protected $appends = ['expense_receipt_url'];
 
     protected $casts = [
         'departure_date'    => 'date',
@@ -75,6 +78,13 @@ class Trip extends Model
     public function expenseLines()
     {
         return $this->hasMany(TripExpenseLine::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function getExpenseReceiptUrlAttribute(): ?string
+    {
+        return $this->expense_receipt_path
+            ? '/storage/' . ltrim($this->expense_receipt_path, '/')
+            : null;
     }
 
     public function getTotalCostsAttribute(): float

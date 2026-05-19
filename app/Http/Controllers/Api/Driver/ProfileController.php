@@ -12,8 +12,10 @@ class ProfileController extends Controller
 {
     public function show(Request $request): JsonResponse
     {
-        $driver = $request->user()->driver->load('vehicle:id,plate,make,model_name,type');
-        return response()->json(['driver' => $driver]);
+        $driver = $request->user()->driver->load('vehicle:id,driver_id,plate,make,model_name,type');
+        $data = $driver->toArray();
+        $data['login_email'] = $request->user()->email;
+        return response()->json(['driver' => $data]);
     }
 
     public function changePassword(Request $request): JsonResponse

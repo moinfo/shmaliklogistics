@@ -100,8 +100,10 @@ export default function StaffCard({ employee }) {
                                 <Button component="a" href={`https://wa.me/${employee.phone.replace('+', '')}`} target="_blank" rel="noopener noreferrer" fullWidth size="md" radius="xl" variant="light" color="green">
                                     💬 WhatsApp
                                 </Button>
-                                <Button component="a" href={`mailto:${employee.email}`} fullWidth size="md" radius="xl" variant="subtle" color="gray" style={{ border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.8)' }}>
-                                    ✉️ {employee.email}
+                                <Button component="a" href={`mailto:${employee.email}`} fullWidth size="md" radius="xl" variant="subtle" color="gray" style={{ border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.8)', overflow: 'hidden' }}>
+                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+                                        ✉️ {employee.email}
+                                    </span>
                                 </Button>
                             </Stack>
                         </motion.div>

@@ -1,32 +1,27 @@
 import { Link } from '@inertiajs/react';
-import { Box, Text, Group, Stack, SimpleGrid, TextInput, Textarea, Select, NumberInput } from '@mantine/core';
+import { Box, Text, Group, Stack, SimpleGrid, TextInput, Textarea, Select, NumberInput, Button } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DatePicker from '../../../components/DatePicker';
 
-const dk = {
-    card:    '#0F1E32',
-    border:  'var(--c-border-color)',
-    divider: 'rgba(255,255,255,0.06)',
-    textPri: '#E2E8F0',
-    textSec: 'var(--c-text-secondary)',
-    textMut: 'var(--c-text-muted)',
-};
+// ─── Section card wrapper ────────────────────────────────────────────────────
 
 function Section({ title, icon, children, isDark }) {
-    const cardBg     = isDark ? dk.card : '#ffffff';
-    const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const textPri    = isDark ? dk.textPri : '#1E293B';
-    const divider    = isDark ? dk.divider : '#E2E8F0';
+    const cardBg     = isDark ? '#1A0900' : '#ffffff';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0';
+    const cardShadow = isDark ? '0 2px 16px rgba(0,0,0,0.35)' : '0 1px 8px rgba(0,0,0,0.06)';
+    const textPri    = isDark ? '#F1F5F9' : '#1E293B';
+    const divider    = isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9';
     return (
-        <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden', marginBottom: 16 }}>
+        <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow, marginBottom: 16 }}>
+            <Box style={{ height: 3, background: 'linear-gradient(90deg, #C2410C, #EA580C)' }} />
             <Box style={{ padding: '14px 20px', borderBottom: `1px solid ${divider}` }}>
                 <Group gap={8}>
-                    {icon && <Text style={{ fontSize: 16 }}>{icon}</Text>}
+                    {icon && <Text size="md">{icon}</Text>}
                     <Text fw={700} size="sm" style={{ color: textPri }}>{title}</Text>
                 </Group>
             </Box>
-            <Box style={{ padding: '20px' }}>{children}</Box>
+            <Box style={{ padding: '20px 24px' }}>{children}</Box>
         </Box>
     );
 }
@@ -35,16 +30,17 @@ export default function TripForm({ data, setData, errors, statuses, drivers = []
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
 
-    const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const textPri    = isDark ? dk.textPri : '#1E293B';
-    const textSec    = isDark ? dk.textSec : '#64748B';
+    const cardBg     = isDark ? '#1A0900' : '#ffffff';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0';
+    const textPri    = isDark ? '#F1F5F9' : '#1E293B';
+    const textSec    = isDark ? '#94A3B8' : '#64748B';
     const inputBg    = isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC';
 
     const inputStyles = {
-        label:    { color: textSec, marginBottom: 4, fontSize: 13 },
-        input:    { background: inputBg, border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 },
+        label: { color: textSec, fontSize: 12, fontWeight: 600, marginBottom: 4 },
+        input: { background: inputBg, border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 },
     };
-    const dropdownStyle = { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` };
+    const dropdownStyle = { background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 12 };
     const numStyles = { ...inputStyles, section: { color: textSec } };
 
     // Build Select options, including current value as fallback if not in list
@@ -102,12 +98,12 @@ export default function TripForm({ data, setData, errors, statuses, drivers = []
         + (Number(data.other_costs) || 0);
     const profit = (Number(data.freight_amount) || 0) - totalCosts;
 
-    // Selected driver & vehicle info for the hint strip
     const selectedDriver  = drivers.find(d => d.name === data.driver_name);
     const selectedVehicle = vehicles.find(v => v.plate === data.vehicle_plate);
 
     return (
         <form onSubmit={onSubmit}>
+            {/* ── Trip Details ── */}
             <Section title="Trip Details" icon="🚛" isDark={isDark}>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Select
@@ -126,6 +122,7 @@ export default function TripForm({ data, setData, errors, statuses, drivers = []
                 </SimpleGrid>
             </Section>
 
+            {/* ── Driver & Vehicle ── */}
             <Section title="Driver & Vehicle" icon="👤" isDark={isDark}>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" mb={selectedDriver || selectedVehicle ? 'xs' : 0}>
                     <Stack gap={4}>
@@ -191,11 +188,12 @@ export default function TripForm({ data, setData, errors, statuses, drivers = []
                 )}
             </Section>
 
+            {/* ── Financials ── */}
             <Section title="Financials (TZS)" icon="💰" isDark={isDark}>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" mb="md">
                     <NumberInput label="Freight Amount / TZS Income" placeholder="45,000,000" min={0} required value={data.freight_amount} onChange={v => setData('freight_amount', v)} error={errors.freight_amount} styles={numStyles} thousandSeparator="," />
 
-                    {/* USD invoice block — spans full row on mobile, side-by-side on sm+ */}
+                    {/* USD invoice block */}
                     <Box style={{ gridColumn: '1 / -1' }}>
                         <Box style={{ background: isDark ? 'rgba(59,130,246,0.05)' : '#EFF6FF', borderRadius: 10, padding: '14px 16px', border: `1px solid ${isDark ? 'rgba(59,130,246,0.2)' : '#BFDBFE'}` }}>
                             <Text size="xs" fw={700} style={{ color: '#3B82F6', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>💵 USD Invoice (optional)</Text>
@@ -247,13 +245,17 @@ export default function TripForm({ data, setData, errors, statuses, drivers = []
                 </SimpleGrid>
 
                 {/* Live P&L summary */}
-                <Box style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#F0F4F9', borderRadius: 10, padding: '14px 18px', border: `1px solid ${cardBorder}` }}>
+                <Box style={{
+                    background: profit >= 0 ? (isDark ? 'rgba(34,197,94,0.07)' : '#F0FDF4') : (isDark ? 'rgba(239,68,68,0.07)' : '#FEF2F2'),
+                    borderRadius: 10, padding: '14px 18px',
+                    border: `1px solid ${profit >= 0 ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                }}>
                     <Group justify="space-between">
                         <Text size="sm" style={{ color: textSec }}>Total Costs</Text>
                         <Text size="sm" fw={600} style={{ color: '#EF4444' }}>TZS {new Intl.NumberFormat('en-TZ').format(totalCosts)}</Text>
                     </Group>
                     <Group justify="space-between" mt={6}>
-                        <Text size="sm" fw={700} style={{ color: textPri }}>Net Profit</Text>
+                        <Text size="sm" fw={700} style={{ color: textPri }}>Net {profit >= 0 ? 'Profit' : 'Loss'}</Text>
                         <Text size="sm" fw={800} style={{ color: profit >= 0 ? '#22C55E' : '#EF4444' }}>
                             TZS {new Intl.NumberFormat('en-TZ').format(Math.abs(profit))} {profit < 0 ? '(Loss)' : ''}
                         </Text>
@@ -261,6 +263,7 @@ export default function TripForm({ data, setData, errors, statuses, drivers = []
                 </Box>
             </Section>
 
+            {/* ── Notes ── */}
             <Section title="Notes" icon="📝" isDark={isDark}>
                 <Textarea
                     placeholder="Additional notes, instructions, or remarks…"
@@ -273,13 +276,20 @@ export default function TripForm({ data, setData, errors, statuses, drivers = []
             </Section>
 
             <Group justify="flex-end" gap="md">
-                <Box component={Link} href={backHref} style={{ padding: '10px 20px', borderRadius: 10, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
+                <Box
+                    component={Link} href={backHref}
+                    style={{ display: 'inline-flex', alignItems: 'center', padding: '10px 18px', borderRadius: 10, background: cardBg, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}
+                >
                     Cancel
                 </Box>
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box component="button" type="submit" disabled={processing} style={{ padding: '10px 28px', borderRadius: 10, border: 'none', cursor: processing ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)', opacity: processing ? 0.7 : 1 }}>
-                        {processing ? 'Saving…' : submitLabel}
-                    </Box>
+                    <Button
+                        type="submit"
+                        loading={processing}
+                        style={{ background: 'linear-gradient(135deg, #C2410C, #EA580C)', border: 'none', height: 42, borderRadius: 10, fontWeight: 700, boxShadow: '0 4px 16px rgba(234,88,12,0.4)' }}
+                    >
+                        {submitLabel}
+                    </Button>
                 </motion.div>
             </Group>
         </form>

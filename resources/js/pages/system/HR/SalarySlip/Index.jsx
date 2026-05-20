@@ -1,12 +1,11 @@
 import { Head, router } from '@inertiajs/react';
 import { Box, Text, Group, Stack, Select, SimpleGrid } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
+import { motion } from 'framer-motion';
 import { useRef, useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 
 const MONTHS = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const MONTH_SHORT = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 function fmt2(n) { return Number(n ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function fmt0(n) { return Number(n ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
@@ -29,7 +28,6 @@ function Payslip({ slip, run, bankDetail, company, nssfRate }) {
             {/* Header */}
             <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '28px 32px 20px', borderBottom: '3px solid #0F4C75' }}>
                 <Group gap={16} align="flex-start">
-                    {/* Company logo circle */}
                     <Box style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid #0F4C75', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         {company?.company_logo
                             ? <img src={`/storage/${company.company_logo}`} alt="logo" style={{ width: 54, height: 54, borderRadius: '50%', objectFit: 'contain' }} />
@@ -78,9 +76,9 @@ function Payslip({ slip, run, bankDetail, company, nssfRate }) {
             </Box>
 
             {/* Income / Deductions */}
-            <Box style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, padding: '0 0 0 0', borderBottom: '1px solid #E5E7EB' }}>
+            <Box style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, borderBottom: '1px solid #E5E7EB' }}>
                 {/* Income */}
-                <Box style={{ borderRight: '1px solid #E5E7EB', padding: '0 0 0 0' }}>
+                <Box style={{ borderRight: '1px solid #E5E7EB' }}>
                     <Box style={{ padding: '10px 16px', background: '#E6F7F5', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #B2DFDB' }}>
                         <Text style={{ fontSize: 11, fontWeight: 700, color: '#0D9488', letterSpacing: 0.8 }}>EMPLOYEE INCOME</Text>
                         <Text style={{ fontSize: 12, fontWeight: 800, color: '#0D9488' }}>{fmt2(slip?.gross_salary)}</Text>
@@ -96,9 +94,8 @@ function Payslip({ slip, run, bankDetail, company, nssfRate }) {
                         </table>
                     </Box>
                 </Box>
-
                 {/* Deductions */}
-                <Box style={{ padding: '0 0 0 0' }}>
+                <Box>
                     <Box style={{ padding: '10px 16px', background: '#FFF7ED', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #FED7AA' }}>
                         <Text style={{ fontSize: 11, fontWeight: 700, color: '#EA580C', letterSpacing: 0.8 }}>DEDUCTIONS</Text>
                         <Text style={{ fontSize: 12, fontWeight: 800, color: '#EA580C' }}>{fmt2(slip?.total_deductions)}</Text>
@@ -111,7 +108,7 @@ function Payslip({ slip, run, bankDetail, company, nssfRate }) {
                                 {row('Loan Balance', fmt2(slip?.loan_balance))}
                                 {row('PAYE', fmt2(slip?.paye), false, '#DC2626')}
                                 {row(`NSSF (${nssfRate?.toFixed(4)}%)`, fmt2(slip?.nssf_employee), false, '#D97706')}
-                                {row(`NHIF`, fmt2(slip?.nhif_employee), false, '#7C3AED')}
+                                {row('NHIF', fmt2(slip?.nhif_employee), false, '#7C3AED')}
                                 {slip?.heslb > 0 && row('HESLB', fmt2(slip?.heslb))}
                                 {slip?.adjustment != 0 && row('Adjustment', fmt2(slip?.adjustment), false, '#F59E0B')}
                                 {slip?.other_deductions > 0 && row('Other Deductions', fmt2(slip?.other_deductions))}
@@ -143,24 +140,28 @@ function Payslip({ slip, run, bankDetail, company, nssfRate }) {
 export default function SalarySlipIndex({ slip, run, bankDetail, employees, company, nssfRate, filters }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
-    const textPri = isDark ? dk.textPri : '#1E293B';
-    const textSec = isDark ? dk.textSec : '#64748B';
-    const cardBorder = isDark ? dk.border : '#E2E8F0';
+    const cardBg     = isDark ? '#1A0900' : '#ffffff';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0';
+    const cardShadow = isDark ? '0 2px 16px rgba(0,0,0,0.35)' : '0 1px 8px rgba(0,0,0,0.06)';
+    const textPri    = isDark ? '#F1F5F9' : '#1E293B';
+    const textSec    = isDark ? '#94A3B8' : '#64748B';
+    const divider    = isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9';
+    const inputBg    = isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC';
+
+    const inputStyles = {
+        label: { color: textSec, fontSize: 12, fontWeight: 600, marginBottom: 4 },
+        input: { background: inputBg, border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 },
+    };
+    const dropdownStyle = { background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 12 };
 
     const [empId, setEmpId]   = useState(filters.employee_id ?? '');
     const [year, setYear]     = useState(String(filters.year ?? new Date().getFullYear()));
     const [month, setMonth]   = useState(String(filters.month ?? (new Date().getMonth() + 1)));
 
-    const iS = { input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 }, label: { color: textSec, fontSize: 13, fontWeight: 600, marginBottom: 4 }, dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` } };
-
     const showSlip = () => router.get('/system/hr/salary-slips', { employee_id: empId, year, month }, { preserveState: true, replace: true });
-
     const handlePrint = () => window.print();
 
-    const yearOptions = Array.from({ length: 6 }, (_, i) => {
-        const y = new Date().getFullYear() - i;
-        return { value: String(y), label: String(y) };
-    });
+    const yearOptions  = Array.from({ length: 6 }, (_, i) => { const y = new Date().getFullYear() - i; return { value: String(y), label: String(y) }; });
     const monthOptions = MONTHS.slice(1).map((m, i) => ({ value: String(i + 1), label: m }));
     const empOptions   = employees.map(e => ({ value: String(e.id), label: `${e.name} (${e.employee_number})` }));
 
@@ -168,7 +169,6 @@ export default function SalarySlipIndex({ slip, run, bankDetail, employees, comp
         <DashboardLayout title="Salary Slip">
             <Head title="Salary Slip" />
 
-            {/* Print-only styles */}
             <style>{`
                 @media print {
                     body * { visibility: hidden !important; }
@@ -177,67 +177,125 @@ export default function SalarySlipIndex({ slip, run, bankDetail, employees, comp
                 }
             `}</style>
 
-            <Group justify="space-between" mb="xl" align="flex-start">
-                <Stack gap={2}>
-                    <Text fw={800} size="xl" style={{ color: textPri }}>Salary Slip</Text>
-                    <Text size="sm" style={{ color: textSec }}>Search and print individual employee payslips</Text>
-                </Stack>
-            </Group>
+            {/* Banner */}
+            <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+                <Box mb={24} style={{
+                    background: isDark
+                        ? 'linear-gradient(135deg, #1E0800 0%, #3D1200 60%, #C2410C 100%)'
+                        : 'linear-gradient(135deg, #C2410C 0%, #EA580C 60%, #F97316 100%)',
+                    borderRadius: 18,
+                    padding: '20px 28px',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    boxShadow: '0 6px 32px rgba(194,65,12,0.3)',
+                }}>
+                    <Box style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
+                    <Group justify="space-between" align="center" wrap="wrap" gap="md" style={{ position: 'relative', zIndex: 1 }}>
+                        <Group gap={10}>
+                            <Box style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem' }}>
+                                📄
+                            </Box>
+                            <Stack gap={1}>
+                                <Text fw={900} size="lg" c="white">Salary Slip</Text>
+                                <Text size="xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Search and print individual employee payslips</Text>
+                            </Stack>
+                        </Group>
+                    </Group>
+                </Box>
+            </motion.div>
 
             {/* Filter bar */}
-            <Box style={{ background: isDark ? dk.card : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 12, padding: '16px 20px', marginBottom: 20 }}>
-                <Group gap="md" align="flex-end">
-                    <Select label="Month" data={monthOptions} value={month} onChange={v => setMonth(v ?? String(new Date().getMonth() + 1))} styles={iS} style={{ width: 160 }} />
-                    <Select label="Year" data={yearOptions} value={year} onChange={v => setYear(v ?? String(new Date().getFullYear()))} styles={iS} style={{ width: 110 }} />
-                    <Select label="Employee" data={empOptions} value={empId} onChange={v => setEmpId(v ?? '')} searchable clearable placeholder="Select employee…" styles={iS} style={{ flex: 1 }} />
-                    <Box component="button" onClick={showSlip} style={{ padding: '10px 24px', borderRadius: 9, background: '#0D9488', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
-                        🔍 Show
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+                <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow, marginBottom: 20 }}>
+                    <Box style={{ height: 3, background: 'linear-gradient(90deg, #C2410C, #EA580C)' }} />
+                    <Box style={{ padding: '20px 24px' }}>
+                        <Group gap="md" align="flex-end" wrap="wrap">
+                            <Select
+                                label="Month"
+                                data={monthOptions}
+                                value={month}
+                                onChange={v => setMonth(v ?? String(new Date().getMonth() + 1))}
+                                styles={{ ...inputStyles, dropdown: dropdownStyle }}
+                                style={{ width: 160 }}
+                            />
+                            <Select
+                                label="Year"
+                                data={yearOptions}
+                                value={year}
+                                onChange={v => setYear(v ?? String(new Date().getFullYear()))}
+                                styles={{ ...inputStyles, dropdown: dropdownStyle }}
+                                style={{ width: 110 }}
+                            />
+                            <Select
+                                label="Employee"
+                                data={empOptions}
+                                value={empId}
+                                onChange={v => setEmpId(v ?? '')}
+                                searchable
+                                clearable
+                                placeholder="Select employee…"
+                                styles={{ ...inputStyles, dropdown: dropdownStyle }}
+                                style={{ flex: 1, minWidth: 200 }}
+                            />
+                            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                                <Box
+                                    component="button"
+                                    onClick={showSlip}
+                                    style={{ padding: '10px 24px', borderRadius: 10, background: 'linear-gradient(135deg, #C2410C, #EA580C)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 4px 16px rgba(234,88,12,0.4)', height: 42 }}
+                                >
+                                    🔍 Show
+                                </Box>
+                            </motion.div>
+                        </Group>
                     </Box>
-                </Group>
-            </Box>
+                </Box>
+            </motion.div>
 
             {/* Summary cards */}
             {slip && (
                 <>
-                    <SimpleGrid cols={3} spacing="md" mb="md">
+                    <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md" mb="md">
                         {[
-                            ['GROSS SALARY', slip.gross_salary, '#3B82F6', '💼'],
+                            ['GROSS SALARY',    slip.gross_salary,    '#3B82F6', '💼'],
                             ['TOTAL DEDUCTIONS', slip.total_deductions, '#EF4444', '🔻'],
-                            ['NET SALARY', slip.net_salary, '#0D9488', '💰'],
-                        ].map(([label, value, color, icon]) => (
-                            <Box key={label} style={{ background: isDark ? dk.card : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 12, padding: '18px 22px' }}>
-                                <Group gap={12}>
-                                    <Box style={{ width: 40, height: 40, borderRadius: 10, background: color + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <Text style={{ fontSize: 20 }}>{icon}</Text>
-                                    </Box>
-                                    <div>
-                                        <Text size="xs" fw={700} style={{ color: textSec, letterSpacing: 0.5, textTransform: 'uppercase' }}>{label}</Text>
-                                        <Text size="xl" fw={800} style={{ color, lineHeight: 1.2 }}>{Number(value ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
-                                    </div>
-                                </Group>
-                            </Box>
+                            ['NET SALARY',      slip.net_salary,      '#0D9488', '💰'],
+                        ].map(([label, value, color, icon], i) => (
+                            <motion.div key={label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
+                                <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, padding: '18px 22px', boxShadow: cardShadow }}>
+                                    <Group gap={12}>
+                                        <Box style={{ width: 40, height: 40, borderRadius: 10, background: color + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Text style={{ fontSize: 20 }}>{icon}</Text>
+                                        </Box>
+                                        <div>
+                                            <Text size="xs" fw={700} style={{ color: textSec, letterSpacing: 0.5, textTransform: 'uppercase' }}>{label}</Text>
+                                            <Text size="xl" fw={800} style={{ color, lineHeight: 1.2 }}>
+                                                {Number(value ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </Text>
+                                        </div>
+                                    </Group>
+                                </Box>
+                            </motion.div>
                         ))}
                     </SimpleGrid>
 
                     {/* Action buttons */}
                     <Group justify="flex-end" mb="md" gap="sm">
                         <Box component="button" onClick={handlePrint}
-                            style={{ padding: '10px 22px', borderRadius: 9, background: '#1F2937', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                            style={{ padding: '10px 22px', borderRadius: 10, background: isDark ? 'rgba(255,255,255,0.08)' : '#1F2937', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                             🖨️ Print Payslip
                         </Box>
                         <Box component="button" onClick={handlePrint}
-                            style={{ padding: '10px 22px', borderRadius: 9, background: '#F59E0B', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                            style={{ padding: '10px 22px', borderRadius: 10, background: '#F59E0B', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                             📄 Export PDF
                         </Box>
                     </Group>
 
-                    {/* The printable payslip document */}
                     <Payslip slip={slip} run={run} bankDetail={bankDetail} company={company} nssfRate={nssfRate} />
                 </>
             )}
 
             {!slip && empId && (
-                <Box style={{ background: isDark ? dk.card : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 12, padding: '60px', textAlign: 'center' }}>
+                <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, padding: '60px', textAlign: 'center', boxShadow: cardShadow }}>
                     <Text style={{ fontSize: 40, marginBottom: 12 }}>📋</Text>
                     <Text fw={700} size="lg" style={{ color: textPri, marginBottom: 6 }}>No payslip found</Text>
                     <Text size="sm" style={{ color: textSec }}>No payroll run exists for {MONTHS[parseInt(month)]} {year}, or this employee has no slip for that period.</Text>
@@ -245,7 +303,7 @@ export default function SalarySlipIndex({ slip, run, bankDetail, employees, comp
             )}
 
             {!slip && !empId && (
-                <Box style={{ background: isDark ? dk.card : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 12, padding: '60px', textAlign: 'center' }}>
+                <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, padding: '60px', textAlign: 'center', boxShadow: cardShadow }}>
                     <Text style={{ fontSize: 40, marginBottom: 12 }}>🔍</Text>
                     <Text fw={700} size="lg" style={{ color: textPri, marginBottom: 6 }}>Select month, year and employee</Text>
                     <Text size="sm" style={{ color: textSec }}>Use the filters above to search for a salary slip.</Text>

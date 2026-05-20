@@ -4,30 +4,30 @@ import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DatePicker from '../../../components/DatePicker';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
-
-function Section({ icon, title, children, isDark }) {
-    const cardBg     = isDark ? dk.card : '#ffffff';
-    const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const textPri    = isDark ? dk.textPri : '#1E293B';
-    const divider    = isDark ? dk.divider : '#E2E8F0';
+function SectionCard({ title, icon, children, isDark }) {
+    const cardBg     = isDark ? '#1A0900' : '#ffffff';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0';
+    const cardShadow = isDark ? '0 2px 16px rgba(0,0,0,0.35)' : '0 1px 8px rgba(0,0,0,0.06)';
+    const textPri    = isDark ? '#F1F5F9' : '#1E293B';
+    const divider    = isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9';
     return (
-        <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden', marginBottom: 16 }}>
+        <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow, marginBottom: 16 }}>
+            <Box style={{ height: 3, background: 'linear-gradient(90deg, #C2410C, #EA580C)' }} />
             <Box style={{ padding: '14px 20px', borderBottom: `1px solid ${divider}` }}>
                 <Group gap={8}>
-                    {icon && <Text style={{ fontSize: 16 }}>{icon}</Text>}
+                    <Text size="md">{icon}</Text>
                     <Text fw={700} size="sm" style={{ color: textPri }}>{title}</Text>
                 </Group>
             </Box>
-            <Box style={{ padding: '20px' }}>{children}</Box>
+            <Box style={{ padding: '20px 24px' }}>{children}</Box>
         </Box>
     );
 }
 
-// Visual toggle grid for licence classes
 function LicenceClassToggle({ classes, selected, onToggle, isDark }) {
-    const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0';
+    const textMut    = isDark ? '#475569' : '#98A2B3';
+    const textSec    = isDark ? '#94A3B8' : '#64748B';
 
     return (
         <Box>
@@ -48,12 +48,12 @@ function LicenceClassToggle({ classes, selected, onToggle, isDark }) {
                                         cursor: 'pointer',
                                         userSelect: 'none',
                                         background: active
-                                            ? 'var(--c-border-strong)'
-                                            : isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC',
+                                            ? (isDark ? 'rgba(194,65,12,0.18)' : 'rgba(234,88,12,0.08)')
+                                            : (isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC'),
                                         border: active
-                                            ? '1.5px solid rgba(33,150,243,0.5)'
+                                            ? '1.5px solid rgba(234,88,12,0.55)'
                                             : `1px solid ${cardBorder}`,
-                                        color: active ? '#60A5FA' : textMut,
+                                        color: active ? '#EA580C' : textMut,
                                         fontWeight: active ? 800 : 500,
                                         fontSize: 14,
                                         letterSpacing: 0.5,
@@ -71,8 +71,8 @@ function LicenceClassToggle({ classes, selected, onToggle, isDark }) {
                 <Group gap={6} mt={10} wrap="wrap">
                     {(selected ?? []).map(code => (
                         <Box key={code} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                            <Box style={{ width: 6, height: 6, borderRadius: '50%', background: '#3B82F6' }} />
-                            <Text size="xs" style={{ color: isDark ? dk.textSec : '#64748B' }}>
+                            <Box style={{ width: 6, height: 6, borderRadius: '50%', background: '#EA580C' }} />
+                            <Text size="xs" style={{ color: textSec }}>
                                 <b>{code}</b> — {classes[code]}
                             </Text>
                         </Box>
@@ -87,16 +87,17 @@ export default function DriverForm({ data, setData, errors, statuses, licenseCla
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
 
-    const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const textSec    = isDark ? dk.textSec : '#64748B';
-    const textPri    = isDark ? dk.textPri : '#1E293B';
+    const cardBg     = isDark ? '#1A0900' : '#ffffff';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0';
+    const textPri    = isDark ? '#F1F5F9' : '#1E293B';
+    const textSec    = isDark ? '#94A3B8' : '#64748B';
     const inputBg    = isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC';
+    const dropdownStyle = { background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 12 };
 
     const inputStyles = {
-        label: { color: textSec, marginBottom: 4, fontSize: 13 },
+        label: { color: textSec, fontSize: 12, fontWeight: 600, marginBottom: 4 },
         input: { background: inputBg, border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 },
     };
-    const dropdownStyle = { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` };
 
     const toggleClass = (code) => {
         const current = data.license_classes ?? [];
@@ -116,7 +117,7 @@ export default function DriverForm({ data, setData, errors, statuses, licenseCla
 
     return (
         <form onSubmit={onSubmit}>
-            <Section icon="👤" title="Personal Information" isDark={isDark}>
+            <SectionCard icon="👤" title="Personal Information" isDark={isDark}>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <TextInput label="Full Name" placeholder="Juma Mwangi" required value={data.name} onChange={e => setData('name', e.target.value)} error={errors.name} styles={inputStyles} />
                     <Select label="Status" required value={data.status} onChange={v => setData('status', v)} data={Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))} error={errors.status} styles={{ ...inputStyles, dropdown: dropdownStyle }} />
@@ -129,9 +130,9 @@ export default function DriverForm({ data, setData, errors, statuses, licenseCla
                     <TextInput label="Birth Region" placeholder="e.g. Kilimanjaro" value={data.birth_region ?? ''} onChange={e => setData('birth_region', e.target.value)} error={errors.birth_region} styles={inputStyles} />
                     <TextInput label="Birth District" placeholder="e.g. Moshi Rural" value={data.birth_district ?? ''} onChange={e => setData('birth_district', e.target.value)} error={errors.birth_district} styles={inputStyles} />
                 </SimpleGrid>
-            </Section>
+            </SectionCard>
 
-            <Section icon="🪪" title="Driving Licence" isDark={isDark}>
+            <SectionCard icon="🪪" title="Driving Licence" isDark={isDark}>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" mb="lg">
                     <TextInput
                         label="Licence Number" placeholder="TZ-DL-XXXXXX"
@@ -150,7 +151,6 @@ export default function DriverForm({ data, setData, errors, statuses, licenseCla
                     </Stack>
                 </SimpleGrid>
 
-                {/* Licence class toggle grid */}
                 <LicenceClassToggle
                     classes={licenseClasses}
                     selected={data.license_classes}
@@ -160,9 +160,9 @@ export default function DriverForm({ data, setData, errors, statuses, licenseCla
                 {errors.license_classes && (
                     <Text size="xs" style={{ color: '#EF4444', marginTop: 6 }}>{errors.license_classes}</Text>
                 )}
-            </Section>
+            </SectionCard>
 
-            <Section icon="🛂" title="Visa / Travel Documents" isDark={isDark}>
+            <SectionCard icon="🛂" title="Visa / Travel Documents" isDark={isDark}>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap={2}>
                         <DatePicker
@@ -180,23 +180,36 @@ export default function DriverForm({ data, setData, errors, statuses, licenseCla
                     </Stack>
                 </SimpleGrid>
                 <Text size="xs" style={{ color: textSec, marginTop: 8 }}>Upload the actual document files from the driver profile page.</Text>
-            </Section>
+            </SectionCard>
 
-            <Section icon="🚨" title="Emergency Contact" isDark={isDark}>
+            <SectionCard icon="🚨" title="Emergency Contact" isDark={isDark}>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <TextInput label="Contact Name" placeholder="Mary Mwangi" value={data.emergency_contact_name ?? ''} onChange={e => setData('emergency_contact_name', e.target.value)} error={errors.emergency_contact_name} styles={inputStyles} />
                     <TextInput label="Contact Phone" placeholder="+255 700 000 000" value={data.emergency_contact_phone ?? ''} onChange={e => setData('emergency_contact_phone', e.target.value)} error={errors.emergency_contact_phone} styles={inputStyles} />
                 </SimpleGrid>
-            </Section>
+            </SectionCard>
 
-            <Section icon="📝" title="Notes" isDark={isDark}>
-                <Textarea placeholder="Additional notes…" minRows={3} value={data.notes ?? ''} onChange={e => setData('notes', e.target.value)} error={errors.notes} styles={{ label: inputStyles.label, input: { ...inputStyles.input, resize: 'vertical' } }} />
-            </Section>
+            <SectionCard icon="📝" title="Notes" isDark={isDark}>
+                <Textarea
+                    placeholder="Additional notes…" minRows={3}
+                    value={data.notes ?? ''} onChange={e => setData('notes', e.target.value)}
+                    error={errors.notes}
+                    styles={{ label: inputStyles.label, input: { ...inputStyles.input, resize: 'vertical' } }}
+                />
+            </SectionCard>
 
-            <Group justify="flex-end" gap="md">
-                <Box component={Link} href={backHref} style={{ padding: '10px 20px', borderRadius: 10, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>Cancel</Box>
+            <Group justify="flex-end" gap="md" mt={4}>
+                <Box
+                    component={Link} href={backHref}
+                    style={{ background: cardBg, border: `1px solid ${cardBorder}`, color: textSec, padding: '10px 18px', borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}
+                >
+                    Cancel
+                </Box>
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box component="button" type="submit" disabled={processing} style={{ padding: '10px 28px', borderRadius: 10, border: 'none', cursor: processing ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)', opacity: processing ? 0.7 : 1 }}>
+                    <Box
+                        component="button" type="submit" disabled={processing}
+                        style={{ background: 'linear-gradient(135deg, #C2410C, #EA580C)', border: 'none', height: 42, borderRadius: 10, fontWeight: 700, boxShadow: '0 4px 16px rgba(234,88,12,0.4)', color: '#fff', cursor: processing ? 'not-allowed' : 'pointer', padding: '0 28px', fontSize: 14, opacity: processing ? 0.7 : 1 }}
+                    >
                         {processing ? 'Saving…' : submitLabel}
                     </Box>
                 </motion.div>

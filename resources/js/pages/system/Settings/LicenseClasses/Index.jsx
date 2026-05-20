@@ -5,20 +5,20 @@ import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)', cardHov: '#132436' };
-
 export default function LicenseClassesIndex({ classes }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const { props } = usePage();
 
-    const cardBg     = isDark ? dk.card : '#ffffff';
-    const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const textPri    = isDark ? dk.textPri : '#1E293B';
-    const textSec    = isDark ? dk.textSec : '#64748B';
-    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
-    const divider    = isDark ? dk.divider : '#E2E8F0';
-    const rowHov     = isDark ? dk.cardHov : '#F8FAFC';
+    const cardBg     = isDark ? '#1A0900' : '#ffffff';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0';
+    const cardShadow = isDark ? '0 2px 16px rgba(0,0,0,0.35)' : '0 1px 8px rgba(0,0,0,0.06)';
+    const textPri    = isDark ? '#F1F5F9' : '#1E293B';
+    const textSec    = isDark ? '#94A3B8' : '#64748B';
+    const textMut    = isDark ? '#475569' : '#98A2B3';
+    const divider    = isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9';
+    const headBg     = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC';
+    const rowHov     = isDark ? 'rgba(255,255,255,0.04)' : '#FAFAFA';
 
     const flash = props.flash ?? {};
     const can = useCan();
@@ -34,34 +34,52 @@ export default function LicenseClassesIndex({ classes }) {
         <DashboardLayout title="Settings · Licence Classes">
             <Head title="Licence Classes" />
 
+            {/* Page header banner */}
+            <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+                <Box mb={24} style={{
+                    background: isDark
+                        ? 'linear-gradient(135deg, #1E0800 0%, #3D1200 60%, #C2410C 100%)'
+                        : 'linear-gradient(135deg, #C2410C 0%, #EA580C 60%, #F97316 100%)',
+                    borderRadius: 18, padding: '20px 28px', position: 'relative', overflow: 'hidden',
+                    boxShadow: '0 6px 32px rgba(194,65,12,0.3)',
+                }}>
+                    <Box style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
+                    <Group justify="space-between" align="center" wrap="wrap" gap="md" style={{ position: 'relative', zIndex: 1 }}>
+                        <Group gap={10}>
+                            <Box style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem' }}>🪪</Box>
+                            <Stack gap={1}>
+                                <Text fw={900} size="lg" c="white">Licence Classes</Text>
+                                <Text size="xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Manage driving licence class codes available across the system</Text>
+                            </Stack>
+                        </Group>
+                        {canManage && (
+                            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                                <Box
+                                    component={Link} href="/system/settings/license-classes/create"
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', fontWeight: 700, fontSize: 14, padding: '10px 20px', borderRadius: 10, textDecoration: 'none' }}
+                                >
+                                    + Add Class
+                                </Box>
+                            </motion.div>
+                        )}
+                    </Group>
+                </Box>
+            </motion.div>
+
             {flash.success && (
                 <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 10, padding: '10px 16px', marginBottom: 16 }}>
                     <Text size="sm" style={{ color: '#22C55E' }}>✓ {flash.success}</Text>
                 </motion.div>
             )}
 
-            <Group justify="space-between" mb="xl">
-                <Stack gap={2}>
-                    <Text fw={800} size="xl" style={{ color: textPri }}>Licence Classes</Text>
-                    <Text size="sm" style={{ color: textSec }}>Manage driving licence class codes available across the system</Text>
-                </Stack>
-                {canManage && (
-                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                        <Box
-                            component={Link} href="/system/settings/license-classes/create"
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, padding: '10px 20px', borderRadius: 10, textDecoration: 'none', boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}
-                        >
-                            <Text size="sm">＋</Text> Add Class
-                        </Box>
-                    </motion.div>
-                )}
-            </Group>
+            {/* Table card */}
+            <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow }}>
+                <Box style={{ height: 3, background: 'linear-gradient(90deg, #C2410C, #EA580C)' }} />
 
-            <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden' }}>
                 {/* Header row */}
-                <Box style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr 80px 90px 80px', borderBottom: `1px solid ${divider}`, padding: '10px 20px' }}>
+                <Box style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr 80px 90px 80px', background: headBg, padding: '10px 20px', borderBottom: `1px solid ${divider}` }}>
                     {['Code', 'Name', 'Description', 'Order', 'Active', ''].map((h, i) => (
-                        <Text key={i} size="10px" fw={700} style={{ color: textMut, textTransform: 'uppercase', letterSpacing: 1 }}>{h}</Text>
+                        <Text key={i} size="10px" fw={800} style={{ color: textMut, textTransform: 'uppercase', letterSpacing: 0.9 }}>{h}</Text>
                     ))}
                 </Box>
 
@@ -75,14 +93,14 @@ export default function LicenseClassesIndex({ classes }) {
                     classes.map((cls, i) => (
                         <motion.div key={cls.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.04 }}>
                             <Box
-                                style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr 80px 90px 80px', padding: '13px 20px', borderBottom: `1px solid ${divider}`, alignItems: 'center', transition: 'background 0.15s' }}
-                                onMouseEnter={e => e.currentTarget.style.background = rowHov}
-                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr 80px 90px 80px', padding: '13px 20px', borderBottom: `1px solid ${divider}`, alignItems: 'center', borderLeft: '3px solid transparent', transition: 'all 0.15s' }}
+                                onMouseEnter={e => { e.currentTarget.style.background = rowHov; e.currentTarget.style.borderLeftColor = '#EA580C'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeftColor = 'transparent'; }}
                             >
                                 {/* Code badge */}
                                 <Box>
-                                    <Box style={{ display: 'inline-block', background: cls.is_active ? 'var(--c-border-color)' : 'rgba(255,255,255,0.05)', border: `1px solid ${cls.is_active ? 'rgba(33,150,243,0.3)' : cardBorder}`, borderRadius: 6, padding: '4px 10px' }}>
-                                        <Text fw={800} size="sm" style={{ color: cls.is_active ? '#60A5FA' : textMut, fontFamily: 'monospace', letterSpacing: 0.5 }}>{cls.code}</Text>
+                                    <Box style={{ display: 'inline-block', background: cls.is_active ? 'rgba(234,88,12,0.1)' : 'rgba(255,255,255,0.05)', border: `1px solid ${cls.is_active ? 'rgba(234,88,12,0.3)' : cardBorder}`, borderRadius: 6, padding: '4px 10px' }}>
+                                        <Text fw={800} size="sm" style={{ color: cls.is_active ? '#EA580C' : textMut, fontFamily: 'monospace', letterSpacing: 0.5 }}>{cls.code}</Text>
                                     </Box>
                                 </Box>
 

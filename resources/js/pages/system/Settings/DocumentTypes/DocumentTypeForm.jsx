@@ -3,30 +3,30 @@ import { Box, Text, Group, Stack, TextInput, NumberInput, Switch } from '@mantin
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
-
 export default function DocumentTypeForm({ data, setData, errors, processing, onSubmit, backHref, submitLabel = 'Save', isBuiltin = false }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
 
-    const cardBg     = isDark ? dk.card : '#ffffff';
-    const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const textPri    = isDark ? dk.textPri : '#1E293B';
-    const textSec    = isDark ? dk.textSec : '#64748B';
+    const cardBg     = isDark ? '#1A0900' : '#ffffff';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0';
+    const cardShadow = isDark ? '0 2px 16px rgba(0,0,0,0.35)' : '0 1px 8px rgba(0,0,0,0.06)';
+    const textPri    = isDark ? '#F1F5F9' : '#1E293B';
+    const textSec    = isDark ? '#94A3B8' : '#64748B';
+    const divider    = isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9';
     const inputBg    = isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC';
-    const divider    = isDark ? 'rgba(255,255,255,0.06)' : '#E2E8F0';
 
     const inputStyles = {
-        label: { color: textSec, marginBottom: 4, fontSize: 13 },
+        label: { color: textSec, fontSize: 12, fontWeight: 600, marginBottom: 4 },
         input: { background: inputBg, border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 },
     };
 
     return (
         <form onSubmit={onSubmit}>
-            <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden', marginBottom: 16 }}>
+            <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow, marginBottom: 20 }}>
+                <Box style={{ height: 3, background: 'linear-gradient(90deg, #C2410C, #EA580C)' }} />
                 <Box style={{ padding: '14px 20px', borderBottom: `1px solid ${divider}` }}>
                     <Group gap={8}>
-                        <Text style={{ fontSize: 16 }}>📄</Text>
+                        <Text size="md">📄</Text>
                         <Text fw={700} size="sm" style={{ color: textPri }}>Document Details</Text>
                         {isBuiltin && (
                             <Box style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 20, padding: '2px 10px' }}>
@@ -35,7 +35,7 @@ export default function DocumentTypeForm({ data, setData, errors, processing, on
                         )}
                     </Group>
                 </Box>
-                <Box style={{ padding: 20 }}>
+                <Box style={{ padding: '20px 24px' }}>
                     <Stack gap="md">
                         <Group grow>
                             <TextInput
@@ -73,6 +73,7 @@ export default function DocumentTypeForm({ data, setData, errors, processing, on
                                 checked={data.is_active}
                                 onChange={e => setData('is_active', e.currentTarget.checked)}
                                 label="Active"
+                                color="orange"
                                 styles={{ label: { color: textSec, fontSize: 13 } }}
                             />
                             <Text size="xs" style={{ color: textSec }}>
@@ -81,7 +82,7 @@ export default function DocumentTypeForm({ data, setData, errors, processing, on
                         </Box>
 
                         {isBuiltin && (
-                            <Box style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8, padding: '10px 14px' }}>
+                            <Box style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, padding: '10px 14px' }}>
                                 <Text size="xs" style={{ color: '#818CF8' }}>
                                     📌 This is a built-in document type. The name is fixed but you can update the description, sort order, and active status.
                                 </Text>
@@ -92,9 +93,20 @@ export default function DocumentTypeForm({ data, setData, errors, processing, on
             </Box>
 
             <Group justify="flex-end" gap="md">
-                <Box component={Link} href={backHref} style={{ padding: '10px 20px', borderRadius: 10, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>Cancel</Box>
+                <Box
+                    component={Link}
+                    href={backHref}
+                    style={{ padding: '10px 18px', borderRadius: 10, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 14, fontWeight: 600, background: cardBg }}
+                >
+                    Cancel
+                </Box>
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Box component="button" type="submit" disabled={processing} style={{ padding: '10px 28px', borderRadius: 10, border: 'none', cursor: processing ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)', opacity: processing ? 0.7 : 1 }}>
+                    <Box
+                        component="button"
+                        type="submit"
+                        disabled={processing}
+                        style={{ padding: '10px 28px', height: 42, borderRadius: 10, border: 'none', cursor: processing ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg, #C2410C, #EA580C)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(194,65,12,0.35)', opacity: processing ? 0.7 : 1 }}
+                    >
                         {processing ? 'Saving…' : submitLabel}
                     </Box>
                 </motion.div>

@@ -1,45 +1,37 @@
 import { Link } from '@inertiajs/react';
-import { Box, Text, Group, Stack, SimpleGrid, TextInput, Textarea, Select, NumberInput } from '@mantine/core';
+import { Box, Text, Group, Stack, SimpleGrid, TextInput, Textarea, Select, NumberInput, Button } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DatePicker from '../../../components/DatePicker';
-
-const dk = {
-    card:    '#0F1E32',
-    cardHov: '#132436',
-    border:  'var(--c-border-color)',
-    divider: 'rgba(255,255,255,0.06)',
-    textPri: '#E2E8F0',
-    textSec: 'var(--c-text-secondary)',
-    textMut: 'var(--c-text-muted)',
-};
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function docStatus(dateStr) {
     if (!dateStr) return null;
     const days = Math.floor((new Date(dateStr) - new Date()) / 86400000);
-    if (days < 0)   return { color: '#EF4444', label: 'EXPIRED',          days };
-    if (days <= 30) return { color: '#F59E0B', label: `${days}d left`,    days };
+    if (days < 0)   return { color: '#EF4444', label: 'EXPIRED',       days };
+    if (days <= 30) return { color: '#F59E0B', label: `${days}d left`, days };
                     return { color: '#22C55E', label: new Date(dateStr).toLocaleDateString('en-TZ', { day: '2-digit', month: 'short', year: '2-digit' }), days };
 }
 
-// ─── Section wrapper ─────────────────────────────────────────────────────────
+// ─── Section card wrapper ────────────────────────────────────────────────────
 
 function Section({ icon, title, children, isDark }) {
-    const cardBg     = isDark ? dk.card : '#ffffff';
-    const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const textPri    = isDark ? dk.textPri : '#1E293B';
-    const divider    = isDark ? dk.divider : '#E2E8F0';
+    const cardBg     = isDark ? '#1A0900' : '#ffffff';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0';
+    const cardShadow = isDark ? '0 2px 16px rgba(0,0,0,0.35)' : '0 1px 8px rgba(0,0,0,0.06)';
+    const textPri    = isDark ? '#F1F5F9' : '#1E293B';
+    const divider    = isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9';
     return (
-        <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden', marginBottom: 16 }}>
+        <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow, marginBottom: 16 }}>
+            <Box style={{ height: 3, background: 'linear-gradient(90deg, #C2410C, #EA580C)' }} />
             <Box style={{ padding: '14px 20px', borderBottom: `1px solid ${divider}` }}>
                 <Group gap={8}>
-                    {icon && <Text style={{ fontSize: 16 }}>{icon}</Text>}
+                    {icon && <Text size="md">{icon}</Text>}
                     <Text fw={700} size="sm" style={{ color: textPri }}>{title}</Text>
                 </Group>
             </Box>
-            <Box style={{ padding: '20px' }}>{children}</Box>
+            <Box style={{ padding: '20px 24px' }}>{children}</Box>
         </Box>
     );
 }
@@ -47,23 +39,23 @@ function Section({ icon, title, children, isDark }) {
 // ─── Live Preview Card ────────────────────────────────────────────────────────
 
 function VehiclePreview({ data, drivers, typeIcons, isDark }) {
-    const cardBg     = isDark ? dk.card : '#ffffff';
-    const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const textPri    = isDark ? dk.textPri : '#1E293B';
-    const textSec    = isDark ? dk.textSec : '#64748B';
-    const textMut    = isDark ? dk.textMut : 'var(--c-text-secondary)';
-    const divider    = isDark ? dk.divider : '#E2E8F0';
+    const cardBg     = isDark ? '#1A0900' : '#ffffff';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0';
+    const textPri    = isDark ? '#F1F5F9' : '#1E293B';
+    const textSec    = isDark ? '#94A3B8' : '#64748B';
+    const textMut    = isDark ? '#475569' : '#98A2B3';
+    const divider    = isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9';
 
     const assignedDriver = drivers.find(d => String(d.id) === String(data.driver_id));
     const typeIcon = typeIcons?.[data.type] ?? '🚗';
 
     const docs = [
-        { label: 'Insurance',        value: data.insurance_expiry },
-        { label: 'Road Licence',     value: data.road_licence_expiry },
-        { label: 'Fitness',          value: data.fitness_expiry },
-        { label: 'TRA Sticker',      value: data.tra_sticker_expiry },
-        { label: 'GVL',              value: data.goods_vehicle_licence_expiry },
-        { label: 'Next Service',     value: data.next_service_date },
+        { label: 'Insurance',    value: data.insurance_expiry },
+        { label: 'Road Licence', value: data.road_licence_expiry },
+        { label: 'Fitness',      value: data.fitness_expiry },
+        { label: 'TRA Sticker',  value: data.tra_sticker_expiry },
+        { label: 'GVL',          value: data.goods_vehicle_licence_expiry },
+        { label: 'Next Service', value: data.next_service_date },
     ];
 
     const hasAnyDoc = docs.some(d => d.value);
@@ -71,17 +63,15 @@ function VehiclePreview({ data, drivers, typeIcons, isDark }) {
 
     return (
         <Box style={{ position: 'sticky', top: 24 }}>
-            {/* Preview label */}
             <Text size="10px" fw={700} style={{ color: textMut, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 10 }}>Live Preview</Text>
 
-            <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden' }}>
-                {/* Accent bar */}
-                <Box style={{ height: 4, background: 'linear-gradient(90deg, #C2410C, #EA580C, #FB923C)' }} />
+            <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden', boxShadow: isDark ? '0 2px 16px rgba(0,0,0,0.35)' : '0 1px 8px rgba(0,0,0,0.06)' }}>
+                <Box style={{ height: 3, background: 'linear-gradient(90deg, #C2410C, #EA580C, #FB923C)' }} />
 
                 <Box style={{ padding: '20px' }}>
                     {/* Plate badge */}
                     <Box style={{ textAlign: 'center', marginBottom: 16 }}>
-                        <Box style={{ display: 'inline-block', background: isDark ? '#0B1627' : '#F0F4F9', border: `2px solid ${isDark ? dk.border : '#CBD5E1'}`, borderRadius: 10, padding: '8px 20px', minWidth: 160 }}>
+                        <Box style={{ display: 'inline-block', background: isDark ? 'rgba(255,255,255,0.04)' : '#F0F4F9', border: `2px solid ${isDark ? 'rgba(255,255,255,0.12)' : '#CBD5E1'}`, borderRadius: 10, padding: '8px 20px', minWidth: 160 }}>
                             <Text fw={900} style={{ color: textPri, fontSize: 22, letterSpacing: 4, fontFamily: 'monospace' }}>
                                 {plate.toUpperCase()}
                             </Text>
@@ -103,14 +93,12 @@ function VehiclePreview({ data, drivers, typeIcons, isDark }) {
                     </Box>
 
                     <Box style={{ borderTop: `1px solid ${divider}`, paddingTop: 14, marginBottom: 14 }}>
-                        {/* Assigned driver */}
                         <Group gap={8} mb={8}>
                             <Text size="sm">👤</Text>
                             <Text size="sm" style={{ color: assignedDriver ? textPri : textMut }}>
                                 {assignedDriver ? assignedDriver.name : 'No driver assigned'}
                             </Text>
                         </Group>
-                        {/* Specs */}
                         {(data.payload_tons || data.mileage_km) && (
                             <Group gap={16} mb={8}>
                                 {data.payload_tons && (
@@ -144,7 +132,6 @@ function VehiclePreview({ data, drivers, typeIcons, isDark }) {
                         )}
                     </Box>
 
-                    {/* Documents */}
                     {hasAnyDoc && (
                         <Box style={{ borderTop: `1px solid ${divider}`, paddingTop: 14 }}>
                             <Text size="xs" fw={700} style={{ color: textMut, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>Documents</Text>
@@ -166,7 +153,6 @@ function VehiclePreview({ data, drivers, typeIcons, isDark }) {
                 </Box>
             </Box>
 
-            {/* Chassis/Engine small print */}
             {(data.chassis_number || data.engine_number) && (
                 <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 10, padding: '10px 14px', marginTop: 10 }}>
                     {data.chassis_number && (
@@ -193,17 +179,18 @@ export default function VehicleForm({ data, setData, errors, statuses, types, fu
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
 
-    const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const textSec    = isDark ? dk.textSec : '#64748B';
-    const textPri    = isDark ? dk.textPri : '#1E293B';
+    const cardBg     = isDark ? '#1A0900' : '#ffffff';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0';
+    const textPri    = isDark ? '#F1F5F9' : '#1E293B';
+    const textSec    = isDark ? '#94A3B8' : '#64748B';
     const inputBg    = isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC';
 
     const inputStyles = {
-        label: { color: textSec, marginBottom: 4, fontSize: 13 },
+        label: { color: textSec, fontSize: 12, fontWeight: 600, marginBottom: 4 },
         input: { background: inputBg, border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 },
     };
     const numStyles = { ...inputStyles, section: { color: textSec } };
-    const dropdownStyle = { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` };
+    const dropdownStyle = { background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 12 };
 
     const docWarning = (dateStr) => {
         if (!dateStr) return null;
@@ -235,7 +222,8 @@ export default function VehicleForm({ data, setData, errors, statuses, types, fu
                                 label="Status" required value={data.status}
                                 onChange={v => setData('status', v)}
                                 data={Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))}
-                                error={errors.status} styles={{ ...inputStyles, dropdown: dropdownStyle }}
+                                error={errors.status}
+                                styles={{ ...inputStyles, dropdown: dropdownStyle }}
                             />
                             <TextInput
                                 label="Make (Brand)" placeholder="Mercedes-Benz, MAN, Scania…" required
@@ -251,7 +239,8 @@ export default function VehicleForm({ data, setData, errors, statuses, types, fu
                                 label="Vehicle Type" required value={data.type}
                                 onChange={v => setData('type', v)}
                                 data={types.map(t => ({ value: t, label: `${typeIcons[t] ?? ''} ${t}` }))}
-                                error={errors.type} styles={{ ...inputStyles, dropdown: dropdownStyle }}
+                                error={errors.type}
+                                styles={{ ...inputStyles, dropdown: dropdownStyle }}
                             />
                             <NumberInput
                                 label="Year" required min={1990} max={new Date().getFullYear() + 1}
@@ -320,7 +309,8 @@ export default function VehicleForm({ data, setData, errors, statuses, types, fu
                                 label="Fuel Type" required value={data.fuel_type}
                                 onChange={v => setData('fuel_type', v)}
                                 data={fuelTypes.map(f => ({ value: f, label: f.charAt(0).toUpperCase() + f.slice(1) }))}
-                                error={errors.fuel_type} styles={{ ...inputStyles, dropdown: dropdownStyle }}
+                                error={errors.fuel_type}
+                                styles={{ ...inputStyles, dropdown: dropdownStyle }}
                             />
                             <NumberInput
                                 label="Fuel Tank Capacity (litres)" placeholder="400" min={0}
@@ -352,7 +342,6 @@ export default function VehicleForm({ data, setData, errors, statuses, types, fu
                                 </Stack>
                             ))}
 
-                            {/* Custom document types from settings */}
                             {customDocumentTypes.map((docType) => {
                                 const val = (data.extra_documents ?? {})[String(docType.id)] ?? '';
                                 return (
@@ -387,17 +376,18 @@ export default function VehicleForm({ data, setData, errors, statuses, types, fu
                     <Group justify="flex-end" gap="md" mt="lg">
                         <Box
                             component={Link} href={backHref}
-                            style={{ padding: '10px 20px', borderRadius: 10, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 14, fontWeight: 600 }}
+                            style={{ display: 'inline-flex', alignItems: 'center', padding: '10px 18px', borderRadius: 10, background: cardBg, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}
                         >
                             Cancel
                         </Box>
                         <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                            <Box
-                                component="button" type="submit" disabled={processing}
-                                style={{ padding: '10px 28px', borderRadius: 10, border: 'none', cursor: processing ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg, #C2410C, #EA580C)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(234,88,12,0.35)', opacity: processing ? 0.7 : 1 }}
+                            <Button
+                                type="submit"
+                                loading={processing}
+                                style={{ background: 'linear-gradient(135deg, #C2410C, #EA580C)', border: 'none', height: 42, borderRadius: 10, fontWeight: 700, boxShadow: '0 4px 16px rgba(234,88,12,0.4)' }}
                             >
-                                {processing ? 'Saving…' : submitLabel}
-                            </Box>
+                                {submitLabel}
+                            </Button>
                         </motion.div>
                     </Group>
                 </Box>

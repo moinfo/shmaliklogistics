@@ -10,21 +10,21 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 
     /* Theme tokens (dark default — Mantine adds [data-mantine-color-scheme="light"] for the light override below) */
-    --c-card:          #0F1E32;
-    --c-input:         #07111F;
-    --c-thead:         rgba(33,150,243,0.08);
-    --c-border-color:  rgba(33,150,243,0.12);
-    --c-border-input:  rgba(33,150,243,0.2);
-    --c-border-strong: rgba(33,150,243,0.15);
-    --c-border-row:    rgba(33,150,243,0.06);
-    --c-border-subtle: rgba(33,150,243,0.1);
+    --c-card:          #3A1700;
+    --c-input:         #220D00;
+    --c-thead:         rgba(234,88,12,0.08);
+    --c-border-color:  rgba(234,88,12,0.12);
+    --c-border-input:  rgba(234,88,12,0.2);
+    --c-border-strong: rgba(234,88,12,0.15);
+    --c-border-row:    rgba(234,88,12,0.06);
+    --c-border-subtle: rgba(234,88,12,0.1);
     --c-text:          #E2E8F0;
     --c-text-secondary:#94A3B8;
     --c-text-muted:    #475569;
-    --c-tip-bg:        rgba(33,150,243,0.08);
-    --c-tip-border:    rgba(33,150,243,0.2);
-    --c-tip-text:      #60A5FA;
-    --c-hover:         rgba(33,150,243,0.04);
+    --c-tip-bg:        rgba(234,88,12,0.08);
+    --c-tip-border:    rgba(234,88,12,0.2);
+    --c-tip-text:      #FB923C;
+    --c-hover:         rgba(234,88,12,0.04);
 }
 
 @layer base {
@@ -40,9 +40,9 @@
         --c-text:          #1E293B;
         --c-text-secondary:#64748B;
         --c-text-muted:    #94A3B8;
-        --c-tip-bg:        #EFF6FF;
-        --c-tip-border:    #BFDBFE;
-        --c-tip-text:      #1565C0;
+        --c-tip-bg:        #FFF7ED;
+        --c-tip-border:    #FDBA74;
+        --c-tip-text:      #9A3412;
         --c-hover:         rgba(0,0,0,0.025);
     }
 }

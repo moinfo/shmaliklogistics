@@ -13,7 +13,7 @@
 
   {{-- Header --}}
   <tr>
-    <td style="background:linear-gradient(135deg,#0a1628,#1565c0);border-radius:16px 16px 0 0;padding:28px 36px;text-align:center;">
+    <td style="background:linear-gradient(135deg,#0A0400,#C2410C);border-radius:16px 16px 0 0;padding:28px 36px;text-align:center;">
       <img src="{{ url('/logo-full.png') }}" alt="{{ $company->company_name }}" style="max-height:52px;max-width:180px;object-fit:contain;display:inline-block;">
       <div style="margin-top:10px;font-size:11px;color:rgba(255,255,255,0.6);letter-spacing:.5px;">
         {{ $company->company_name }}
@@ -23,7 +23,7 @@
 
   {{-- Doc type banner --}}
   <tr>
-    <td style="background:#1565c0;padding:10px 36px;">
+    <td style="background:#C2410C;padding:10px 36px;">
       @php
         $labels = ['quote'=>'QUOTATION','proforma'=>'PROFORMA INVOICE','invoice'=>'TAX INVOICE'];
         $label  = $labels[$document->type] ?? strtoupper($document->type);
@@ -87,7 +87,7 @@
       {{-- Line items --}}
       <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:0;">
         <thead>
-          <tr style="background:#1565c0;">
+          <tr style="background:#C2410C;">
             <th style="padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:#fff;letter-spacing:.3px;">Description</th>
             <th style="padding:10px 12px;text-align:center;font-size:10px;font-weight:700;color:#fff;width:50px;">Qty</th>
             <th style="padding:10px 12px;text-align:right;font-size:10px;font-weight:700;color:#fff;width:120px;">Unit Price</th>
@@ -107,7 +107,7 @@
       </table>
 
       {{-- Totals --}}
-      <table width="100%" cellpadding="0" cellspacing="0" style="border-top:2px solid #1565c0;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-top:2px solid #C2410C;">
         <tr>
           <td></td>
           <td width="280" style="padding:0;">
@@ -128,7 +128,7 @@
                 <td style="padding:6px 12px;font-size:12px;text-align:right;color:#1e293b;border-bottom:1px solid #f0f0f0;">{{ $document->currency }} {{ $fmt($document->tax_amount) }}</td>
               </tr>
               @endif
-              <tr style="background:#1565c0;">
+              <tr style="background:#C2410C;">
                 <td style="padding:10px 12px;font-size:13px;font-weight:800;color:#fff;">TOTAL</td>
                 <td style="padding:10px 12px;font-size:15px;font-weight:900;color:#fff;text-align:right;">{{ $document->currency }} {{ $fmt($document->total) }}</td>
               </tr>
@@ -158,7 +158,7 @@
       {{-- CTA --}}
       <div style="text-align:center;margin-top:28px;">
         <a href="{{ url("/system/billing/{$document->type}s/{$document->id}") }}"
-           style="display:inline-block;padding:13px 32px;background:linear-gradient(135deg,#1565c0,#2196f3);color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:14px;letter-spacing:.3px;">
+           style="display:inline-block;padding:13px 32px;background:linear-gradient(135deg,#C2410C,#EA580C);color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:14px;letter-spacing:.3px;">
           View {{ ucfirst($document->type) }} Online →
         </a>
       </div>
@@ -168,7 +168,7 @@
 
   {{-- Footer --}}
   <tr>
-    <td style="background:#0a1628;border-radius:0 0 16px 16px;padding:20px 36px;text-align:center;">
+    <td style="background:#0A0400;border-radius:0 0 16px 16px;padding:20px 36px;text-align:center;">
       <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:6px;">{{ $company->company_name }}</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.9;">
         @if($company->company_address){{ $company->company_address }}, {{ $company->company_city }}, {{ $company->company_country }}<br>@endif

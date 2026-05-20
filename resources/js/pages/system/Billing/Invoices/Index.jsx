@@ -1,22 +1,45 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Box, Text, Group, Stack, SimpleGrid, TextInput, Select, Badge, ActionIcon, Pagination } from '@mantine/core';
+import { Box, Text, Group, Stack, SimpleGrid, TextInput, Select, ActionIcon, Tooltip, Pagination } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useCan } from '../../../../lib/can';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 const fmt = (n, cur = 'TZS') => `${cur} ${new Intl.NumberFormat('en-TZ').format(Math.round(Number(n) || 0))}`;
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+
+function CardWave() {
+    return (
+        <svg viewBox="0 0 200 60" style={{ position: 'absolute', bottom: 0, left: 0, right: 0, width: '100%', opacity: 0.12, pointerEvents: 'none' }} preserveAspectRatio="none">
+            <path d="M0,30 C40,10 80,50 120,30 C160,10 180,40 200,30 L200,60 L0,60 Z" fill="white" />
+        </svg>
+    );
+}
+
+function StatusPill({ status, statuses }) {
+    const meta = statuses[status] ?? { label: status, color: '#94A3B8' };
+    return (
+        <Box style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: meta.color + '18', border: `1px solid ${meta.color}35`, borderRadius: 20, padding: '4px 12px', whiteSpace: 'nowrap' }}>
+            <Box style={{ width: 7, height: 7, borderRadius: '50%', background: meta.color, boxShadow: `0 0 6px ${meta.color}`, flexShrink: 0 }} />
+            <Text size="xs" fw={700} style={{ color: meta.color, letterSpacing: 0.4 }}>{meta.label}</Text>
+        </Box>
+    );
+}
 
 export default function InvoicesIndex({ invoices, stats, statuses, filters }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
-    const textPri    = isDark ? dk.textPri : '#1E293B';
-    const textSec    = isDark ? dk.textSec : '#64748B';
-    const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const rowHover   = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC';
+
+    const cardBg     = isDark ? '#1A0900' : '#ffffff';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0';
+    const cardShadow = isDark ? '0 2px 16px rgba(0,0,0,0.35)' : '0 1px 8px rgba(0,0,0,0.06)';
+    const textPri    = isDark ? '#F1F5F9' : '#1E293B';
+    const textSec    = isDark ? '#94A3B8' : '#64748B';
+    const textMut    = isDark ? '#475569' : '#98A2B3';
+    const divider    = isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9';
+    const headBg     = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC';
+    const rowHov     = isDark ? 'rgba(255,255,255,0.04)' : '#FAFAFA';
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
@@ -25,93 +48,277 @@ export default function InvoicesIndex({ invoices, stats, statuses, filters }) {
     const applyFilters = (overrides = {}) =>
         router.get('/system/billing/invoices', { search, status, ...overrides }, { preserveState: true, replace: true });
 
+    const statCards = [
+        {
+            icon: '📄', label: 'Total Invoices', value: String(stats.total),
+            grad: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 60%, #3B82F6 100%)',
+            glow: '0 8px 28px rgba(37,99,235,0.4)',
+        },
+        {
+            icon: '⏳', label: 'Outstanding', value: String(stats.outstanding),
+            grad: 'linear-gradient(135deg, #B45309 0%, #D97706 60%, #F59E0B 100%)',
+            glow: '0 8px 28px rgba(245,158,11,0.4)',
+        },
+        {
+            icon: '✅', label: 'Paid', value: String(stats.paid),
+            grad: 'linear-gradient(135deg, #065F46 0%, #047857 60%, #10B981 100%)',
+            glow: '0 8px 28px rgba(16,185,129,0.4)',
+        },
+        {
+            icon: '💰', label: 'Total Billed', value: 'TZS', valueSub: ` ${new Intl.NumberFormat('en-TZ').format(Math.round(stats.total_billed || 0))}`,
+            grad: 'linear-gradient(135deg, #6D28D9 0%, #7C3AED 60%, #8B5CF6 100%)',
+            glow: '0 8px 28px rgba(139,92,246,0.4)',
+        },
+    ];
+
+    const cols = '160px 1fr 120px 140px 130px 130px 110px 80px';
+
     return (
         <DashboardLayout title="Invoices">
             <Head title="Invoices" />
 
-            <Group justify="space-between" mb="xl" align="flex-start">
-                <Stack gap={2}>
-                    <Text fw={800} size="xl" style={{ color: textPri }}>Invoices</Text>
-                    <Text size="sm" style={{ color: textSec }}>Billing statements for your clients</Text>
-                </Stack>
-                {can('billing_invoices.create') && (
-                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                        <Box component={Link} href="/system/billing/invoices/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                            + New Invoice
+            {/* Page header banner */}
+            <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+                <Box mb={24} style={{
+                    background: isDark
+                        ? 'linear-gradient(135deg, #1E0800 0%, #3D1200 60%, #C2410C 100%)'
+                        : 'linear-gradient(135deg, #C2410C 0%, #EA580C 60%, #F97316 100%)',
+                    borderRadius: 18, padding: '20px 28px', position: 'relative', overflow: 'hidden',
+                    boxShadow: '0 6px 32px rgba(194,65,12,0.3)',
+                }}>
+                    <Box style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
+                    <Box style={{ position: 'absolute', bottom: -20, right: 200, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
+                    <Group justify="space-between" align="center" wrap="wrap" gap="md" style={{ position: 'relative', zIndex: 1 }}>
+                        <Stack gap={4}>
+                            <Group gap={10} align="center">
+                                <Box style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem' }}>📄</Box>
+                                <Stack gap={1}>
+                                    <Text fw={900} size="lg" c="white">Invoices</Text>
+                                    <Text size="xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Billing statements for your clients</Text>
+                                </Stack>
+                            </Group>
+                        </Stack>
+                        <Group gap={10}>
+                            {can('billing_invoices.create') && (
+                                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                                    <Box component={Link} href="/system/billing/invoices/create"
+                                        style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'white', color: '#C2410C', fontWeight: 800, fontSize: 13, padding: '9px 20px', borderRadius: 10, textDecoration: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>
+                                        ＋ New Invoice
+                                    </Box>
+                                </motion.div>
+                            )}
+                        </Group>
+                    </Group>
+                </Box>
+            </motion.div>
+
+            {/* Stat cards */}
+            <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb={24}>
+                {statCards.map((s, i) => (
+                    <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
+                        whileHover={{ y: -4 }}>
+                        <Box style={{ background: s.grad, borderRadius: 16, padding: '18px 20px', boxShadow: s.glow, position: 'relative', overflow: 'hidden', minHeight: 110 }}>
+                            <CardWave />
+                            <Box style={{ position: 'absolute', top: -24, right: -24, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', pointerEvents: 'none' }} />
+                            <Group justify="space-between" align="flex-start" mb={12}>
+                                <Box style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                                    {s.icon}
+                                </Box>
+                            </Group>
+                            <Text fw={900} c="white" style={{ fontSize: s.valueSub ? '1.4rem' : '2rem', lineHeight: 1, position: 'relative', zIndex: 1 }}>
+                                {s.value}
+                                {s.valueSub && <Text component="span" fw={500} style={{ fontSize: '0.85rem', opacity: 0.75 }}>{s.valueSub}</Text>}
+                            </Text>
+                            <Text size="xs" c="white" mt={4} style={{ opacity: 0.7, position: 'relative', zIndex: 1 }}>{s.label}</Text>
                         </Box>
                     </motion.div>
-                )}
-            </Group>
-
-            <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="xl">
-                {[
-                    { label: 'Total', value: stats.total, icon: '📄', color: textPri },
-                    { label: 'Outstanding', value: stats.outstanding, icon: '⏳', color: '#F59E0B' },
-                    { label: 'Paid', value: stats.paid, icon: '✅', color: '#22C55E' },
-                    { label: 'Total Billed', value: `TZS ${new Intl.NumberFormat('en-TZ').format(Math.round(stats.total_billed || 0))}`, icon: '💰', color: '#60A5FA' },
-                ].map(s => (
-                    <Box key={s.label} style={{ background: isDark ? dk.card : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 12, padding: '16px 20px' }}>
-                        <Group gap={10}><Text style={{ fontSize: 22 }}>{s.icon}</Text><div><Text size={s.label === 'Total Billed' ? 'sm' : 'xl'} fw={800} style={{ color: s.color, lineHeight: 1 }}>{s.value}</Text><Text size="xs" style={{ color: textSec }}>{s.label}</Text></div></Group>
-                    </Box>
                 ))}
             </SimpleGrid>
 
-            <Box style={{ background: isDark ? dk.card : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 12, padding: '16px 20px', marginBottom: 16 }}>
+            {/* Filters */}
+            <Box mb={16} style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, padding: '14px 18px', boxShadow: cardShadow }}>
                 <Group gap="md">
-                    <TextInput placeholder="Search number, client…" value={search} onChange={e => setSearch(e.target.value)} onKeyDown={e => e.key === 'Enter' && applyFilters({ search })} style={{ flex: 1 }}
-                        styles={{ input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 } }} />
-                    <Select placeholder="All statuses" value={status} onChange={v => { setStatus(v ?? ''); applyFilters({ status: v ?? '' }); }} clearable style={{ width: 160 }}
-                        data={[{ value: '', label: 'All statuses' }, ...Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))]}
-                        styles={{ input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 }, dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` } }} />
-                    <Box component="button" onClick={() => applyFilters({ search })} style={{ padding: '8px 18px', borderRadius: 8, background: '#2196F3', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>Search</Box>
+                    <TextInput
+                        placeholder="Search number, client…"
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && applyFilters({ search })}
+                        leftSection={<Text size="sm">🔍</Text>}
+                        style={{ flex: 1 }}
+                        styles={{
+                            input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'}`, color: textPri, borderRadius: 10 },
+                        }}
+                    />
+                    <Select
+                        placeholder="All statuses"
+                        value={status}
+                        onChange={v => { setStatus(v ?? ''); applyFilters({ status: v ?? '' }); }}
+                        clearable
+                        data={Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))}
+                        w={180}
+                        styles={{
+                            input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'}`, color: textPri, borderRadius: 10 },
+                            dropdown: { background: isDark ? '#1A0900' : '#fff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'}`, borderRadius: 12 },
+                        }}
+                    />
+                    <Tooltip label="Search">
+                        <ActionIcon onClick={() => applyFilters({ search })} size={38} radius={10}
+                            style={{ background: 'linear-gradient(135deg, #C2410C, #EA580C)', color: '#fff', boxShadow: '0 4px 12px rgba(194,65,12,0.35)' }}>
+                            <Text size="sm">🔍</Text>
+                        </ActionIcon>
+                    </Tooltip>
                 </Group>
             </Box>
 
-            <Box style={{ background: isDark ? dk.card : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 12, overflow: 'hidden' }}>
-                <Box style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ borderBottom: `1px solid ${isDark ? dk.divider : '#E2E8F0'}` }}>
-                                {['Invoice #', 'Client', 'Due Date', 'Total', 'Paid', 'Balance', 'Status', ''].map((h, i) => (
-                                    <th key={i} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, color: textSec }}>{h}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {invoices.data.length === 0 ? (
-                                <tr><td colSpan={8} style={{ padding: 40, textAlign: 'center', color: textSec }}>No invoices found.</td></tr>
-                            ) : invoices.data.map(inv => (
-                                <tr key={inv.id} style={{ borderBottom: `1px solid ${isDark ? dk.divider : '#F1F5F9'}` }}
-                                    onMouseEnter={e => e.currentTarget.style.background = rowHover}
-                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                                    <td style={{ padding: '14px 16px' }}><Text fw={700} size="sm" style={{ color: '#22C55E', fontFamily: 'monospace' }}>{inv.document_number}</Text></td>
-                                    <td style={{ padding: '14px 16px' }}><Text size="sm" fw={600} style={{ color: textPri }}>{inv.client?.name}</Text>{inv.client?.company_name && <Text size="xs" style={{ color: textSec }}>{inv.client.company_name}</Text>}</td>
-                                    <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: inv.status === 'overdue' ? '#EF4444' : textSec }}>{fmtDate(inv.due_date)}</Text></td>
-                                    <td style={{ padding: '14px 16px' }}><Text size="sm" fw={700} style={{ color: textPri }}>{fmt(inv.total, inv.currency)}</Text></td>
-                                    <td style={{ padding: '14px 16px' }}><Text size="sm" style={{ color: '#22C55E' }}>{fmt(inv.amount_paid, inv.currency)}</Text></td>
-                                    <td style={{ padding: '14px 16px' }}><Text size="sm" fw={600} style={{ color: inv.balance_due > 0 ? '#F59E0B' : '#22C55E' }}>{fmt(inv.balance_due, inv.currency)}</Text></td>
-                                    <td style={{ padding: '14px 16px' }}><Badge size="sm" style={{ background: statuses[inv.status]?.color + '22', color: statuses[inv.status]?.color, border: `1px solid ${statuses[inv.status]?.color}44` }}>{statuses[inv.status]?.label}</Badge></td>
-                                    <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                                        <Group gap={6} justify="flex-end">
-                                            {can('billing_invoices.view') && (
-                                                <ActionIcon component={Link} href={`/system/billing/invoices/${inv.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
-                                            )}
-                                            {can('billing_invoices.edit') && (
-                                                <ActionIcon component={Link} href={`/system/billing/invoices/${inv.id}/edit`} variant="subtle" size="sm" style={{ color: textSec }}>✏️</ActionIcon>
-                                            )}
-                                        </Group>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            {/* Table */}
+            <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow }}>
+
+                {/* Toolbar */}
+                <Box style={{ padding: '14px 20px', borderBottom: `1px solid ${divider}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Group gap={8}>
+                        <Box style={{ width: 8, height: 8, borderRadius: '50%', background: 'linear-gradient(135deg, #EA580C, #F97316)', boxShadow: '0 0 6px rgba(234,88,12,0.5)' }} />
+                        <Text size="sm" fw={700} style={{ color: textPri }}>All Invoices</Text>
+                    </Group>
+                    <Text size="xs" style={{ color: textMut }}>
+                        {invoices.data.length > 0 ? `Showing ${invoices.from ?? 1}–${invoices.to ?? invoices.data.length} of ${invoices.total ?? invoices.data.length}` : '0 results'}
+                    </Text>
                 </Box>
-                {invoices.last_page > 1 && (
-                    <Box style={{ padding: '16px 20px', borderTop: `1px solid ${isDark ? dk.divider : '#E2E8F0'}` }}>
-                        <Pagination total={invoices.last_page} value={invoices.current_page} onChange={p => router.get('/system/billing/invoices', { ...filters, page: p })} size="sm" />
+
+                {/* Head */}
+                <Box style={{ display: 'grid', gridTemplateColumns: cols, gap: 0, background: headBg, borderBottom: `1px solid ${divider}`, padding: '10px 20px' }}>
+                    {['Invoice #', 'Client', 'Due Date', 'Total', 'Paid', 'Balance', 'Status', ''].map(h => (
+                        <Text key={h} size="10px" fw={800} style={{ color: textMut, letterSpacing: 0.9, textTransform: 'uppercase' }}>{h}</Text>
+                    ))}
+                </Box>
+
+                {invoices.data.length === 0 ? (
+                    <Box style={{ textAlign: 'center', padding: '72px 0' }}>
+                        <Box style={{
+                            width: 80, height: 80, borderRadius: '50%',
+                            background: isDark ? 'rgba(234,88,12,0.1)' : '#FFF7F0',
+                            border: '2px dashed rgba(234,88,12,0.3)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: '2.4rem', margin: '0 auto 20px',
+                        }}>
+                            📄
+                        </Box>
+                        <Text fw={800} size="md" style={{ color: textPri, marginBottom: 6 }}>No invoices found</Text>
+                        <Text size="sm" style={{ color: textMut }}>Try adjusting your filters or create a new invoice</Text>
+                    </Box>
+                ) : (
+                    invoices.data.map((inv, i) => {
+                        const meta = statuses[inv.status] ?? { label: inv.status, color: '#94A3B8' };
+                        return (
+                            <motion.div key={inv.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
+                                <Box
+                                    style={{
+                                        display: 'grid', gridTemplateColumns: cols, gap: 0,
+                                        padding: '13px 20px', borderBottom: `1px solid ${divider}`,
+                                        cursor: 'pointer', alignItems: 'center',
+                                        transition: 'background 0.15s, border-left 0.15s',
+                                        borderLeft: '3px solid transparent',
+                                    }}
+                                    onMouseEnter={e => {
+                                        e.currentTarget.style.background = rowHov;
+                                        e.currentTarget.style.borderLeft = `3px solid ${meta.color}`;
+                                    }}
+                                    onMouseLeave={e => {
+                                        e.currentTarget.style.background = 'transparent';
+                                        e.currentTarget.style.borderLeft = '3px solid transparent';
+                                    }}
+                                    onClick={() => router.visit(`/system/billing/invoices/${inv.id}`)}>
+
+                                    {/* Invoice # */}
+                                    <Box>
+                                        <Box style={{
+                                            display: 'inline-flex', alignItems: 'center', gap: 5,
+                                            background: isDark ? 'rgba(234,88,12,0.12)' : '#FFF7F0',
+                                            border: '1px solid rgba(234,88,12,0.25)',
+                                            borderRadius: 8, padding: '4px 10px',
+                                        }}>
+                                            <Text size="xs" fw={800} style={{ color: '#EA580C', fontFamily: 'monospace', letterSpacing: 0.4 }}>{inv.document_number}</Text>
+                                        </Box>
+                                    </Box>
+
+                                    {/* Client */}
+                                    <Stack gap={2}>
+                                        <Text size="sm" fw={700} style={{ color: textPri }}>{inv.client?.name}</Text>
+                                        {inv.client?.company_name && (
+                                            <Text size="xs" style={{ color: textSec, maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inv.client.company_name}</Text>
+                                        )}
+                                    </Stack>
+
+                                    {/* Due Date */}
+                                    <Text size="sm" fw={600} style={{ color: inv.status === 'overdue' ? '#EF4444' : textSec }}>
+                                        {fmtDate(inv.due_date)}
+                                    </Text>
+
+                                    {/* Total */}
+                                    <Stack gap={1}>
+                                        <Text size="sm" fw={800} style={{ color: textPri, fontVariantNumeric: 'tabular-nums' }}>{new Intl.NumberFormat('en-TZ').format(Math.round(Number(inv.total) || 0))}</Text>
+                                        <Text size="10px" style={{ color: textMut }}>{inv.currency ?? 'TZS'}</Text>
+                                    </Stack>
+
+                                    {/* Paid */}
+                                    <Text size="sm" fw={600} style={{ color: '#22C55E', fontVariantNumeric: 'tabular-nums' }}>
+                                        {new Intl.NumberFormat('en-TZ').format(Math.round(Number(inv.amount_paid) || 0))}
+                                    </Text>
+
+                                    {/* Balance */}
+                                    <Text size="sm" fw={700} style={{ color: inv.balance_due > 0 ? '#F59E0B' : '#22C55E', fontVariantNumeric: 'tabular-nums' }}>
+                                        {new Intl.NumberFormat('en-TZ').format(Math.round(Number(inv.balance_due) || 0))}
+                                    </Text>
+
+                                    {/* Status */}
+                                    <StatusPill status={inv.status} statuses={statuses} />
+
+                                    {/* Actions */}
+                                    <Group gap={4} wrap="nowrap" onClick={e => e.stopPropagation()}>
+                                        {can('billing_invoices.view') && (
+                                            <Tooltip label="View" position="top" withArrow>
+                                                <ActionIcon component={Link} href={`/system/billing/invoices/${inv.id}`} variant="subtle" size={30}
+                                                    style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'}`, borderRadius: 8, color: textSec }}>
+                                                    <Text size="xs">👁</Text>
+                                                </ActionIcon>
+                                            </Tooltip>
+                                        )}
+                                        {can('billing_invoices.edit') && (
+                                            <Tooltip label="Edit" position="top" withArrow>
+                                                <ActionIcon component={Link} href={`/system/billing/invoices/${inv.id}/edit`} variant="subtle" size={30}
+                                                    style={{ background: isDark ? 'rgba(234,88,12,0.1)' : '#FFF7F0', border: '1px solid rgba(234,88,12,0.25)', borderRadius: 8, color: '#EA580C' }}>
+                                                    <Text size="xs">✏️</Text>
+                                                </ActionIcon>
+                                            </Tooltip>
+                                        )}
+                                    </Group>
+                                </Box>
+                            </motion.div>
+                        );
+                    })
+                )}
+
+                {/* Footer */}
+                {invoices.data.length > 0 && (
+                    <Box style={{ padding: '10px 20px', borderTop: `1px solid ${divider}`, background: headBg }}>
+                        <Text size="xs" style={{ color: textMut }}>
+                            {invoices.total ?? invoices.data.length} total invoice{(invoices.total ?? invoices.data.length) !== 1 ? 's' : ''}
+                        </Text>
                     </Box>
                 )}
             </Box>
+
+            {/* Pagination */}
+            {invoices.last_page > 1 && (
+                <Group justify="center" mt="lg">
+                    <Pagination
+                        value={invoices.current_page}
+                        total={invoices.last_page}
+                        onChange={p => router.get('/system/billing/invoices', { ...filters, page: p })}
+                        size="sm"
+                        styles={{ control: { borderRadius: 8 } }}
+                    />
+                </Group>
+            )}
         </DashboardLayout>
     );
 }

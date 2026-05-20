@@ -17,11 +17,11 @@ export const glass = {
         boxShadow: '0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)',
     },
     brand: {
-        background: 'rgba(21,101,192,0.18)',
+        background: 'rgba(194,65,12,0.18)',
         backdropFilter: 'blur(24px)',
         WebkitBackdropFilter: 'blur(24px)',
-        border: '1px solid rgba(33,150,243,0.28)',
-        boxShadow: '0 8px 32px rgba(21,101,192,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+        border: '1px solid rgba(234,88,12,0.28)',
+        boxShadow: '0 8px 32px rgba(194,65,12,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
     },
     white: {
         background: 'rgba(255,255,255,0.18)',

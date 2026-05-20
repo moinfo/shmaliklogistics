@@ -13,13 +13,13 @@ const en = {
     footer: {
         tagline: 'With Hustles and Prayers We\'ll Reach Our Destination. Reliable, cost-effective logistics across East and Central Africa.',
         quickLinks: 'Quick Links', services: 'Services', activeRoutes: 'Active Routes',
-        copyright: '© 2026 SH Malik Logistics Company Limited. All rights reserved.',
+        copyright: '© 2026 Trans-Mas Logistics Company Limited. All rights reserved.',
     },
     home: {
         quickStats: 'Quick Stats',
         slides: [
             { badge: 'With Hustles and Prayers We\'ll Reach Our Destination', title: 'Moving Your Cargo', highlight: 'Across Africa', desc: 'Reliable, efficient, and cost-effective transportation from Handeni, Tanzania to Zambia, DRC and beyond — with real-time tracking and full cost visibility on every trip.', features: ['GPS Fleet Tracking', 'Border Permit Management', 'Real-Time Cost Reporting'] },
-            { badge: 'SH Malik Logistics Company Limited', title: 'Track Every Shipment', highlight: 'From Loading to Delivery', desc: 'Full cargo visibility with GPS tracking and live status updates. Your clients know exactly where their goods are — without calling the office.', features: ['Live GPS Location', 'Customer Self-Service Portal', 'Automated SMS Alerts'] },
+            { badge: 'Trans-Mas Logistics Company Limited', title: 'Track Every Shipment', highlight: 'From Loading to Delivery', desc: 'Full cargo visibility with GPS tracking and live status updates. Your clients know exactly where their goods are — without calling the office.', features: ['Live GPS Location', 'Customer Self-Service Portal', 'Automated SMS Alerts'] },
             { badge: 'Road Freight · Cargo Handling · Last-Mile Delivery', title: 'Border Crossings', highlight: 'Made Simple', desc: 'We handle all transit permits, customs documentation and border logistics for Zambia and the DRC — professionally managed without third-party reliance.', features: ['Transit Permits Handled', 'COMESA/SADC Compliance', 'Expiry Date Alerts'] },
             { badge: 'Based in Handeni, Tanzania', title: 'A Fleet You Can', highlight: 'Rely On', desc: 'Well-maintained Scania trucks, experienced and trained drivers — ensuring safe and timely delivery across all routes with regular maintenance and safety checks.', features: ['Scheduled Maintenance Alerts', 'Experienced Drivers', 'Fuel Cost Monitoring'] },
         ],
@@ -30,8 +30,8 @@ const en = {
             { icon: '✅', value: '24/7', label: 'Customer Support' },
         ],
         whyUs: {
-            badge: 'Why SH Malik', title: 'Logistics Built on', highlight: 'Trust & Excellence',
-            desc: 'SH Malik Logistics Company Limited is a reliable and customer-focused logistics company based in Handeni, Tanzania. We provide efficient, secure, and cost-effective transportation solutions tailored to meet the needs of modern businesses.',
+            badge: 'Why Trans-Mas', title: 'Logistics Built on', highlight: 'Trust & Excellence',
+            desc: 'Trans-Mas Logistics Company Limited is a reliable and customer-focused logistics company based in Handeni, Tanzania. We provide efficient, secure, and cost-effective transportation solutions tailored to meet the needs of modern businesses.',
             imageBadge: '🏆 Trusted across East Africa', imageSubBadge: 'Tanzania · Zambia · DRC',
             items: [
                 { icon: '🚀', title: 'Fast & Reliable Deliveries', desc: 'Our operations are designed to minimize delays through efficient planning, coordinated execution, and strong communication. We ensure goods arrive on time and in perfect condition.' },
@@ -79,7 +79,7 @@ const en = {
             desc: 'We are ready to support your logistics needs with reliable and efficient solutions. Get in touch with us today to discuss how we can help move your business forward.',
             contacts: [
                 { icon: '📞', label: 'Phone / WhatsApp', value: '+255 652 373 434', sub: 'Call or WhatsApp anytime' },
-                { icon: '📧', label: 'Email Us', value: 'shmaliklogisticscoltd@gmail.com', sub: 'We reply within 2 hours' },
+                { icon: '📧', label: 'Email Us', value: 'transmaslogistics@gmail.com', sub: 'We reply within 2 hours' },
                 { icon: '📍', label: 'Location', value: 'Handeni, Tanzania', sub: 'Main operations base' },
             ],
         },
@@ -104,8 +104,8 @@ const en = {
     },
     about: {
         hero: {
-            badge: 'Who We Are', title: 'About', highlight: 'SH Malik', title2: 'Logistics',
-            desc: 'SH MALIK LOGISTICS COMPANY LIMITED is a reliable and customer-focused logistics company based in Handeni, Tanzania. We provide efficient, secure, and cost-effective transportation solutions tailored to meet the needs of modern businesses.',
+            badge: 'Who We Are', title: 'About', highlight: 'Trans-Mas', title2: 'Logistics',
+            desc: 'TRANS-MAS LOGISTICS COMPANY LIMITED is a reliable and customer-focused logistics company based in Handeni, Tanzania. We provide efficient, secure, and cost-effective transportation solutions tailored to meet the needs of modern businesses.',
             stats: [
                 { value: '550K+', label: 'Shipments', icon: '🚛' }, { value: '20+', label: 'Clients', icon: '🤝' },
                 { value: '1000+', label: 'Testimonials', icon: '⭐' }, { value: '24/7', label: 'Support', icon: '📞' },
@@ -116,7 +116,7 @@ const en = {
             imageBadge: '📍 Based in Handeni, Tanzania',
             imageSubBadge: 'Serving Tanzania · Zambia · DRC',
             paragraphs: [
-                'SH MALIK LOGISTICS COMPANY LIMITED is a reliable and customer-focused logistics company established in Handeni, Tanzania. We provide efficient, secure, and cost-effective transportation solutions tailored to meet the needs of modern businesses.',
+                'TRANS-MAS LOGISTICS COMPANY LIMITED is a reliable and customer-focused logistics company established in Handeni, Tanzania. We provide efficient, secure, and cost-effective transportation solutions tailored to meet the needs of modern businesses.',
                 'We operate routes connecting Tanzania to neighboring countries including Zambia and the Democratic Republic of Congo (DRC), with a fleet of well-maintained Scania trucks managed by experienced and trained drivers. We have worked with established companies such as Hornest Expeditors, African Queen Logistics, and Transfreight Logistics.',
                 'With Hustles and Prayers We\'ll Reach Our Destination — we are committed to delivering excellence and building long-term partnerships through reliable and professional logistics services.',
             ],
@@ -136,7 +136,7 @@ const en = {
         milestones: {
             badge: 'Our Journey', title: 'Company Milestones',
             items: [
-                { year: '2020', title: 'Company Founded', desc: 'SH Malik Logistics Company Limited established in Handeni, Tanzania, with a focus on road freight to Zambia and DRC.' },
+                { year: '2020', title: 'Company Founded', desc: 'Trans-Mas Logistics Company Limited established in Handeni, Tanzania, with a focus on road freight to Zambia and DRC.' },
                 { year: '2021', title: 'Fleet Expanded', desc: 'Fleet grew to 20+ vehicles. Added Zambia and Malawi routes to regular operations.' },
                 { year: '2023', title: 'Technology Integrated', desc: 'GPS tracking, fuel sensors, and digital operations management rolled out across the fleet.' },
                 { year: '2025', title: 'Digital Platform', desc: 'Customer portal and route profitability system launched — giving clients full shipment visibility.' },
@@ -146,7 +146,7 @@ const en = {
         team: {
             badge: 'Our Team', title: 'The People Behind', highlight: 'Every Delivery',
             items: [
-                { role: 'CEO', name: 'Abdulmalik Suleiman', icon: '👔', desc: 'Leading SH Malik Logistics with vision and dedication, driving the company\'s mission to become a leading logistics provider in East Africa.' },
+                { role: 'CEO', name: 'Abdulmalik Suleiman', icon: '👔', desc: 'Leading Trans-Mas Logistics with vision and dedication, driving the company\'s mission to become a leading logistics provider in East Africa.' },
                 { role: 'Head of Accounts', name: 'Salim Hilal', icon: '📊', desc: 'Managing financial operations and ensuring full cost transparency for clients across all logistics operations.' },
                 { role: 'Operations', name: 'Said', icon: '🚛', desc: 'Experienced team managing route planning, driver assignments, fleet coordination and day-to-day logistics operations.' },
                 { role: 'Customer Service', name: 'Support Team', icon: '📞', desc: 'Available 24/7 to answer client queries, provide real-time cargo updates and ensure smooth operations for every shipment.' },
@@ -158,7 +158,7 @@ const en = {
         cards: [
             { icon: '📍', label: 'Address', value: 'Handeni, Tanzania', sub: 'Main operations base' },
             { icon: '📞', label: 'Phone / WhatsApp', value: '+255 652 373 434', sub: 'Call or WhatsApp anytime' },
-            { icon: '📧', label: 'Email', value: 'shmaliklogisticscoltd@gmail.com', sub: 'We reply within 2 hours' },
+            { icon: '📧', label: 'Email', value: 'transmaslogistics@gmail.com', sub: 'We reply within 2 hours' },
         ],
         form: {
             title: 'Send a Message', subtitle: 'We respond within 2 hours',
@@ -194,13 +194,13 @@ const sw = {
     footer: {
         tagline: 'Kwa Bidii na Maombi Tutafikia Marudio Yetu. Usafirishaji wa kuaminika na bei nafuu Afrika Mashariki na Kati.',
         quickLinks: 'Viungo vya Haraka', services: 'Huduma', activeRoutes: 'Njia Zinazofanya Kazi',
-        copyright: '© 2026 SH Malik Logistics Company Limited. Haki zote zimehifadhiwa.',
+        copyright: '© 2026 Trans-Mas Logistics Company Limited. Haki zote zimehifadhiwa.',
     },
     home: {
         quickStats: 'Takwimu za Haraka',
         slides: [
             { badge: 'Kwa Bidii na Maombi Tutafikia Marudio Yetu', title: 'Kusafirisha Mizigo Yako', highlight: 'Kote Afrika', desc: 'Usafirishaji wa kuaminika, bora na wa bei nafuu kutoka Handeni, Tanzania hadi Zambia, DRC na zaidi — na ufuatiliaji wa wakati halisi na uonekani kamili wa gharama kwa kila safari.', features: ['Ufuatiliaji wa GPS', 'Usimamizi wa Vibali vya Mpakani', 'Ripoti ya Gharama ya Wakati Halisi'] },
-            { badge: 'SH Malik Logistics Company Limited', title: 'Fuatilia Kila Usafirishaji', highlight: 'Kutoka Kupakia Hadi Kutoa', desc: 'Uonekani kamili wa mizigo na ufuatiliaji wa GPS. Wateja wako wanajua hasa wapi bidhaa zao zipo — bila kupiga simu ofisini.', features: ['Mahali pa GPS kwa Wakati Halisi', 'Lango la Mteja la Kujisaidia', 'Arifa za SMS za Kiotomatiki'] },
+            { badge: 'Trans-Mas Logistics Company Limited', title: 'Fuatilia Kila Usafirishaji', highlight: 'Kutoka Kupakia Hadi Kutoa', desc: 'Uonekani kamili wa mizigo na ufuatiliaji wa GPS. Wateja wako wanajua hasa wapi bidhaa zao zipo — bila kupiga simu ofisini.', features: ['Mahali pa GPS kwa Wakati Halisi', 'Lango la Mteja la Kujisaidia', 'Arifa za SMS za Kiotomatiki'] },
             { badge: 'Usafirishaji · Ushughulikiaji wa Mizigo · Utoaji', title: 'Kuvuka Mipaka', highlight: 'Imefanywa Rahisi', desc: 'Tunashughulikia vibali vyote vya usafiri, nyaraka za forodha na usimamizi wa mipaka kwa Zambia na DRC — inayosimamiwa kitaalamu bila kutegemea washirika wa nje.', features: ['Vibali vya Usafiri Vimeshughulikiwa', 'Uzingatifu wa COMESA/SADC', 'Arifa za Tarehe ya Kuisha'] },
             { badge: 'Makao Makuu Handeni, Tanzania', title: 'Gari Unaloweza', highlight: 'Kuitegemea', desc: 'Malori ya Scania yaliyodumishwa vizuri, madereva wenye uzoefu na mafunzo — kuhakikisha utoaji salama na wa wakati kwenye njia zote na ukaguzi wa matengenezo mara kwa mara.', features: ['Arifa za Matengenezo Yaliyopangwa', 'Madereva Wenye Uzoefu', 'Ufuatiliaji wa Gharama za Mafuta'] },
         ],
@@ -211,7 +211,7 @@ const sw = {
             { icon: '✅', value: '24/7', label: 'Msaada wa Wateja' },
         ],
         whyUs: {
-            badge: 'Kwa Nini SH Malik', title: 'Usafirishaji Uliojengwa kwa', highlight: 'Uwazi na Uaminifu',
+            badge: 'Kwa Nini Trans-Mas', title: 'Usafirishaji Uliojengwa kwa', highlight: 'Uwazi na Uaminifu',
             desc: 'Matatizo mengi ya usafirishaji Afrika yanatoka kwa gharama zilizofichwa, kutokuwa na uonekani, na mawasiliano yasiyoaminika. Tulijenga shughuli yetu ili kutatua matatizo hayo.',
             imageBadge: '🏆 Inayoaminiwa Afrika Mashariki', imageSubBadge: 'DRC · Zambia · Malawi · Mozambique',
             items: [
@@ -260,7 +260,7 @@ const sw = {
             desc: 'Tuko tayari kusaidia mahitaji yako ya usafirishaji na suluhisho za kuaminika na bora. Wasiliana nasi leo kujadili jinsi tunavyoweza kusaidia biashara yako kusonga mbele.',
             contacts: [
                 { icon: '📞', label: 'Simu / WhatsApp', value: '+255 652 373 434', sub: 'Piga simu au WhatsApp wakati wowote' },
-                { icon: '📧', label: 'Tutumie Barua Pepe', value: 'shmaliklogisticscoltd@gmail.com', sub: 'Tunajibu ndani ya masaa 2' },
+                { icon: '📧', label: 'Tutumie Barua Pepe', value: 'transmaslogistics@gmail.com', sub: 'Tunajibu ndani ya masaa 2' },
                 { icon: '📍', label: 'Mahali', value: 'Handeni, Tanzania', sub: 'Kituo kikuu cha uendeshaji' },
             ],
         },
@@ -285,8 +285,8 @@ const sw = {
     },
     about: {
         hero: {
-            badge: 'Sisi ni Nani', title: 'Kuhusu', highlight: 'SH Malik', title2: 'Logistics',
-            desc: 'SH MALIK LOGISTICS COMPANY LIMITED ni kampuni ya usafirishaji ya kuaminika na inayozingatia wateja, iliyoko Handeni, Tanzania. Tunatoa usafirishaji bora, salama, na wa bei nafuu.',
+            badge: 'Sisi ni Nani', title: 'Kuhusu', highlight: 'Trans-Mas', title2: 'Logistics',
+            desc: 'TRANS-MAS LOGISTICS COMPANY LIMITED ni kampuni ya usafirishaji ya kuaminika na inayozingatia wateja, iliyoko Handeni, Tanzania. Tunatoa usafirishaji bora, salama, na wa bei nafuu.',
             stats: [
                 { value: '550K+', label: 'Usafirishaji', icon: '🚛' }, { value: '20+', label: 'Wateja', icon: '🤝' },
                 { value: '1000+', label: 'Maoni', icon: '⭐' }, { value: '24/7', label: 'Msaada', icon: '📞' },
@@ -297,7 +297,7 @@ const sw = {
             imageBadge: '📍 Makao Makuu Handeni, Tanzania',
             imageSubBadge: 'Inahudumia Tanzania · Zambia · DRC',
             paragraphs: [
-                'SH MALIK LOGISTICS COMPANY LIMITED ni kampuni ya usafirishaji ya kuaminika na inayozingatia wateja iliyoanzishwa Handeni, Tanzania. Tunatoa usafirishaji bora, salama, na wa bei nafuu ulioundwa kukidhi mahitaji ya biashara za kisasa.',
+                'TRANS-MAS LOGISTICS COMPANY LIMITED ni kampuni ya usafirishaji ya kuaminika na inayozingatia wateja iliyoanzishwa Handeni, Tanzania. Tunatoa usafirishaji bora, salama, na wa bei nafuu ulioundwa kukidhi mahitaji ya biashara za kisasa.',
                 'Tunafanya kazi kwenye njia zinazounganisha Tanzania na nchi jirani ikiwa ni pamoja na Zambia na Jamhuri ya Kidemokrasia ya Congo (DRC), na gari la malori ya Scania yaliyodumishwa vizuri yanayosimamiwa na madereva wenye uzoefu. Tumefanya kazi na makampuni kama Hornest Expeditors, African Queen Logistics, na Transfreight Logistics.',
                 'Kwa Bidii na Maombi Tutafikia Marudio Yetu — tumejitolea kutoa ubora na kujenga ushirikiano wa muda mrefu kupitia huduma za usafirishaji za kuaminika na za kitaalamu.',
             ],
@@ -317,7 +317,7 @@ const sw = {
         milestones: {
             badge: 'Safari Yetu', title: 'Hatua Muhimu za Kampuni',
             items: [
-                { year: '2020', title: 'Kampuni Ilianzishwa', desc: 'SH Malik Logistics Company Limited ilianzishwa Handeni, Tanzania, ikiwa na lengo la usafirishaji wa barabara hadi Zambia na DRC.' },
+                { year: '2020', title: 'Kampuni Ilianzishwa', desc: 'Trans-Mas Logistics Company Limited ilianzishwa Handeni, Tanzania, ikiwa na lengo la usafirishaji wa barabara hadi Zambia na DRC.' },
                 { year: '2021', title: 'Gari Lipanuliwa', desc: 'Gari lilikua hadi magari 20+. Njia za Zambia na Malawi ziliongezwa kwenye shughuli za kawaida.' },
                 { year: '2023', title: 'Teknolojia Iliunganishwa', desc: 'Ufuatiliaji wa GPS, sensaa za mafuta, na usimamizi wa shughuli za kidijitali vilienezwa kwa gari zote.' },
                 { year: '2025', title: 'Jukwaa la Kidijitali', desc: 'Lango la mteja na mfumo wa faida ya njia vilizinduliwa — kuwapa wateja uonekani kamili wa mizigo.' },
@@ -327,7 +327,7 @@ const sw = {
         team: {
             badge: 'Timu Yetu', title: 'Watu Nyuma ya', highlight: 'Kila Utoaji',
             items: [
-                { role: 'Mkurugenzi Mtendaji', name: 'Abdulmalik Suleiman', icon: '👔', desc: 'Kuongoza SH Malik Logistics kwa maono na kujitolea, akiendesha dhamira ya kampuni kuwa mtoaji mkuu wa usafirishaji Afrika Mashariki.' },
+                { role: 'Mkurugenzi Mtendaji', name: 'Abdulmalik Suleiman', icon: '👔', desc: 'Kuongoza Trans-Mas Logistics kwa maono na kujitolea, akiendesha dhamira ya kampuni kuwa mtoaji mkuu wa usafirishaji Afrika Mashariki.' },
                 { role: 'Mkuu wa Hesabu', name: 'Salim Hilal', icon: '📊', desc: 'Kusimamia shughuli za kifedha na kuhakikisha uwazi kamili wa gharama kwa wateja katika shughuli zote za usafirishaji.' },
                 { role: 'Uendeshaji', name: 'Said', icon: '🚛', desc: 'Timu yenye uzoefu inayosimamia upangaji wa njia, mgawanyo wa madereva, uratibu wa gari na shughuli za kila siku za usafirishaji.' },
                 { role: 'Huduma kwa Wateja', name: 'Timu ya Msaada', icon: '📞', desc: 'Inapatikana masaa 24/7 kujibu maswali ya wateja, kutoa masasisho ya mizigo kwa wakati halisi na kuhakikisha shughuli laini.' },
@@ -339,7 +339,7 @@ const sw = {
         cards: [
             { icon: '📍', label: 'Anwani', value: 'Handeni, Tanzania', sub: 'Kituo kikuu cha uendeshaji' },
             { icon: '📞', label: 'Simu / WhatsApp', value: '+255 652 373 434', sub: 'Piga simu au WhatsApp wakati wowote' },
-            { icon: '📧', label: 'Barua Pepe', value: 'shmaliklogisticscoltd@gmail.com', sub: 'Tunajibu ndani ya masaa 2' },
+            { icon: '📧', label: 'Barua Pepe', value: 'transmaslogistics@gmail.com', sub: 'Tunajibu ndani ya masaa 2' },
         ],
         form: {
             title: 'Tuma Ujumbe', subtitle: 'Tunajibu ndani ya masaa 2',

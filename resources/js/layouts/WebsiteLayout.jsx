@@ -22,12 +22,21 @@ export default function WebsiteLayout({ children }) {
     ];
 
     const navBg = scrolled
-        ? (isDark ? 'rgba(5,13,24,0.97)' : 'rgba(255,255,255,0.92)')
-        : (isDark ? 'linear-gradient(135deg, #0A1628 0%, #1565C0 100%)' : 'linear-gradient(135deg, #0A1628 0%, #1565C0 100%)');
+        ? (isDark ? 'rgba(10,4,0,0.97)' : 'rgba(255,255,255,0.96)')
+        : (isDark ? 'linear-gradient(135deg, #0A0400 0%, #C2410C 100%)' : 'rgba(255,255,255,0.98)');
 
     const navTextColor = (active) => {
-        if (scrolled && !isDark) return active ? '#1565C0' : '#1a2a4a';
-        return active ? '#2196F3' : 'rgba(255,255,255,0.85)';
+        if (!isDark) return active ? '#C2410C' : '#1a2a4a';
+        return active ? '#EA580C' : 'rgba(255,255,255,0.85)';
+    };
+
+    const langBtnBg = (active) => {
+        if (!isDark) return active ? 'rgba(194,65,12,0.12)' : 'transparent';
+        return active ? 'rgba(234,88,12,0.85)' : 'transparent';
+    };
+    const langBtnColor = (active) => {
+        if (!isDark) return active ? '#C2410C' : '#475569';
+        return active ? '#fff' : 'rgba(255,255,255,0.65)';
     };
 
     return (
@@ -50,11 +59,21 @@ export default function WebsiteLayout({ children }) {
                     <Group h="100%" justify="space-between">
                         <motion.div whileHover={{ scale: 1.03 }} transition={{ type: 'spring', stiffness: 400 }}>
                             <Link href="/" style={{ textDecoration: 'none' }}>
-                                <img
-                                    src="/logo-full.png"
-                                    alt="SH Malik Logistics"
-                                    style={{ height: scrolled ? 40 : 48, width: 'auto', objectFit: 'contain', transition: 'height 0.3s' }}
-                                />
+                                <Group gap={10} align="center" wrap="nowrap">
+                                    <img
+                                        src="/logo.jpeg"
+                                        alt="Trans-Mas Logistics"
+                                        style={{ height: scrolled ? 44 : 56, width: 'auto', objectFit: 'contain', transition: 'height 0.3s', borderRadius: 8 }}
+                                    />
+                                    <Stack gap={0}>
+                                        <Text fw={900} size="sm" style={{ lineHeight: 1.1, color: isDark ? '#ffffff' : '#1E293B', letterSpacing: 0.5 }}>
+                                            TRANS-MAS
+                                        </Text>
+                                        <Text size="xs" fw={500} style={{ color: isDark ? '#FB923C' : '#EA580C', letterSpacing: 1, textTransform: 'uppercase', lineHeight: 1.2 }}>
+                                            Logistics Co. Ltd
+                                        </Text>
+                                    </Stack>
+                                </Group>
                             </Link>
                         </motion.div>
 
@@ -74,7 +93,7 @@ export default function WebsiteLayout({ children }) {
                                         style={{
                                             textDecoration: 'none',
                                             color: navTextColor(url === link.href),
-                                            borderBottom: url === link.href ? '2px solid #2196F3' : '2px solid transparent',
+                                            borderBottom: url === link.href ? '2px solid #EA580C' : '2px solid transparent',
                                             paddingBottom: 2,
                                             transition: 'all 0.2s',
                                         }}
@@ -86,7 +105,7 @@ export default function WebsiteLayout({ children }) {
 
                             {/* Language toggle */}
                             <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.35 }}>
-                                <Box style={{ display: 'flex', gap: 1, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 20, padding: '2px 3px', backdropFilter: 'blur(8px)' }}>
+                                <Box style={{ display: 'flex', gap: 1, background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(0,0,0,0.1)', borderRadius: 20, padding: '2px 3px', backdropFilter: 'blur(8px)' }}>
                                     {['en', 'sw'].map(l => (
                                         <motion.button
                                             key={l}
@@ -94,9 +113,9 @@ export default function WebsiteLayout({ children }) {
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
                                             style={{
-                                                background: lang === l ? 'rgba(33,150,243,0.85)' : 'transparent',
+                                                background: langBtnBg(lang === l),
                                                 border: 'none', cursor: 'pointer', borderRadius: 16,
-                                                padding: '3px 10px', color: lang === l ? '#fff' : 'rgba(255,255,255,0.65)',
+                                                padding: '3px 10px', color: langBtnColor(lang === l),
                                                 fontSize: 12, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase',
                                                 transition: 'all 0.2s',
                                             }}
@@ -116,9 +135,9 @@ export default function WebsiteLayout({ children }) {
                                         size="lg"
                                         onClick={() => setColorScheme(isDark ? 'light' : 'dark')}
                                         style={{
-                                            background: 'rgba(255,255,255,0.1)',
-                                            border: '1px solid rgba(255,255,255,0.2)',
-                                            color: 'white',
+                                            background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)',
+                                            border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(0,0,0,0.1)',
+                                            color: isDark ? 'white' : '#1a2a4a',
                                             backdropFilter: 'blur(8px)',
                                         }}
                                     >
@@ -152,7 +171,7 @@ export default function WebsiteLayout({ children }) {
                                     color="brand.4"
                                     radius="xl"
                                     size="sm"
-                                    style={{ boxShadow: '0 0 20px rgba(33,150,243,0.4)' }}
+                                    style={{ boxShadow: '0 0 20px rgba(234,88,12,0.4)' }}
                                 >
                                     {T.nav.login}
                                 </Button>
@@ -161,17 +180,17 @@ export default function WebsiteLayout({ children }) {
 
                         <Group gap="sm" hiddenFrom="sm">
                             {/* Mobile: compact lang + theme toggles */}
-                            <Box style={{ display: 'flex', gap: 1, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 20, padding: '2px 3px' }}>
+                            <Box style={{ display: 'flex', gap: 1, background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(0,0,0,0.1)', borderRadius: 20, padding: '2px 3px' }}>
                                 {['en', 'sw'].map(l => (
-                                    <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? 'rgba(33,150,243,0.85)' : 'transparent', border: 'none', cursor: 'pointer', borderRadius: 16, padding: '3px 8px', color: lang === l ? '#fff' : 'rgba(255,255,255,0.65)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>
+                                    <button key={l} onClick={() => setLang(l)} style={{ background: langBtnBg(lang === l), border: 'none', cursor: 'pointer', borderRadius: 16, padding: '3px 8px', color: langBtnColor(lang === l), fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>
                                         {l}
                                     </button>
                                 ))}
                             </Box>
-                            <ActionIcon variant="subtle" radius="xl" size="md" onClick={() => setColorScheme(isDark ? 'light' : 'dark')} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white' }}>
+                            <ActionIcon variant="subtle" radius="xl" size="md" onClick={() => setColorScheme(isDark ? 'light' : 'dark')} style={{ background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(0,0,0,0.1)', color: isDark ? 'white' : '#1a2a4a' }}>
                                 {isDark ? '☀️' : '🌙'}
                             </ActionIcon>
-                            <Burger opened={opened} onClick={toggle} color="white" size="sm" />
+                            <Burger opened={opened} onClick={toggle} color={isDark ? 'white' : '#1a2a4a'} size="sm" />
                         </Group>
                     </Group>
                 </Container>
@@ -180,13 +199,19 @@ export default function WebsiteLayout({ children }) {
             {/* ── Mobile Drawer ── */}
             <AppShell.Navbar
                 style={{
-                    background: isDark ? 'rgba(5,13,24,0.97)' : 'rgba(255,255,255,0.97)',
+                    background: isDark ? 'rgba(10,4,0,0.97)' : 'rgba(255,255,255,0.97)',
                     backdropFilter: 'blur(20px)',
                     borderRight: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
                 }}
             >
                 <Stack gap="xs" p="lg">
-                    <img src="/logo-full.png" alt="SH Malik" style={{ height: 50, objectFit: 'contain', marginBottom: 12 }} />
+                    <Group gap={10} align="center" mb={12}>
+                        <img src="/logo.jpeg" alt="Trans-Mas Logistics" style={{ height: 60, width: 'auto', objectFit: 'contain', borderRadius: 8 }} />
+                        <Stack gap={0}>
+                            <Text fw={900} size="sm" style={{ lineHeight: 1.1, color: isDark ? '#ffffff' : '#1E293B', letterSpacing: 0.5 }}>TRANS-MAS</Text>
+                            <Text size="xs" fw={500} style={{ color: '#EA580C', letterSpacing: 1, textTransform: 'uppercase', lineHeight: 1.2 }}>Logistics Co. Ltd</Text>
+                        </Stack>
+                    </Group>
                     {navLinks.map((link) => (
                         <NavLink
                             key={link.href}
@@ -210,61 +235,103 @@ export default function WebsiteLayout({ children }) {
             {/* ── Footer ── */}
             <Box
                 component="footer"
-                style={{
-                    background: isDark
-                        ? 'linear-gradient(180deg, #050D18 0%, #0A1628 100%)'
-                        : 'linear-gradient(180deg, #0A1628 0%, #050D18 100%)',
-                    borderTop: '1px solid rgba(255,255,255,0.06)',
-                }}
-                pt={60} pb="xl"
+                style={{ background: 'linear-gradient(180deg, #100500 0%, #070200 100%)', position: 'relative', overflow: 'hidden' }}
             >
-                <Container size="xl">
-                    <Box style={{ height: 2, background: 'linear-gradient(90deg, transparent, #1565C0, #2196F3, transparent)', marginBottom: 48, borderRadius: 2 }} />
+                {/* Dot grid */}
+                <Box style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(234,88,12,0.045) 1px, transparent 1px)', backgroundSize: '28px 28px', pointerEvents: 'none' }} />
+                {/* Glow blobs */}
+                <Box style={{ position: 'absolute', top: -80, left: -60, width: 380, height: 380, borderRadius: '50%', background: 'radial-gradient(circle, rgba(194,65,12,0.13) 0%, transparent 70%)', pointerEvents: 'none' }} />
+                <Box style={{ position: 'absolute', bottom: 0, right: 60, width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(234,88,12,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-                    <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="xl" mb={48}>
-                        <Stack gap="md">
-                            <img src="/logo-full.png" alt="SH Malik Logistics" style={{ height: 60, width: 'auto', objectFit: 'contain' }} />
-                            <Text c="gray.6" size="sm" lh={1.8}>{T.footer.tagline}</Text>
-                            <Stack gap={6}>
-                                <Text c="gray.5" size="sm">📍 Handeni, Tanzania</Text>
-                                <Text c="gray.5" size="sm">📞 +255 652 373 434</Text>
-                                <Text c="gray.5" size="sm">📧 shmaliklogisticscoltd@gmail.com</Text>
+                {/* Top accent bar */}
+                <Box style={{ height: 3, background: 'linear-gradient(90deg, transparent 0%, #C2410C 25%, #EA580C 50%, #C2410C 75%, transparent 100%)' }} />
+
+                <Container size="xl" pt={56} pb="xl" style={{ position: 'relative', zIndex: 1 }}>
+                    <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="xl" mb={52}>
+
+                        {/* Company */}
+                        <Stack gap="lg">
+                            <img src="/logo.jpeg" alt="Trans-Mas Logistics" style={{ height: 72, width: 'auto', objectFit: 'contain', borderRadius: 10 }} />
+                            <Text c="gray.5" size="sm" lh={1.8}>{T.footer.tagline}</Text>
+                            <Stack gap={8}>
+                                {[
+                                    { icon: '📍', text: 'Handeni, Tanzania' },
+                                    { icon: '📞', text: '+255 652 373 434' },
+                                    { icon: '📧', text: 'transmaslogistics@gmail.com' },
+                                ].map(item => (
+                                    <Group key={item.text} gap={10} style={{ background: 'rgba(234,88,12,0.07)', border: '1px solid rgba(234,88,12,0.14)', borderRadius: 10, padding: '8px 12px' }}>
+                                        <Text size="sm">{item.icon}</Text>
+                                        <Text c="gray.4" size="xs">{item.text}</Text>
+                                    </Group>
+                                ))}
                             </Stack>
                         </Stack>
 
+                        {/* Quick Links */}
                         <Stack gap="sm">
-                            <Text fw={700} c="white" size="sm" tt="uppercase" style={{ letterSpacing: 2 }}>{T.footer.quickLinks}</Text>
+                            <Group gap={8} mb={6}>
+                                <Box style={{ width: 3, height: 16, background: 'linear-gradient(180deg, #EA580C, #C2410C)', borderRadius: 2 }} />
+                                <Text fw={700} c="white" size="sm" tt="uppercase" style={{ letterSpacing: 2 }}>{T.footer.quickLinks}</Text>
+                            </Group>
                             {navLinks.map((link) => (
-                                <Anchor key={link.href} component={Link} href={link.href} c="gray.5" size="sm"
-                                    style={{ textDecoration: 'none', transition: 'color 0.2s' }}
-                                    onMouseEnter={e => e.target.style.color = '#2196F3'}
-                                    onMouseLeave={e => e.target.style.color = ''}>
-                                    → {link.label}
+                                <Anchor key={link.href} component={Link} href={link.href}
+                                    style={{ textDecoration: 'none', color: '#94A3B8', fontSize: 14, transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 8 }}
+                                    onMouseEnter={e => { e.currentTarget.style.color = '#FB923C'; e.currentTarget.style.paddingLeft = '4px'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.color = '#94A3B8'; e.currentTarget.style.paddingLeft = '0'; }}>
+                                    <Box style={{ width: 4, height: 4, borderRadius: '50%', background: '#EA580C', flexShrink: 0 }} />
+                                    {link.label}
                                 </Anchor>
                             ))}
                         </Stack>
 
+                        {/* Services */}
                         <Stack gap="sm">
-                            <Text fw={700} c="white" size="sm" tt="uppercase" style={{ letterSpacing: 2 }}>{T.footer.services}</Text>
+                            <Group gap={8} mb={6}>
+                                <Box style={{ width: 3, height: 16, background: 'linear-gradient(180deg, #EA580C, #C2410C)', borderRadius: 2 }} />
+                                <Text fw={700} c="white" size="sm" tt="uppercase" style={{ letterSpacing: 2 }}>{T.footer.services}</Text>
+                            </Group>
                             {T.home.services.items.slice(0, 5).map(s => (
-                                <Text key={s.title} c="gray.5" size="sm" style={{ cursor: 'default' }}>→ {s.title}</Text>
+                                <Group key={s.title} gap={8} align="flex-start">
+                                    <Box style={{ width: 4, height: 4, borderRadius: '50%', background: '#EA580C', flexShrink: 0, marginTop: 6 }} />
+                                    <Text c="gray.5" size="sm" style={{ lineHeight: 1.5 }}>{s.title}</Text>
+                                </Group>
                             ))}
                         </Stack>
 
-                        <Stack gap="sm">
-                            <Text fw={700} c="white" size="sm" tt="uppercase" style={{ letterSpacing: 2 }}>{T.footer.activeRoutes}</Text>
+                        {/* Active Routes */}
+                        <Stack gap={8}>
+                            <Group gap={8} mb={6}>
+                                <Box style={{ width: 3, height: 16, background: 'linear-gradient(180deg, #EA580C, #C2410C)', borderRadius: 2 }} />
+                                <Text fw={700} c="white" size="sm" tt="uppercase" style={{ letterSpacing: 2 }}>{T.footer.activeRoutes}</Text>
+                            </Group>
                             {T.home.routes.items.map(r => (
-                                <Text key={r.to} c="gray.5" size="sm">{r.flag} Tanzania → {r.to}</Text>
+                                <Group key={r.to} gap={10} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10, padding: '8px 12px' }}>
+                                    <Text style={{ fontSize: '1.1rem' }}>{r.flag}</Text>
+                                    <Box>
+                                        <Text c="gray.6" size="10px" fw={500} tt="uppercase" style={{ letterSpacing: 0.6 }}>Tanzania</Text>
+                                        <Text c="brand.3" size="sm" fw={600}>→ {r.to}</Text>
+                                    </Box>
+                                </Group>
                             ))}
                         </Stack>
                     </SimpleGrid>
 
+                    {/* Bottom bar */}
                     <Box style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 24 }}>
                         <Group justify="space-between" wrap="wrap" gap="sm">
                             <Text c="gray.6" size="xs">{T.footer.copyright}</Text>
-                            <Group gap="xs">
-                                <Box style={{ width: 6, height: 6, borderRadius: '50%', background: '#1565C0' }} />
-                                <Text c="gray.6" size="xs">Handeni, Tanzania</Text>
+                            <Group gap="lg">
+                                <Group gap={6}>
+                                    <motion.div
+                                        style={{ width: 7, height: 7, borderRadius: '50%', background: '#22C55E' }}
+                                        animate={{ scale: [1, 1.5, 1], opacity: [1, 0.6, 1] }}
+                                        transition={{ duration: 2, repeat: Infinity }}
+                                    />
+                                    <Text c="gray.5" size="xs">Online · Handeni, Tanzania</Text>
+                                </Group>
+                                <Text c="gray.6" size="xs" style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: 12 }}>
+                                    TIN: 187-839-823
+                                </Text>
                             </Group>
                         </Group>
                     </Box>

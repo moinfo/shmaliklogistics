@@ -1,11 +1,10 @@
 import { Head, useForm, router } from '@inertiajs/react';
 import { Box, Text, Group, Stack, Badge, SimpleGrid } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useCan } from '../../../../lib/can';
-
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 
 const MODULES = [
     { key: 'trips',                       label: 'Trips',                     actions: ['view', 'create', 'edit', 'delete'] },
@@ -46,9 +45,7 @@ const MODULES = [
 
 const ALL_ACTIONS = ['view', 'create', 'edit', 'delete', 'approve', 'process'];
 
-function hasWildcard(perms) {
-    return (perms ?? []).includes('*');
-}
+function hasWildcard(perms) { return (perms ?? []).includes('*'); }
 
 function hasPerm(perms, moduleKey, action) {
     if (!perms) return false;
@@ -59,7 +56,7 @@ function hasPerm(perms, moduleKey, action) {
 
 function togglePerm(perms, moduleKey, action) {
     const key  = `${moduleKey}.${action}`;
-    const list = perms.filter(p => p !== '*'); // never mutate wildcard via checkbox
+    const list = perms.filter(p => p !== '*');
     if (list.includes(key)) return list.filter(p => p !== key);
     return [...list, key];
 }
@@ -68,10 +65,8 @@ function toggleModuleAll(perms, moduleKey, allActions) {
     const wildcard = `${moduleKey}.*`;
     const list = (perms ?? []).filter(p => p !== '*');
     if (list.includes(wildcard)) {
-        // Remove wildcard and individual entries for this module
         return list.filter(p => !p.startsWith(`${moduleKey}.`));
     }
-    // Add wildcard, remove individual entries
     const filtered = list.filter(p => !p.startsWith(`${moduleKey}.`));
     return [...filtered, wildcard];
 }
@@ -91,11 +86,12 @@ function RoleForm({ role, onClose, isDark, cardBorder }) {
         permissions: role?.permissions ?? [],
     });
 
-    const textPri = isDark ? dk.textPri : '#1E293B';
-    const textSec = isDark ? dk.textSec : '#64748B';
-    const inputBg = isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC';
-    const matrixBg = isDark ? 'rgba(255,255,255,0.02)' : '#F8FAFC';
-    const matrixBorder = isDark ? 'rgba(255,255,255,0.06)' : '#E2E8F0';
+    const cardBg    = isDark ? '#1A0900' : '#ffffff';
+    const textPri   = isDark ? '#F1F5F9' : '#1E293B';
+    const textSec   = isDark ? '#94A3B8' : '#64748B';
+    const inputBg   = isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC';
+    const matrixBg  = isDark ? 'rgba(255,255,255,0.02)' : '#F8FAFC';
+    const matBorder = isDark ? 'rgba(255,255,255,0.06)' : '#E2E8F0';
 
     const submit = e => {
         e.preventDefault();
@@ -107,108 +103,110 @@ function RoleForm({ role, onClose, isDark, cardBorder }) {
     };
 
     return (
-        <Box component="form" onSubmit={submit} style={{ background: isDark ? '#07111F' : '#F8FAFC', border: `1px solid ${cardBorder}`, borderRadius: 12, padding: 20, marginBottom: 16 }}>
-            <Text fw={700} size="sm" style={{ color: textPri, marginBottom: 16 }}>{isEdit ? `Edit Role — ${role.name}` : 'New Role'}</Text>
+        <Box component="form" onSubmit={submit} style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden', marginBottom: 20 }}>
+            <Box style={{ height: 3, background: 'linear-gradient(90deg, #C2410C, #EA580C)' }} />
+            <Box style={{ padding: 20 }}>
+                <Text fw={700} size="sm" style={{ color: textPri, marginBottom: 16 }}>{isEdit ? `Edit Role — ${role.name}` : 'New Role'}</Text>
 
-            {/* Name + description */}
-            <SimpleGrid cols={2} spacing="sm" mb="md">
-                <Box>
-                    <Text size="xs" fw={600} style={{ color: textSec, marginBottom: 4 }}>Role Name *</Text>
-                    <Box component="input" value={data.name} onChange={e => setData('name', e.target.value)} placeholder="e.g. Finance Officer"
-                        style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: `1px solid ${errors.name ? '#EF4444' : cardBorder}`, background: inputBg, color: textPri, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
-                    {errors.name && <Text size="xs" style={{ color: '#EF4444', marginTop: 3 }}>{errors.name}</Text>}
+                {/* Name + description */}
+                <SimpleGrid cols={2} spacing="sm" mb="md">
+                    <Box>
+                        <Text size="xs" fw={600} style={{ color: textSec, marginBottom: 4 }}>Role Name *</Text>
+                        <Box component="input" value={data.name} onChange={e => setData('name', e.target.value)} placeholder="e.g. Finance Officer"
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: `1px solid ${errors.name ? '#EF4444' : cardBorder}`, background: inputBg, color: textPri, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                        {errors.name && <Text size="xs" style={{ color: '#EF4444', marginTop: 3 }}>{errors.name}</Text>}
+                    </Box>
+                    <Box>
+                        <Text size="xs" fw={600} style={{ color: textSec, marginBottom: 4 }}>Description</Text>
+                        <Box component="input" value={data.description} onChange={e => setData('description', e.target.value)} placeholder="Brief description"
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: `1px solid ${cardBorder}`, background: inputBg, color: textPri, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                    </Box>
+                </SimpleGrid>
+
+                {/* Permissions matrix */}
+                <Text size="xs" fw={700} style={{ color: textSec, marginBottom: 10, letterSpacing: 0.5, textTransform: 'uppercase' }}>Permissions Matrix</Text>
+
+                {/* Admin shortcut */}
+                <Box mb="md" style={{ padding: '10px 14px', background: isDark ? 'rgba(234,88,12,0.08)' : '#FFF7F0', borderRadius: 8, border: '1px solid rgba(234,88,12,0.2)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <input type="checkbox" id="perm-all"
+                        checked={hasWildcard(data.permissions)}
+                        onChange={e => setData('permissions', e.target.checked ? ['*'] : [])} />
+                    <Text size="sm" fw={700} style={{ color: '#EA580C' }} component="label" htmlFor="perm-all">
+                        ⚡ Grant full access (Administrator)
+                    </Text>
                 </Box>
-                <Box>
-                    <Text size="xs" fw={600} style={{ color: textSec, marginBottom: 4 }}>Description</Text>
-                    <Box component="input" value={data.description} onChange={e => setData('description', e.target.value)} placeholder="Brief description"
-                        style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: `1px solid ${cardBorder}`, background: inputBg, color: textPri, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
-                </Box>
-            </SimpleGrid>
 
-            {/* Permissions matrix */}
-            <Text size="xs" fw={700} style={{ color: textSec, marginBottom: 10, letterSpacing: 0.5, textTransform: 'uppercase' }}>Permissions Matrix</Text>
-
-            {/* Admin shortcut */}
-            <Box mb="md" style={{ padding: '10px 14px', background: isDark ? 'var(--c-thead)' : '#EFF6FF', borderRadius: 8, border: '1px solid var(--c-border-input)', display: 'flex', alignItems: 'center', gap: 12 }}>
-                <input type="checkbox" id="perm-all"
-                    checked={hasWildcard(data.permissions)}
-                    onChange={e => setData('permissions', e.target.checked ? ['*'] : [])} />
-                <Text size="sm" fw={700} style={{ color: '#3B82F6' }} component="label" htmlFor="perm-all">
-                    ⚡ Grant full access (Administrator)
-                </Text>
-            </Box>
-
-            <Box style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-                    <thead>
-                        <tr>
-                            <th style={{ padding: '8px 12px', textAlign: 'left', color: textSec, fontWeight: 700, fontSize: 11, letterSpacing: 0.5, background: matrixBg, borderBottom: `1px solid ${matrixBorder}`, minWidth: 160 }}>MODULE</th>
-                            <th style={{ padding: '8px 10px', textAlign: 'center', color: textSec, fontWeight: 700, fontSize: 11, letterSpacing: 0.5, background: matrixBg, borderBottom: `1px solid ${matrixBorder}`, whiteSpace: 'nowrap' }}>ALL</th>
-                            {ALL_ACTIONS.map(a => (
-                                <th key={a} style={{ padding: '8px 10px', textAlign: 'center', color: textSec, fontWeight: 700, fontSize: 11, letterSpacing: 0.5, background: matrixBg, borderBottom: `1px solid ${matrixBorder}`, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{a}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {MODULES.map((mod, i) => {
-                            const wildcard = hasWildcard(data.permissions);
-                            const moduleAll = hasModuleAll(data.permissions, mod.key);
-                            return (
-                            <tr key={mod.key} style={{ borderBottom: `1px solid ${matrixBorder}`, background: i % 2 === 0 ? matrixBg : 'transparent' }}>
-                                <td style={{ padding: '8px 12px', color: textPri, fontWeight: 600, fontSize: 12 }}>{mod.label}</td>
-                                {/* ALL toggle */}
-                                <td style={{ padding: '8px 10px', textAlign: 'center' }}>
-                                    {wildcard ? (
-                                        <Text size="sm" style={{ color: '#3B82F6', fontWeight: 700 }}>✓</Text>
-                                    ) : (
-                                        <input type="checkbox"
-                                            checked={moduleAll}
-                                            onChange={() => setData('permissions', toggleModuleAll(data.permissions, mod.key, mod.actions))}
-                                            style={{ accentColor: '#3B82F6', width: 15, height: 15, cursor: 'pointer' }} />
-                                    )}
-                                </td>
-                                {ALL_ACTIONS.map(action => {
-                                    const supported = mod.actions.includes(action);
-                                    const granted = hasPerm(data.permissions, mod.key, action);
-                                    const inherited = supported && granted && (wildcard || moduleAll);
-                                    return (
-                                        <td key={action} style={{ padding: '8px 10px', textAlign: 'center' }}>
-                                            {!supported ? (
-                                                <Text size="xs" style={{ color: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0' }}>—</Text>
-                                            ) : inherited ? (
-                                                <Text size="sm" style={{ color: '#3B82F6', fontWeight: 700 }}>✓</Text>
+                <Box style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                        <thead>
+                            <tr>
+                                <th style={{ padding: '8px 12px', textAlign: 'left', color: textSec, fontWeight: 700, fontSize: 11, letterSpacing: 0.5, background: matrixBg, borderBottom: `1px solid ${matBorder}`, minWidth: 160 }}>MODULE</th>
+                                <th style={{ padding: '8px 10px', textAlign: 'center', color: textSec, fontWeight: 700, fontSize: 11, letterSpacing: 0.5, background: matrixBg, borderBottom: `1px solid ${matBorder}`, whiteSpace: 'nowrap' }}>ALL</th>
+                                {ALL_ACTIONS.map(a => (
+                                    <th key={a} style={{ padding: '8px 10px', textAlign: 'center', color: textSec, fontWeight: 700, fontSize: 11, letterSpacing: 0.5, background: matrixBg, borderBottom: `1px solid ${matBorder}`, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{a}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {MODULES.map((mod, i) => {
+                                const wildcard  = hasWildcard(data.permissions);
+                                const moduleAll = hasModuleAll(data.permissions, mod.key);
+                                return (
+                                    <tr key={mod.key} style={{ borderBottom: `1px solid ${matBorder}`, background: i % 2 === 0 ? matrixBg : 'transparent' }}>
+                                        <td style={{ padding: '8px 12px', color: textPri, fontWeight: 600, fontSize: 12 }}>{mod.label}</td>
+                                        <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                                            {wildcard ? (
+                                                <Text size="sm" style={{ color: '#EA580C', fontWeight: 700 }}>✓</Text>
                                             ) : (
                                                 <input type="checkbox"
-                                                    checked={granted}
-                                                    onChange={() => setData('permissions', togglePerm(data.permissions, mod.key, action))}
-                                                    style={{ accentColor: '#3B82F6', width: 14, height: 14, cursor: 'pointer' }} />
+                                                    checked={moduleAll}
+                                                    onChange={() => setData('permissions', toggleModuleAll(data.permissions, mod.key, mod.actions))}
+                                                    style={{ accentColor: '#EA580C', width: 15, height: 15, cursor: 'pointer' }} />
                                             )}
                                         </td>
-                                    );
-                                })}
-                            </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </Box>
+                                        {ALL_ACTIONS.map(action => {
+                                            const supported = mod.actions.includes(action);
+                                            const granted   = hasPerm(data.permissions, mod.key, action);
+                                            const inherited = supported && granted && (wildcard || moduleAll);
+                                            return (
+                                                <td key={action} style={{ padding: '8px 10px', textAlign: 'center' }}>
+                                                    {!supported ? (
+                                                        <Text size="xs" style={{ color: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0' }}>—</Text>
+                                                    ) : inherited ? (
+                                                        <Text size="sm" style={{ color: '#EA580C', fontWeight: 700 }}>✓</Text>
+                                                    ) : (
+                                                        <input type="checkbox"
+                                                            checked={granted}
+                                                            onChange={() => setData('permissions', togglePerm(data.permissions, mod.key, action))}
+                                                            style={{ accentColor: '#EA580C', width: 14, height: 14, cursor: 'pointer' }} />
+                                                    )}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </Box>
 
-            <Group justify="space-between" align="center" mt="md">
-                <Group gap="sm" align="center">
-                    <input type="checkbox" checked={data.is_active} onChange={e => setData('is_active', e.target.checked)} id={`role-active-${role?.id ?? 'new'}`} />
-                    <Text size="sm" style={{ color: textSec }} component="label" htmlFor={`role-active-${role?.id ?? 'new'}`}>Active</Text>
+                <Group justify="space-between" align="center" mt="md">
+                    <Group gap="sm" align="center">
+                        <input type="checkbox" checked={data.is_active} onChange={e => setData('is_active', e.target.checked)} id={`role-active-${role?.id ?? 'new'}`} style={{ accentColor: '#EA580C' }} />
+                        <Text size="sm" style={{ color: textSec }} component="label" htmlFor={`role-active-${role?.id ?? 'new'}`}>Active</Text>
+                    </Group>
+                    <Group gap="sm">
+                        <Box component="button" type="button" onClick={onClose}
+                            style={{ padding: '7px 16px', borderRadius: 8, background: 'none', border: `1px solid ${cardBorder}`, color: textSec, cursor: 'pointer', fontSize: 13 }}>
+                            Cancel
+                        </Box>
+                        <Box component="button" type="submit" disabled={processing}
+                            style={{ padding: '7px 20px', borderRadius: 8, background: 'linear-gradient(135deg,#C2410C,#EA580C)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13, boxShadow: '0 4px 12px rgba(194,65,12,0.35)' }}>
+                            {processing ? 'Saving…' : isEdit ? 'Update Role' : 'Create Role'}
+                        </Box>
+                    </Group>
                 </Group>
-                <Group gap="sm">
-                    <Box component="button" type="button" onClick={onClose}
-                        style={{ padding: '7px 16px', borderRadius: 8, background: 'none', border: `1px solid ${cardBorder}`, color: textSec, cursor: 'pointer', fontSize: 13 }}>
-                        Cancel
-                    </Box>
-                    <Box component="button" type="submit" disabled={processing}
-                        style={{ padding: '7px 20px', borderRadius: 8, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13 }}>
-                        {processing ? 'Saving…' : isEdit ? 'Update Role' : 'Create Role'}
-                    </Box>
-                </Group>
-            </Group>
+            </Box>
         </Box>
     );
 }
@@ -216,14 +214,19 @@ function RoleForm({ role, onClose, isDark, cardBorder }) {
 export default function RolesIndex({ roles }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
-    const textPri    = isDark ? dk.textPri : '#1E293B';
-    const textSec    = isDark ? dk.textSec : '#64748B';
-    const cardBg     = isDark ? dk.card : '#ffffff';
-    const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const divider    = isDark ? dk.divider : '#F1F5F9';
 
-    const [showNew, setShowNew] = useState(false);
-    const [editing, setEditing] = useState(null);
+    const cardBg     = isDark ? '#1A0900' : '#ffffff';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0';
+    const cardShadow = isDark ? '0 2px 16px rgba(0,0,0,0.35)' : '0 1px 8px rgba(0,0,0,0.06)';
+    const textPri    = isDark ? '#F1F5F9' : '#1E293B';
+    const textSec    = isDark ? '#94A3B8' : '#64748B';
+    const textMut    = isDark ? '#475569' : '#98A2B3';
+    const divider    = isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9';
+    const headBg     = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC';
+    const rowHov     = isDark ? 'rgba(255,255,255,0.04)' : '#FAFAFA';
+
+    const [showNew, setShowNew]     = useState(false);
+    const [editing, setEditing]     = useState(null);
     const [confirmDel, setConfirmDel] = useState(null);
     const can = useCan();
     const canManage = can('settings.edit');
@@ -243,27 +246,58 @@ export default function RolesIndex({ roles }) {
         <DashboardLayout title="Roles">
             <Head title="Roles & Permissions" />
 
-            <Group justify="space-between" mb="xl" align="flex-start">
-                <Stack gap={2}>
-                    <Text fw={800} size="xl" style={{ color: textPri }}>Roles & Permissions</Text>
-                    <Text size="sm" style={{ color: textSec }}>Define what each role can access across the system</Text>
-                </Stack>
-                {canManage && (
-                    <Box component="button" onClick={() => { setShowNew(true); setEditing(null); }}
-                        style={{ padding: '10px 22px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                        + Add Role
-                    </Box>
-                )}
-            </Group>
+            {/* Page Header Banner */}
+            <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+                <Box mb={24} style={{
+                    background: isDark ? 'linear-gradient(135deg, #1E0800 0%, #3D1200 60%, #C2410C 100%)' : 'linear-gradient(135deg, #C2410C 0%, #EA580C 60%, #F97316 100%)',
+                    borderRadius: 18, padding: '20px 28px', position: 'relative', overflow: 'hidden',
+                    boxShadow: '0 6px 32px rgba(194,65,12,0.3)',
+                }}>
+                    <Box style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
+                    <Group justify="space-between" align="center" wrap="wrap" gap="md" style={{ position: 'relative', zIndex: 1 }}>
+                        <Group gap={10}>
+                            <Box style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem' }}>🔑</Box>
+                            <Stack gap={1}>
+                                <Text fw={900} size="lg" c="white">Roles & Permissions</Text>
+                                <Text size="xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Define what each role can access across the system</Text>
+                            </Stack>
+                        </Group>
+                        {canManage && (
+                            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                                <Box component="button" onClick={() => { setShowNew(true); setEditing(null); }}
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'white', color: '#C2410C', fontWeight: 800, fontSize: 13, padding: '9px 20px', borderRadius: 10, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>
+                                    + Add Role
+                                </Box>
+                            </motion.div>
+                        )}
+                    </Group>
+                </Box>
+            </motion.div>
 
+            {/* New Role Form */}
             {showNew && !editing && (
-                <RoleForm onClose={() => setShowNew(false)} isDark={isDark} cardBorder={cardBorder} />
+                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+                    <RoleForm onClose={() => setShowNew(false)} isDark={isDark} cardBorder={cardBorder} />
+                </motion.div>
             )}
 
-            <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 12, overflow: 'hidden' }}>
+            {/* Roles List */}
+            <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow }}>
+                <Box style={{ height: 3, background: 'linear-gradient(90deg, #C2410C, #EA580C)' }} />
+
+                {/* Toolbar */}
+                <Box style={{ padding: '14px 20px', borderBottom: `1px solid ${divider}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Group gap={8}>
+                        <Box style={{ width: 8, height: 8, borderRadius: '50%', background: 'linear-gradient(135deg, #EA580C, #F97316)', boxShadow: '0 0 6px rgba(234,88,12,0.5)' }} />
+                        <Text size="sm" fw={700} style={{ color: textPri }}>All Roles</Text>
+                    </Group>
+                    <Text size="xs" style={{ color: textMut }}>{roles.length} role{roles.length !== 1 ? 's' : ''}</Text>
+                </Box>
+
                 {roles.length === 0 ? (
-                    <Box style={{ padding: '40px 20px', textAlign: 'center' }}>
-                        <Text size="sm" style={{ color: textSec }}>No roles yet.</Text>
+                    <Box style={{ padding: '48px 20px', textAlign: 'center' }}>
+                        <Box style={{ width: 72, height: 72, borderRadius: '50%', background: isDark ? 'rgba(234,88,12,0.1)' : '#FFF7F0', border: '2px dashed rgba(234,88,12,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 16px' }}>🔑</Box>
+                        <Text size="sm" fw={600} style={{ color: textSec }}>No roles yet. Create a role to get started.</Text>
                     </Box>
                 ) : roles.map((r, i) => (
                     <Box key={r.id}>
@@ -272,44 +306,55 @@ export default function RolesIndex({ roles }) {
                                 <RoleForm role={r} onClose={() => setEditing(null)} isDark={isDark} cardBorder={cardBorder} />
                             </Box>
                         ) : (
-                            <Box style={{ padding: '14px 20px', borderBottom: i < roles.length - 1 ? `1px solid ${divider}` : 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                                <Group gap="md" align="center" style={{ flex: 1 }}>
-                                    <Box style={{ width: 42, height: 42, borderRadius: 10, background: isDark ? 'var(--c-border-strong)' : '#EFF6FF', border: '1px solid rgba(33,150,243,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
-                                        🔑
-                                    </Box>
-                                    <Box>
-                                        <Group gap={8} align="center">
-                                            <Text fw={700} size="sm" style={{ color: textPri }}>{r.name}</Text>
-                                            {!r.is_active && <Badge size="xs" color="gray" variant="light">Inactive</Badge>}
-                                            <Badge size="xs" color="blue" variant="light">{r.users_count} user{r.users_count !== 1 ? 's' : ''}</Badge>
-                                        </Group>
-                                        <Group gap="sm" mt={3}>
-                                            {r.description && <Text size="xs" style={{ color: textSec }}>{r.description}</Text>}
-                                            <Text size="xs" style={{ color: '#60A5FA' }}>{permSummary(r.permissions)}</Text>
-                                        </Group>
-                                    </Box>
-                                </Group>
-                                <Group gap="sm">
-                                    {confirmDel === r.id ? (
-                                        <>
-                                            <Text size="xs" style={{ color: textSec }}>Delete?</Text>
-                                            <Box component="button" onClick={() => deleteRole(r.id)}
-                                                style={{ padding: '5px 12px', borderRadius: 6, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Yes</Box>
-                                            <Box component="button" onClick={() => setConfirmDel(null)}
-                                                style={{ padding: '5px 12px', borderRadius: 6, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, border: 'none', cursor: 'pointer', fontSize: 12 }}>No</Box>
-                                        </>
-                                    ) : canManage ? (
-                                        <>
-                                            <Box component="button" onClick={() => { setEditing(r.id); setShowNew(false); }}
-                                                style={{ padding: '5px 14px', borderRadius: 6, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Edit</Box>
-                                            <Box component="button" onClick={() => setConfirmDel(r.id)} disabled={r.users_count > 0}
-                                                style={{ padding: '5px 14px', borderRadius: 6, background: r.users_count > 0 ? 'transparent' : 'rgba(239,68,68,0.1)', color: r.users_count > 0 ? (isDark ? '#334155' : '#CBD5E1') : '#EF4444', border: `1px solid ${r.users_count > 0 ? 'transparent' : 'rgba(239,68,68,0.2)'}`, cursor: r.users_count > 0 ? 'not-allowed' : 'pointer', fontSize: 12, fontWeight: 600 }}>Delete</Box>
-                                        </>
-                                    ) : (
-                                        <Text size="xs" style={{ color: textSec }}>Read-only</Text>
-                                    )}
-                                </Group>
-                            </Box>
+                            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
+                                <Box style={{
+                                    padding: '14px 20px',
+                                    borderBottom: i < roles.length - 1 ? `1px solid ${divider}` : 'none',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                                    borderLeft: '3px solid transparent', transition: 'background 0.15s, border-left 0.15s',
+                                }}
+                                    onMouseEnter={e => { e.currentTarget.style.background = rowHov; e.currentTarget.style.borderLeft = '3px solid #EA580C'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeft = '3px solid transparent'; }}>
+                                    <Group gap="md" align="center" style={{ flex: 1 }}>
+                                        <Box style={{ width: 42, height: 42, borderRadius: 12, background: isDark ? 'rgba(234,88,12,0.12)' : '#FFF7F0', border: '1px solid rgba(234,88,12,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                                            🔑
+                                        </Box>
+                                        <Box>
+                                            <Group gap={8} align="center">
+                                                <Text fw={700} size="sm" style={{ color: textPri }}>{r.name}</Text>
+                                                {!r.is_active && <Badge size="xs" color="gray" variant="light">Inactive</Badge>}
+                                                <Box style={{ background: isDark ? 'rgba(234,88,12,0.12)' : '#FFF7F0', border: '1px solid rgba(234,88,12,0.25)', borderRadius: 20, padding: '1px 8px' }}>
+                                                    <Text size="xs" fw={700} style={{ color: '#EA580C' }}>{r.users_count} user{r.users_count !== 1 ? 's' : ''}</Text>
+                                                </Box>
+                                            </Group>
+                                            <Group gap="sm" mt={3}>
+                                                {r.description && <Text size="xs" style={{ color: textSec }}>{r.description}</Text>}
+                                                <Text size="xs" style={{ color: '#EA580C', opacity: 0.8 }}>{permSummary(r.permissions)}</Text>
+                                            </Group>
+                                        </Box>
+                                    </Group>
+                                    <Group gap="sm" onClick={e => e.stopPropagation()}>
+                                        {confirmDel === r.id ? (
+                                            <>
+                                                <Text size="xs" style={{ color: textSec }}>Delete?</Text>
+                                                <Box component="button" onClick={() => deleteRole(r.id)}
+                                                    style={{ padding: '5px 12px', borderRadius: 6, background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Yes</Box>
+                                                <Box component="button" onClick={() => setConfirmDel(null)}
+                                                    style={{ padding: '5px 12px', borderRadius: 6, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textSec, border: 'none', cursor: 'pointer', fontSize: 12 }}>No</Box>
+                                            </>
+                                        ) : canManage ? (
+                                            <>
+                                                <Box component="button" onClick={() => { setEditing(r.id); setShowNew(false); }}
+                                                    style={{ padding: '5px 14px', borderRadius: 6, background: isDark ? 'rgba(234,88,12,0.1)' : '#FFF7F0', color: '#EA580C', border: '1px solid rgba(234,88,12,0.25)', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Edit</Box>
+                                                <Box component="button" onClick={() => setConfirmDel(r.id)} disabled={r.users_count > 0}
+                                                    style={{ padding: '5px 14px', borderRadius: 6, background: r.users_count > 0 ? 'transparent' : 'rgba(239,68,68,0.1)', color: r.users_count > 0 ? (isDark ? '#334155' : '#CBD5E1') : '#EF4444', border: `1px solid ${r.users_count > 0 ? 'transparent' : 'rgba(239,68,68,0.2)'}`, cursor: r.users_count > 0 ? 'not-allowed' : 'pointer', fontSize: 12, fontWeight: 600 }}>Delete</Box>
+                                            </>
+                                        ) : (
+                                            <Text size="xs" style={{ color: textSec }}>Read-only</Text>
+                                        )}
+                                    </Group>
+                                </Box>
+                            </motion.div>
                         )}
                     </Box>
                 ))}

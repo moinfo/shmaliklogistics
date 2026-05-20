@@ -76,7 +76,7 @@ function VehiclePreview({ data, drivers, typeIcons, isDark }) {
 
             <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden' }}>
                 {/* Accent bar */}
-                <Box style={{ height: 4, background: 'linear-gradient(90deg, #1565C0, #2196F3, #60A5FA)' }} />
+                <Box style={{ height: 4, background: 'linear-gradient(90deg, #C2410C, #EA580C, #FB923C)' }} />
 
                 <Box style={{ padding: '20px' }}>
                     {/* Plate badge */}
@@ -264,7 +264,7 @@ export default function VehicleForm({ data, setData, errors, statuses, types, fu
                                 error={errors.color} styles={inputStyles}
                             />
                             <TextInput
-                                label="Owner Name" placeholder="SH Malik Logistics"
+                                label="Owner Name" placeholder="Trans-Mas Logistics"
                                 value={data.owner_name ?? ''} onChange={e => setData('owner_name', e.target.value)}
                                 error={errors.owner_name} styles={inputStyles}
                             />
@@ -394,7 +394,7 @@ export default function VehicleForm({ data, setData, errors, statuses, types, fu
                         <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                             <Box
                                 component="button" type="submit" disabled={processing}
-                                style={{ padding: '10px 28px', borderRadius: 10, border: 'none', cursor: processing ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg, #1565C0, #2196F3)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)', opacity: processing ? 0.7 : 1 }}
+                                style={{ padding: '10px 28px', borderRadius: 10, border: 'none', cursor: processing ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg, #C2410C, #EA580C)', color: '#fff', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(234,88,12,0.35)', opacity: processing ? 0.7 : 1 }}
                             >
                                 {processing ? 'Saving…' : submitLabel}
                             </Box>

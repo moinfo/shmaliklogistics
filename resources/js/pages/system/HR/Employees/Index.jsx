@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Box, Text, Group, Stack, SimpleGrid, TextInput, Select, Badge, ActionIcon, Pagination } from '@mantine/core';
+import { Box, Text, Group, Stack, SimpleGrid, TextInput, Select, ActionIcon, Tooltip, Pagination } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -7,18 +7,31 @@ import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { useCan } from '../../../../lib/can';
 import { formatDate } from '../../../../lib/date';
 
-const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
-
-function StatCard({ label, value, icon, color, isDark }) {
+function CardWave() {
     return (
-        <Box style={{ background: isDark ? dk.card : '#fff', border: `1px solid ${isDark ? dk.border : '#E2E8F0'}`, borderRadius: 12, padding: '16px 20px' }}>
-            <Group gap={10}>
-                <Text style={{ fontSize: 22 }}>{icon}</Text>
-                <div>
-                    <Text size="xl" fw={800} style={{ color: color ?? (isDark ? dk.textPri : '#1E293B'), lineHeight: 1 }}>{value}</Text>
-                    <Text size="xs" style={{ color: isDark ? dk.textSec : '#64748B' }}>{label}</Text>
-                </div>
-            </Group>
+        <svg viewBox="0 0 200 60" style={{ position: 'absolute', bottom: 0, left: 0, right: 0, width: '100%', opacity: 0.12, pointerEvents: 'none' }} preserveAspectRatio="none">
+            <path d="M0,30 C40,10 80,50 120,30 C160,10 180,40 200,30 L200,60 L0,60 Z" fill="white" />
+        </svg>
+    );
+}
+
+function PersonAvatar({ name, size = 36 }) {
+    const initials = (name || '?').split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+    const colors = ['#2563EB', '#0284C7', '#0D9488', '#059669', '#7C3AED', '#DB2777', '#EA580C'];
+    const color = colors[(name || '').charCodeAt(0) % colors.length];
+    return (
+        <Box style={{ width: size, height: size, borderRadius: '50%', background: color + '22', border: `2px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Text size="xs" fw={900} style={{ color }}>{initials}</Text>
+        </Box>
+    );
+}
+
+function StatusPill({ status, statuses }) {
+    const meta = statuses[status] ?? { label: status, color: '#94A3B8' };
+    return (
+        <Box style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: meta.color + '18', border: `1px solid ${meta.color}35`, borderRadius: 20, padding: '4px 12px', whiteSpace: 'nowrap' }}>
+            <Box style={{ width: 7, height: 7, borderRadius: '50%', background: meta.color, boxShadow: `0 0 6px ${meta.color}`, flexShrink: 0 }} />
+            <Text size="xs" fw={700} style={{ color: meta.color, letterSpacing: 0.4 }}>{meta.label}</Text>
         </Box>
     );
 }
@@ -26,14 +39,20 @@ function StatCard({ label, value, icon, color, isDark }) {
 export default function EmployeesIndex({ employees, stats, statuses, departments, filters }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
-    const textPri = isDark ? dk.textPri : '#1E293B';
-    const textSec = isDark ? dk.textSec : '#64748B';
-    const cardBorder = isDark ? dk.border : '#E2E8F0';
-    const rowHover = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC';
 
-    const [search, setSearch]       = useState(filters.search ?? '');
-    const [department, setDept]     = useState(filters.department ?? '');
-    const [status, setStatus]       = useState(filters.status ?? '');
+    const cardBg     = isDark ? '#1A0900' : '#ffffff';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0';
+    const cardShadow = isDark ? '0 2px 16px rgba(0,0,0,0.35)' : '0 1px 8px rgba(0,0,0,0.06)';
+    const textPri    = isDark ? '#F1F5F9' : '#1E293B';
+    const textSec    = isDark ? '#94A3B8' : '#64748B';
+    const textMut    = isDark ? '#475569' : '#98A2B3';
+    const divider    = isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9';
+    const headBg     = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC';
+    const rowHov     = isDark ? 'rgba(255,255,255,0.04)' : '#FAFAFA';
+
+    const [search, setSearch]   = useState(filters.search ?? '');
+    const [department, setDept] = useState(filters.department ?? '');
+    const [status, setStatus]   = useState(filters.status ?? '');
     const can = useCan();
 
     const applyFilters = (overrides = {}) => {
@@ -45,114 +64,249 @@ export default function EmployeesIndex({ employees, stats, statuses, departments
         router.delete(`/system/hr/employees/${id}`, { preserveScroll: true });
     };
 
-    const deptData = [{ value: '', label: 'All departments' }, ...departments.map(d => ({ value: d, label: d }))];
+    const deptData   = [{ value: '', label: 'All departments' }, ...departments.map(d => ({ value: d, label: d }))];
     const statusData = [{ value: '', label: 'All statuses' }, ...Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))];
+
+    const statCards = [
+        { icon: '👥', label: 'Total Employees', value: String(stats.total),    grad: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 60%, #3B82F6 100%)', glow: '0 8px 28px rgba(37,99,235,0.4)' },
+        { icon: '✅', label: 'Active',           value: String(stats.active),   grad: 'linear-gradient(135deg, #065F46 0%, #047857 60%, #10B981 100%)', glow: '0 8px 28px rgba(16,185,129,0.4)' },
+        { icon: '🏖️', label: 'On Leave',         value: String(stats.on_leave), grad: 'linear-gradient(135deg, #92400E 0%, #B45309 60%, #F59E0B 100%)', glow: '0 8px 28px rgba(245,158,11,0.4)' },
+    ];
+
+    const cols = '140px 1fr 200px 180px 160px 140px 80px';
 
     return (
         <DashboardLayout title="Employees">
             <Head title="Employees" />
 
-            <Group justify="space-between" mb="xl" align="flex-start">
-                <Stack gap={2}>
-                    <Text fw={800} size="xl" style={{ color: textPri }}>Employees</Text>
-                    <Text size="sm" style={{ color: textSec }}>Manage your workforce</Text>
-                </Stack>
-                {can('hr_employees.create') && (
-                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                        <Box component={Link} href="/system/hr/employees/create" style={{ padding: '10px 20px', borderRadius: 10, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 14, boxShadow: '0 4px 16px rgba(33,150,243,0.35)' }}>
-                            + Add Employee
+            {/* ── Page header ── */}
+            <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+                <Box mb={28} style={{
+                    background: isDark
+                        ? 'linear-gradient(135deg, #1E0800 0%, #3D1200 60%, #C2410C 100%)'
+                        : 'linear-gradient(135deg, #C2410C 0%, #EA580C 60%, #F97316 100%)',
+                    borderRadius: 18, padding: '22px 28px',
+                    position: 'relative', overflow: 'hidden',
+                    boxShadow: '0 6px 32px rgba(194,65,12,0.3)',
+                }}>
+                    <Box style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
+                    <Box style={{ position: 'absolute', bottom: -20, right: 200, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
+
+                    <Group justify="space-between" align="center" style={{ position: 'relative', zIndex: 1 }} wrap="wrap" gap="md">
+                        <Group gap={10} align="center">
+                            <Box style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem' }}>
+                                👤
+                            </Box>
+                            <Stack gap={1}>
+                                <Text fw={900} size="lg" c="white">Employees</Text>
+                                <Text size="xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Manage your workforce</Text>
+                            </Stack>
+                        </Group>
+                        <Group gap={10}>
+                            {can('hr_employees.create') && (
+                                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                                    <Box component={Link} href="/system/hr/employees/create"
+                                        style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'white', color: '#C2410C', fontWeight: 800, fontSize: 13, padding: '9px 20px', borderRadius: 10, textDecoration: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>
+                                        ＋ Add Employee
+                                    </Box>
+                                </motion.div>
+                            )}
+                        </Group>
+                    </Group>
+                </Box>
+            </motion.div>
+
+            {/* ── Stat cards ── */}
+            <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md" mb={24}>
+                {statCards.map((s, i) => (
+                    <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} whileHover={{ y: -4 }}>
+                        <Box style={{ background: s.grad, borderRadius: 16, padding: '18px 20px', boxShadow: s.glow, position: 'relative', overflow: 'hidden', minHeight: 110 }}>
+                            <CardWave />
+                            <Box style={{ position: 'absolute', top: -24, right: -24, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', pointerEvents: 'none' }} />
+                            <Group justify="space-between" align="flex-start" mb={12}>
+                                <Box style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                                    {s.icon}
+                                </Box>
+                            </Group>
+                            <Text fw={900} c="white" style={{ fontSize: '2rem', lineHeight: 1, position: 'relative', zIndex: 1 }}>{s.value}</Text>
+                            <Text size="xs" c="white" mt={4} style={{ opacity: 0.7, position: 'relative', zIndex: 1 }}>{s.label}</Text>
                         </Box>
                     </motion.div>
-                )}
-            </Group>
-
-            <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md" mb="xl">
-                <StatCard label="Total Employees" value={stats.total} icon="👥" isDark={isDark} />
-                <StatCard label="Active" value={stats.active} icon="✅" color="#22C55E" isDark={isDark} />
-                <StatCard label="On Leave" value={stats.on_leave} icon="🏖️" color="#F59E0B" isDark={isDark} />
+                ))}
             </SimpleGrid>
 
-            <Box style={{ background: isDark ? dk.card : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 12, padding: '16px 20px', marginBottom: 16 }}>
+            {/* ── Filters ── */}
+            <Box mb={16} style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, padding: '14px 18px', boxShadow: cardShadow }}>
                 <Group gap="md">
                     <TextInput
                         placeholder="Search name, number, position…"
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && applyFilters({ search })}
+                        leftSection={<Text size="sm">🔍</Text>}
                         style={{ flex: 1 }}
-                        styles={{ input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 } }}
+                        styles={{ input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'}`, color: textPri, borderRadius: 10 } }}
                     />
-                    <Select placeholder="All departments" value={department} onChange={v => { setDept(v ?? ''); applyFilters({ department: v ?? '' }); }} data={deptData} styles={{ input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 }, dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` } }} style={{ width: 180 }} clearable />
-                    <Select placeholder="All statuses" value={status} onChange={v => { setStatus(v ?? ''); applyFilters({ status: v ?? '' }); }} data={statusData} styles={{ input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8 }, dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` } }} style={{ width: 150 }} clearable />
-                    <Box component="button" onClick={() => applyFilters({ search })} style={{ padding: '8px 18px', borderRadius: 8, background: '#2196F3', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>Search</Box>
+                    <Select
+                        placeholder="All departments"
+                        value={department}
+                        onChange={v => { setDept(v ?? ''); applyFilters({ department: v ?? '' }); }}
+                        data={deptData}
+                        clearable
+                        w={190}
+                        styles={{ input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'}`, color: textPri, borderRadius: 10 }, dropdown: { background: isDark ? '#1A0900' : '#fff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'}`, borderRadius: 12 } }}
+                    />
+                    <Select
+                        placeholder="All statuses"
+                        value={status}
+                        onChange={v => { setStatus(v ?? ''); applyFilters({ status: v ?? '' }); }}
+                        data={statusData}
+                        clearable
+                        w={160}
+                        styles={{ input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'}`, color: textPri, borderRadius: 10 }, dropdown: { background: isDark ? '#1A0900' : '#fff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'}`, borderRadius: 12 } }}
+                    />
+                    <Tooltip label="Search">
+                        <ActionIcon onClick={() => applyFilters({ search })} size={38} radius={10}
+                            style={{ background: 'linear-gradient(135deg, #C2410C, #EA580C)', color: '#fff', boxShadow: '0 4px 12px rgba(194,65,12,0.35)' }}>
+                            <Text size="sm">🔍</Text>
+                        </ActionIcon>
+                    </Tooltip>
                 </Group>
             </Box>
 
-            <Box style={{ background: isDark ? dk.card : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 12, overflow: 'hidden' }}>
-                <Box style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ borderBottom: `1px solid ${isDark ? dk.divider : '#E2E8F0'}` }}>
-                                {['ID', 'Name', 'Department / Position', 'Contact', 'Salary', 'Status', ''].map((h, i) => (
-                                    <th key={i} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, color: textSec, whiteSpace: 'nowrap' }}>{h}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {employees.data.length === 0 ? (
-                                <tr><td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: textSec }}>No employees found.</td></tr>
-                            ) : employees.data.map(emp => (
-                                <tr key={emp.id} style={{ borderBottom: `1px solid ${isDark ? dk.divider : '#F1F5F9'}` }}
-                                    onMouseEnter={e => e.currentTarget.style.background = rowHover}
-                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                                    <td style={{ padding: '14px 16px' }}>
-                                        <Text size="xs" fw={700} style={{ color: textSec, fontFamily: 'monospace' }}>{emp.employee_number}</Text>
-                                    </td>
-                                    <td style={{ padding: '14px 16px' }}>
-                                        <Text fw={700} size="sm" style={{ color: textPri }}>{emp.name}</Text>
-                                        {emp.hire_date && <Text size="xs" style={{ color: textSec }}>Since {formatDate(emp.hire_date)}</Text>}
-                                    </td>
-                                    <td style={{ padding: '14px 16px' }}>
-                                        {emp.department && <Text size="sm" style={{ color: textPri }}>{emp.department}</Text>}
-                                        {emp.position && <Text size="xs" style={{ color: textSec }}>{emp.position}</Text>}
-                                        {!emp.department && !emp.position && <Text size="xs" style={{ color: isDark ? dk.textMut : 'var(--c-text-secondary)' }}>—</Text>}
-                                    </td>
-                                    <td style={{ padding: '14px 16px' }}>
-                                        <Text size="sm" style={{ color: textSec }}>{emp.phone ?? '—'}</Text>
-                                        {emp.email && <Text size="xs" style={{ color: isDark ? dk.textMut : 'var(--c-text-secondary)' }}>{emp.email}</Text>}
-                                    </td>
-                                    <td style={{ padding: '14px 16px' }}>
-                                        {emp.salary ? <Text size="sm" fw={600} style={{ color: '#F59E0B', whiteSpace: 'nowrap' }}>{emp.salary_currency} {Number(emp.salary).toLocaleString()}</Text> : <Text size="xs" style={{ color: isDark ? dk.textMut : 'var(--c-text-secondary)' }}>—</Text>}
-                                    </td>
-                                    <td style={{ padding: '14px 16px' }}>
-                                        <Badge size="sm" style={{ background: statuses[emp.status]?.color + '22', color: statuses[emp.status]?.color, border: `1px solid ${statuses[emp.status]?.color}44` }}>
-                                            {statuses[emp.status]?.label}
-                                        </Badge>
-                                    </td>
-                                    <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                                        <Group gap={6} justify="flex-end">
-                                            {can('hr_employees.view') && (
-                                                <ActionIcon component={Link} href={`/system/hr/employees/${emp.id}`} variant="subtle" size="sm" style={{ color: '#3B82F6' }}>👁</ActionIcon>
-                                            )}
-                                            {can('hr_employees.edit') && (
-                                                <ActionIcon component={Link} href={`/system/hr/employees/${emp.id}/edit`} variant="subtle" size="sm" style={{ color: textSec }}>✏️</ActionIcon>
-                                            )}
-                                            {can('hr_employees.delete') && (
-                                                <ActionIcon variant="subtle" size="sm" style={{ color: '#EF4444' }} onClick={() => handleDelete(emp.id)}>🗑️</ActionIcon>
-                                            )}
-                                        </Group>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            {/* ── Table card ── */}
+            <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow }}>
+
+                {/* Toolbar */}
+                <Box style={{ padding: '14px 20px', borderBottom: `1px solid ${divider}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Group gap={8}>
+                        <Box style={{ width: 8, height: 8, borderRadius: '50%', background: 'linear-gradient(135deg, #EA580C, #F97316)', boxShadow: '0 0 6px rgba(234,88,12,0.5)' }} />
+                        <Text size="sm" fw={700} style={{ color: textPri }}>All Employees</Text>
+                    </Group>
+                    <Text size="xs" style={{ color: textMut }}>
+                        {employees.data.length > 0 ? `Showing ${employees.from ?? 1}–${employees.to ?? employees.data.length} of ${employees.total ?? employees.data.length}` : '0 results'}
+                    </Text>
                 </Box>
-                {employees.last_page > 1 && (
-                    <Box style={{ padding: '16px 20px', borderTop: `1px solid ${isDark ? dk.divider : '#E2E8F0'}` }}>
-                        <Pagination total={employees.last_page} value={employees.current_page} onChange={p => router.get('/system/hr/employees', { ...filters, page: p })} size="sm" />
+
+                {/* Head */}
+                <Box style={{ display: 'grid', gridTemplateColumns: cols, gap: 0, background: headBg, borderBottom: `1px solid ${divider}`, padding: '10px 20px' }}>
+                    {['Emp #', 'Name', 'Department / Position', 'Contact', 'Salary', 'Status', ''].map(h => (
+                        <Text key={h} size="10px" fw={800} style={{ color: textMut, letterSpacing: 0.9, textTransform: 'uppercase' }}>{h}</Text>
+                    ))}
+                </Box>
+
+                {employees.data.length === 0 ? (
+                    <Box style={{ textAlign: 'center', padding: '72px 0' }}>
+                        <Box style={{ width: 80, height: 80, borderRadius: '50%', background: isDark ? 'rgba(234,88,12,0.1)' : '#FFF7F0', border: '2px dashed rgba(234,88,12,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.4rem', margin: '0 auto 20px' }}>
+                            👤
+                        </Box>
+                        <Text fw={800} size="md" style={{ color: textPri, marginBottom: 6 }}>No employees found</Text>
+                        <Text size="sm" style={{ color: textMut }}>Try adjusting your filters or add a new employee</Text>
+                    </Box>
+                ) : (
+                    employees.data.map((emp, i) => {
+                        const meta = statuses[emp.status] ?? { label: emp.status, color: '#94A3B8' };
+                        return (
+                            <motion.div key={emp.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
+                                <Box
+                                    style={{ display: 'grid', gridTemplateColumns: cols, gap: 0, padding: '13px 20px', borderBottom: `1px solid ${divider}`, cursor: 'pointer', alignItems: 'center', transition: 'background 0.15s, border-left 0.15s', borderLeft: '3px solid transparent' }}
+                                    onMouseEnter={e => { e.currentTarget.style.background = rowHov; e.currentTarget.style.borderLeft = `3px solid ${meta.color}`; }}
+                                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeft = '3px solid transparent'; }}
+                                    onClick={() => router.visit(`/system/hr/employees/${emp.id}`)}>
+
+                                    {/* Emp # */}
+                                    <Box>
+                                        <Box style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: isDark ? 'rgba(234,88,12,0.12)' : '#FFF7F0', border: '1px solid rgba(234,88,12,0.25)', borderRadius: 8, padding: '4px 10px' }}>
+                                            <Text size="xs" fw={800} style={{ color: '#EA580C', fontFamily: 'monospace', letterSpacing: 0.4 }}>{emp.employee_number}</Text>
+                                        </Box>
+                                    </Box>
+
+                                    {/* Name */}
+                                    <Group gap={10} align="center">
+                                        <PersonAvatar name={emp.name} />
+                                        <Stack gap={2}>
+                                            <Text size="sm" fw={700} style={{ color: textPri, lineHeight: 1.2 }}>{emp.name}</Text>
+                                            {emp.hire_date && <Text size="xs" style={{ color: textMut }}>Since {formatDate(emp.hire_date)}</Text>}
+                                        </Stack>
+                                    </Group>
+
+                                    {/* Dept / Position */}
+                                    <Stack gap={2}>
+                                        {emp.department && <Text size="sm" fw={600} style={{ color: textPri }}>{emp.department}</Text>}
+                                        {emp.position && <Text size="xs" style={{ color: textSec }}>{emp.position}</Text>}
+                                        {!emp.department && !emp.position && <Text size="xs" style={{ color: textMut }}>—</Text>}
+                                    </Stack>
+
+                                    {/* Contact */}
+                                    <Stack gap={2}>
+                                        <Text size="sm" style={{ color: textSec }}>{emp.phone ?? '—'}</Text>
+                                        {emp.email && <Text size="xs" style={{ color: textMut, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160 }}>{emp.email}</Text>}
+                                    </Stack>
+
+                                    {/* Salary */}
+                                    {emp.salary
+                                        ? <Text size="sm" fw={700} style={{ color: '#F59E0B', whiteSpace: 'nowrap' }}>{emp.salary_currency} {Number(emp.salary).toLocaleString()}</Text>
+                                        : <Text size="xs" style={{ color: textMut }}>—</Text>
+                                    }
+
+                                    {/* Status */}
+                                    <StatusPill status={emp.status} statuses={statuses} />
+
+                                    {/* Actions */}
+                                    <Group gap={4} wrap="nowrap" onClick={e => e.stopPropagation()}>
+                                        {can('hr_employees.view') && (
+                                            <Tooltip label="View" position="top" withArrow>
+                                                <ActionIcon component={Link} href={`/system/hr/employees/${emp.id}`} variant="subtle" size={30}
+                                                    style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E2E8F0', borderRadius: 8, color: textSec }}>
+                                                    <Text size="xs">👁</Text>
+                                                </ActionIcon>
+                                            </Tooltip>
+                                        )}
+                                        {can('hr_employees.edit') && (
+                                            <Tooltip label="Edit" position="top" withArrow>
+                                                <ActionIcon component={Link} href={`/system/hr/employees/${emp.id}/edit`} variant="subtle" size={30}
+                                                    style={{ background: isDark ? 'rgba(234,88,12,0.1)' : '#FFF7F0', border: '1px solid rgba(234,88,12,0.25)', borderRadius: 8, color: '#EA580C' }}>
+                                                    <Text size="xs">✏️</Text>
+                                                </ActionIcon>
+                                            </Tooltip>
+                                        )}
+                                        {can('hr_employees.delete') && (
+                                            <Tooltip label="Delete" position="top" withArrow>
+                                                <ActionIcon variant="subtle" size={30} onClick={() => handleDelete(emp.id)}
+                                                    style={{ background: isDark ? 'rgba(239,68,68,0.1)' : '#FEF2F2', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 8, color: '#EF4444' }}>
+                                                    <Text size="xs">🗑️</Text>
+                                                </ActionIcon>
+                                            </Tooltip>
+                                        )}
+                                    </Group>
+                                </Box>
+                            </motion.div>
+                        );
+                    })
+                )}
+
+                {/* Footer */}
+                {employees.data.length > 0 && (
+                    <Box style={{ padding: '10px 20px', borderTop: `1px solid ${divider}`, background: headBg }}>
+                        <Text size="xs" style={{ color: textMut }}>
+                            {employees.total ?? employees.data.length} total employee{(employees.total ?? employees.data.length) !== 1 ? 's' : ''}
+                        </Text>
                     </Box>
                 )}
             </Box>
+
+            {/* ── Pagination ── */}
+            {employees.last_page > 1 && (
+                <Group justify="center" mt="lg">
+                    <Pagination
+                        value={employees.current_page}
+                        total={employees.last_page}
+                        onChange={p => router.get('/system/hr/employees', { ...filters, page: p })}
+                        size="sm"
+                        styles={{ control: { borderRadius: 8 } }}
+                    />
+                </Group>
+            )}
         </DashboardLayout>
     );
 }

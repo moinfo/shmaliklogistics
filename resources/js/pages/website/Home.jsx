@@ -20,7 +20,7 @@ export default function Home() {
 
     return (
         <WebsiteLayout>
-            <Head title="Home — SH Malik Logistics" />
+            <Head title="Home — Trans-Mas Logistics" />
 
             {/* ── Hero Slider ── */}
             <Carousel
@@ -48,39 +48,43 @@ export default function Home() {
                                 animate={{ scale: 1 }}
                                 transition={{ duration: 8, ease: 'linear' }}
                             />
-                            <Box style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, rgba(10,22,40,0.94) 0%, rgba(21,101,192,0.80) 55%, rgba(10,22,40,0.5) 100%)' }} />
-                            <motion.div
-                                style={{ position: 'absolute', top: '20%', right: '15%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(33,150,243,0.15) 0%, transparent 70%)', pointerEvents: 'none' }}
-                                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
-                                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                            />
+                            {isDark && <Box style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #0A0400 0%, #1E0800 50%, #A83200 100%)' }} />}
+                            {isDark && (
+                                <motion.div
+                                    style={{ position: 'absolute', top: '20%', right: '15%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(234,88,12,0.15) 0%, transparent 70%)', pointerEvents: 'none' }}
+                                    animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+                                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                                />
+                            )}
+                            {!isDark && <Box style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.93) 28%, rgba(255,255,255,0.5) 56%, rgba(255,255,255,0.0) 76%)' }} />}
+                            {!isDark && <Box style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 4, background: 'linear-gradient(90deg, #C2410C, #EA580C 40%, transparent 75%)', pointerEvents: 'none' }} />}
                             <Container size="xl" style={{ position: 'relative', zIndex: 1 }} py={100}>
                                 <Group align="flex-start" gap={60} wrap="nowrap">
                                     <Stack gap="xl" style={{ flex: 1, minWidth: 0 }}>
                                         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-                                            <motion.img src="/logo-icon.png" alt="SH Malik" style={{ height: 85, width: 'auto', objectFit: 'contain' }}
+                                            <motion.img src="/logo.jpeg" alt="Trans-Mas Logistics" style={{ height: isDark ? 90 : 72, width: 'auto', objectFit: 'contain', borderRadius: 12 }}
                                                 animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }} />
                                         </motion.div>
                                         <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
                                             <Badge color="brand.4" variant="light" size="lg" radius="xl" style={{ backdropFilter: 'blur(10px)' }}>{slide.badge}</Badge>
                                         </motion.div>
                                         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}>
-                                            <Title order={1} c="white" style={{ fontSize: 'clamp(2.4rem, 5vw, 4rem)', lineHeight: 1.1, fontWeight: 900 }}>
+                                            <Title order={1} c={isDark ? 'white' : '#1E293B'} style={{ fontSize: 'clamp(2.4rem, 5vw, 4rem)', lineHeight: 1.1, fontWeight: 900 }}>
                                                 {slide.title}{' '}
-                                                <Text component="span" style={{ background: 'linear-gradient(135deg, #2196F3, #80B8FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
+                                                <Text component="span" style={{ background: 'linear-gradient(135deg, #EA580C, #FB923C)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
                                                     {slide.highlight}
                                                 </Text>
                                             </Title>
                                         </motion.div>
                                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.5 }}>
-                                            <Text c="gray.3" size="lg" lh={1.8} maw={580}>{slide.desc}</Text>
+                                            <Text c={isDark ? 'gray.3' : '#475569'} size="lg" lh={1.8} maw={580}>{slide.desc}</Text>
                                         </motion.div>
                                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.6 }}>
                                             <Group gap="sm" wrap="wrap">
                                                 {slide.features.map((f, fi) => (
                                                     <motion.div key={f} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.7 + fi * 0.1 }}>
-                                                        <Box style={{ background: 'rgba(33,150,243,0.15)', border: '1px solid rgba(33,150,243,0.35)', borderRadius: 20, padding: '6px 16px', backdropFilter: 'blur(8px)' }}>
-                                                            <Text c="brand.2" size="sm" fw={500}>✓ {f}</Text>
+                                                        <Box style={{ background: isDark ? 'rgba(234,88,12,0.15)' : 'rgba(234,88,12,0.08)', border: '1px solid rgba(234,88,12,0.3)', borderRadius: 20, padding: '6px 16px', backdropFilter: isDark ? 'blur(8px)' : 'none' }}>
+                                                            <Text c={isDark ? 'brand.2' : 'brand.7'} size="sm" fw={500}>✓ {f}</Text>
                                                         </Box>
                                                     </motion.div>
                                                 ))}
@@ -89,12 +93,12 @@ export default function Home() {
                                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.9 }}>
                                             <Group gap="md">
                                                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-                                                    <Button component={Link} href="/contact" size="lg" radius="xl" color="brand.4" style={{ paddingInline: 36, boxShadow: '0 0 30px rgba(33,150,243,0.5)' }}>
+                                                    <Button component={Link} href="/contact" size="lg" radius="xl" color="brand.4" style={{ paddingInline: 36, boxShadow: '0 0 30px rgba(234,88,12,0.5)' }}>
                                                         {T.common.getQuote}
                                                     </Button>
                                                 </motion.div>
                                                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-                                                    <Button component={Link} href="/services" size="lg" radius="xl" variant="outline" color="white" style={{ paddingInline: 36 }}>
+                                                    <Button component={Link} href="/services" size="lg" radius="xl" variant="outline" color={isDark ? 'white' : 'brand.7'} style={{ paddingInline: 36 }}>
                                                         {T.common.ourServices}
                                                     </Button>
                                                 </motion.div>
@@ -105,18 +109,21 @@ export default function Home() {
                                     {/* Side stats card */}
                                     <Box visibleFrom="md" style={{ width: 260, flexShrink: 0 }}>
                                         <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.5 }}>
-                                            <Paper style={{ ...glass.dark, borderRadius: 20 }} p="xl">
+                                            <Paper style={isDark
+                                            ? { ...glass.dark, borderRadius: 20 }
+                                            : { background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(234,88,12,0.18)', borderTop: '3px solid #EA580C', borderRadius: 20, boxShadow: '0 12px 40px rgba(0,0,0,0.12)' }
+                                        } p="xl">
                                                 <Stack gap="lg">
-                                                    <Text c="brand.3" fw={700} size="xs" tt="uppercase" style={{ letterSpacing: 2 }}>{T.home.quickStats}</Text>
+                                                    <Text c={isDark ? 'brand.3' : 'brand.7'} fw={700} size="xs" tt="uppercase" style={{ letterSpacing: 2 }}>{T.home.quickStats}</Text>
                                                     {stats.map((s, si) => (
                                                         <motion.div key={s.label} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 + si * 0.1 }}>
-                                                            <Group justify="space-between" style={{ padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                                                                <Text c="gray.4" size="sm">{s.icon} {s.label}</Text>
-                                                                <Text c="white" fw={900} size="lg">{s.value}</Text>
+                                                            <Group justify="space-between" style={{ padding: '8px 0', borderBottom: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}>
+                                                                <Text c={isDark ? 'gray.4' : 'dimmed'} size="sm">{s.icon} {s.label}</Text>
+                                                                <Text c={isDark ? 'white' : '#1E293B'} fw={900} size="lg">{s.value}</Text>
                                                             </Group>
                                                         </motion.div>
                                                     ))}
-                                                    <Text c="gray.6" size="xs">Handeni, Tanzania</Text>
+                                                    <Text c={isDark ? 'gray.6' : 'dimmed'} size="xs">Handeni, Tanzania</Text>
                                                 </Stack>
                                             </Paper>
                                         </motion.div>
@@ -129,8 +136,8 @@ export default function Home() {
             </Carousel>
 
             {/* ── Stats Bar ── */}
-            <Box style={{ background: 'linear-gradient(90deg, #0A1628 0%, #1565C0 50%, #0A1628 100%)', position: 'relative', overflow: 'hidden' }} py="xl">
-                <motion.div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(33,150,243,0.1) 0%, transparent 70%)' }}
+            <Box style={{ background: isDark ? 'linear-gradient(90deg, #0A0400 0%, #EA580C 50%, #0A0400 100%)' : 'linear-gradient(90deg, #C2410C 0%, #EA580C 50%, #C2410C 100%)', position: 'relative', overflow: 'hidden' }} py="xl">
+                <motion.div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(234,88,12,0.1) 0%, transparent 70%)' }}
                     animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 3, repeat: Infinity }} />
                 <Container size="xl">
                     <StaggerContainer delay={0.15}>
@@ -139,10 +146,10 @@ export default function Home() {
                                 <motion.div key={s.label} variants={fadeUp}>
                                     <Stack align="center" gap={6} py="md">
                                         <Text size="1.8rem">{s.icon}</Text>
-                                        <Text fw={900} style={{ fontSize: '2.2rem', lineHeight: 1, background: 'linear-gradient(135deg, #fff, #80B8FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                                        <Text fw={900} style={{ fontSize: '2.2rem', lineHeight: 1, color: '#ffffff' }}>
                                             {s.value}
                                         </Text>
-                                        <Text c="brand.2" size="sm" fw={500}>{s.label}</Text>
+                                        <Text c={isDark ? 'brand.2' : 'white'} size="sm" fw={500}>{s.label}</Text>
                                     </Stack>
                                 </motion.div>
                             ))}
@@ -154,11 +161,11 @@ export default function Home() {
             {/* ── Why Choose Us ── */}
             <Box py={100} style={{
                 background: isDark
-                    ? 'linear-gradient(135deg, #050E1E 0%, #0A1628 100%)'
-                    : 'linear-gradient(135deg, #e8f0fe 0%, #dbeafe 50%, #eff6ff 100%)',
+                    ? 'linear-gradient(135deg, #0A0400 0%, #1E0800 100%)'
+                    : 'linear-gradient(135deg, #fef3ee 0%, #fde8d8 50%, #fff7f0 100%)',
                 position: 'relative', overflow: 'hidden',
             }}>
-                <MeshBackground colors={['#1565C0', '#2196F3', '#0A3A7A']} />
+                <MeshBackground colors={['#C2410C', '#EA580C', '#7A2800']} />
                 <Container size="xl">
                     <SimpleGrid cols={{ base: 1, md: 2 }} spacing={80} style={{ alignItems: 'center' }}>
                         <ScrollReveal variants={fadeLeft}>
@@ -167,7 +174,7 @@ export default function Home() {
                                     <Badge color="brand" variant="light" size="lg" w="fit-content">{whyUs.badge}</Badge>
                                     <Title order={2} style={{ fontSize: 'clamp(1.8rem, 3vw, 2.8rem)', lineHeight: 1.2 }}>
                                         {whyUs.title}{' '}
-                                        <Text component="span" style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
+                                        <Text component="span" style={{ background: 'linear-gradient(135deg, #C2410C, #EA580C)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
                                             {whyUs.highlight}
                                         </Text>
                                     </Title>
@@ -197,7 +204,7 @@ export default function Home() {
                                 <motion.div style={{ position: 'absolute', bottom: 24, left: 24, right: 24 }} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }}>
                                     <Box style={{ ...glass.dark, borderRadius: 16, padding: '18px 22px' }}>
                                         <Group gap="md">
-                                            <Box style={{ width: 8, height: 8, borderRadius: '50%', background: '#2196F3' }} />
+                                            <Box style={{ width: 8, height: 8, borderRadius: '50%', background: '#EA580C' }} />
                                             <Stack gap={2}>
                                                 <Text c="white" fw={600} size="sm">{whyUs.imageBadge}</Text>
                                                 <Text c="brand.3" size="xs">{whyUs.imageSubBadge}</Text>
@@ -212,19 +219,19 @@ export default function Home() {
             </Box>
 
             {/* ── Services ── */}
-            <Box py={100} style={{ background: 'linear-gradient(135deg, #0A1628 0%, #0E4FA0 50%, #1565C0 100%)', position: 'relative', overflow: 'hidden' }}>
-                <MeshBackground colors={['#2196F3', '#0A3A7A', '#4D9BFF']} />
+            <Box py={100} style={{ background: isDark ? 'linear-gradient(135deg, #0A0400 0%, #7A2800 50%, #C2410C 100%)' : 'linear-gradient(135deg, #FFF7F0 0%, #FFE8D6 50%, #FFD5B8 100%)', position: 'relative', overflow: 'hidden' }}>
+                {isDark && <MeshBackground colors={['#EA580C', '#7A2800', '#FB923C']} />}
                 <Container size="xl">
                     <ScrollReveal>
                         <Stack align="center" gap="sm" mb={60}>
-                            <Badge variant="light" size="lg" style={{ ...glass.white, color: '#80B8FF' }}>{services.badge}</Badge>
-                            <Title order={2} ta="center" c="white" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)' }}>
+                            <Badge variant="light" size="lg" style={isDark ? { ...glass.white, color: '#FB923C' } : undefined} color={isDark ? undefined : 'brand'}>{services.badge}</Badge>
+                            <Title order={2} ta="center" c={isDark ? 'white' : undefined} style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)' }}>
                                 {services.title}{' '}
-                                <Text component="span" style={{ background: 'linear-gradient(135deg, #80B8FF, #2196F3)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
+                                <Text component="span" style={{ background: 'linear-gradient(135deg, #FB923C, #EA580C)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
                                     {services.highlight}
                                 </Text>
                             </Title>
-                            <Text c="gray.4" ta="center" maw={500} size="lg">{services.desc}</Text>
+                            <Text c={isDark ? 'gray.4' : 'dimmed'} ta="center" maw={500} size="lg">{services.desc}</Text>
                         </Stack>
                     </ScrollReveal>
                     <StaggerContainer delay={0.1}>
@@ -232,19 +239,19 @@ export default function Home() {
                             {services.items.map((s) => (
                                 <motion.div key={s.title} variants={fadeUp}>
                                     <HoverCard style={{ height: '100%' }}>
-                                        <Box style={{ ...glass.white, borderRadius: 20, overflow: 'hidden', height: '100%' }}>
-                                            <Box style={{ padding: '28px 28px 22px', position: 'relative', overflow: 'hidden', borderBottom: '1px solid rgba(255,255,255,0.15)' }}>
-                                                <Box style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+                                        <Box style={isDark ? { ...glass.white, borderRadius: 20, overflow: 'hidden', height: '100%' } : { background: '#FFFFFF', borderRadius: 20, overflow: 'hidden', height: '100%', border: '1px solid #E2E8F0', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+                                            <Box style={{ padding: '28px 28px 22px', position: 'relative', overflow: 'hidden', borderBottom: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #F1F5F9', background: isDark ? 'transparent' : 'linear-gradient(135deg, #FFF7F0, #FFE8D6)' }}>
+                                                <Box style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, borderRadius: '50%', background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(234,88,12,0.06)' }} />
                                                 <Text size="2.6rem">{s.icon}</Text>
-                                                <Text fw={800} size="xl" c="white" mt="sm">{s.title}</Text>
+                                                <Text fw={800} size="xl" c={isDark ? 'white' : '#1E293B'} mt="sm">{s.title}</Text>
                                             </Box>
                                             <Box p="xl">
-                                                <Text c="gray.3" size="sm" lh={1.7} mb="lg">{s.desc}</Text>
+                                                <Text c={isDark ? 'gray.3' : 'dimmed'} size="sm" lh={1.7} mb="lg">{s.desc}</Text>
                                                 <Stack gap={8}>
                                                     {s.features.map(f => (
                                                         <Group key={f} gap={8}>
-                                                            <Box style={{ width: 6, height: 6, borderRadius: '50%', background: '#80B8FF', flexShrink: 0 }} />
-                                                            <Text size="sm" c="gray.2" fw={500}>{f}</Text>
+                                                            <Box style={{ width: 6, height: 6, borderRadius: '50%', background: '#FB923C', flexShrink: 0 }} />
+                                                            <Text size="sm" c={isDark ? 'gray.2' : '#475569'} fw={500}>{f}</Text>
                                                         </Group>
                                                     ))}
                                                 </Stack>
@@ -259,34 +266,34 @@ export default function Home() {
             </Box>
 
             {/* ── Routes ── */}
-            <Box py={100} style={{ background: 'linear-gradient(160deg, #050E1E 0%, #0A2A5E 55%, #0E4FA0 100%)', position: 'relative', overflow: 'hidden' }}>
-                <MeshBackground colors={['#1565C0', '#2196F3', '#0A3A7A']} />
-                <Box style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(33,150,243,0.07) 1px, transparent 1px)', backgroundSize: '36px 36px', pointerEvents: 'none' }} />
+            <Box py={100} style={{ background: isDark ? 'linear-gradient(160deg, #0A0400 0%, #5A1500 55%, #7A2800 100%)' : 'linear-gradient(160deg, #F0F4F9 0%, #E8F0F8 55%, #F5F0EB 100%)', position: 'relative', overflow: 'hidden' }}>
+                {isDark && <MeshBackground colors={['#C2410C', '#EA580C', '#7A2800']} />}
+                <Box style={{ position: 'absolute', inset: 0, backgroundImage: isDark ? 'radial-gradient(rgba(234,88,12,0.07) 1px, transparent 1px)' : 'radial-gradient(rgba(194,65,12,0.04) 1px, transparent 1px)', backgroundSize: '36px 36px', pointerEvents: 'none' }} />
                 <Container size="xl" style={{ position: 'relative', zIndex: 1 }}>
                     <ScrollReveal>
                         <Stack align="center" gap="sm" mb={20}>
-                            <Badge variant="light" size="lg" style={{ ...glass.white, color: '#80B8FF' }}>{routes.badge}</Badge>
-                            <Title order={2} ta="center" c="white" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)' }}>
+                            <Badge variant="light" size="lg" style={isDark ? { ...glass.white, color: '#FB923C' } : undefined} color={isDark ? undefined : 'brand'}>{routes.badge}</Badge>
+                            <Title order={2} ta="center" c={isDark ? 'white' : undefined} style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)' }}>
                                 {routes.title}{' '}
-                                <Text component="span" style={{ background: 'linear-gradient(135deg, #80B8FF, #2196F3)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
+                                <Text component="span" style={{ background: 'linear-gradient(135deg, #FB923C, #EA580C)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
                                     {routes.highlight}
                                 </Text>
                             </Title>
-                            <Text c="gray.4" ta="center" maw={500} size="lg">{routes.desc}</Text>
+                            <Text c={isDark ? 'gray.4' : 'dimmed'} ta="center" maw={500} size="lg">{routes.desc}</Text>
                         </Stack>
                     </ScrollReveal>
 
                     <ScrollReveal>
                         <Box style={{ display: 'flex', justifyContent: 'center', paddingBottom: 52 }}>
                             <motion.div
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(33,150,243,0.15)', border: '1px solid rgba(33,150,243,0.4)', borderRadius: 40, padding: '10px 26px', backdropFilter: 'blur(14px)' }}
-                                animate={{ boxShadow: ['0 0 0px rgba(33,150,243,0)', '0 0 32px rgba(33,150,243,0.35)', '0 0 0px rgba(33,150,243,0)'] }}
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(234,88,12,0.15)', border: '1px solid rgba(234,88,12,0.4)', borderRadius: 40, padding: '10px 26px', backdropFilter: 'blur(14px)' }}
+                                animate={{ boxShadow: ['0 0 0px rgba(234,88,12,0)', '0 0 32px rgba(234,88,12,0.35)', '0 0 0px rgba(234,88,12,0)'] }}
                                 transition={{ duration: 2.8, repeat: Infinity }}
                             >
-                                <motion.div style={{ width: 10, height: 10, borderRadius: '50%', background: '#2196F3' }}
+                                <motion.div style={{ width: 10, height: 10, borderRadius: '50%', background: '#EA580C' }}
                                     animate={{ scale: [1, 1.5, 1], opacity: [1, 0.6, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
-                                <Text c="white" fw={700} size="sm">{routes.hub}</Text>
-                                <Text c="brand.3" size="sm">{routes.hubSub}</Text>
+                                <Text c={isDark ? 'white' : '#1E293B'} fw={700} size="sm">{routes.hub}</Text>
+                                <Text c="brand.5" size="sm">{routes.hubSub}</Text>
                             </motion.div>
                         </Box>
                     </ScrollReveal>
@@ -296,19 +303,19 @@ export default function Home() {
                             {routes.items.map((r, i) => (
                                 <motion.div key={r.to} variants={fadeUp} style={{ height: '100%' }}>
                                     <HoverCard style={{ height: '100%' }}>
-                                        <Box style={{ ...glass.white, borderRadius: 24, overflow: 'hidden', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-                                            <Box style={{ height: 3, background: 'linear-gradient(90deg, #1565C0, #2196F3, #80B8FF)', flexShrink: 0 }} />
-                                            <Box style={{ position: 'absolute', top: -50, right: -50, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(33,150,243,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+                                        <Box style={isDark ? { ...glass.white, borderRadius: 24, overflow: 'hidden', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column' } : { background: '#FFFFFF', borderRadius: 24, overflow: 'hidden', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', border: '1px solid #E2E8F0', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+                                            <Box style={{ height: 3, background: 'linear-gradient(90deg, #C2410C, #EA580C, #FB923C)', flexShrink: 0 }} />
+                                            <Box style={{ position: 'absolute', top: -50, right: -50, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(234,88,12,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
                                             <Box style={{ padding: '26px 24px 24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                                                 <motion.div animate={{ y: [0, -7, 0] }} transition={{ duration: 2.5 + i * 0.4, repeat: Infinity, ease: 'easeInOut' }} style={{ display: 'inline-block', marginBottom: 14 }}>
                                                     <Text style={{ fontSize: '3.6rem', lineHeight: 1 }}>{r.flag}</Text>
                                                 </motion.div>
-                                                <Text fw={900} size="xl" c="white" mb={4}>{r.country}</Text>
-                                                <Box style={{ background: 'rgba(255,255,255,0.07)', borderRadius: 12, padding: '10px 14px', margin: '12px 0' }}>
+                                                <Text fw={900} size="xl" c={isDark ? 'white' : '#1E293B'} mb={4}>{r.country}</Text>
+                                                <Box style={{ background: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)', borderRadius: 12, padding: '10px 14px', margin: '12px 0' }}>
                                                     <Group gap={4} align="center" wrap="nowrap">
                                                         <Stack gap={1} style={{ minWidth: 0 }}>
-                                                            <Text size="9px" c="gray.5" fw={600} tt="uppercase" style={{ letterSpacing: 0.8 }}>{routes.from}</Text>
-                                                            <Text size="xs" c="gray.2" fw={700} truncate>{r.from}</Text>
+                                                            <Text size="9px" c="dimmed" fw={600} tt="uppercase" style={{ letterSpacing: 0.8 }}>{routes.from}</Text>
+                                                            <Text size="xs" c={isDark ? 'gray.2' : '#1E293B'} fw={700} truncate>{r.from}</Text>
                                                         </Stack>
                                                         <Box style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
                                                             <motion.div animate={{ x: [0, 5, 0] }} transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}>
@@ -316,19 +323,19 @@ export default function Home() {
                                                             </motion.div>
                                                         </Box>
                                                         <Stack gap={1} align="flex-end" style={{ minWidth: 0 }}>
-                                                            <Text size="9px" c="gray.5" fw={600} tt="uppercase" style={{ letterSpacing: 0.8 }}>{routes.to}</Text>
-                                                            <Text size="xs" c="brand.3" fw={700} truncate>{r.to}</Text>
+                                                            <Text size="9px" c="dimmed" fw={600} tt="uppercase" style={{ letterSpacing: 0.8 }}>{routes.to}</Text>
+                                                            <Text size="xs" c="brand.5" fw={700} truncate>{r.to}</Text>
                                                         </Stack>
                                                     </Group>
                                                 </Box>
                                                 <Group gap="sm" mt="auto" pt={4}>
-                                                    <Box style={{ flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: 10, padding: '8px 10px' }}>
-                                                        <Text size="9px" c="gray.5" tt="uppercase" fw={600} style={{ letterSpacing: 0.8 }}>{routes.distance}</Text>
-                                                        <Text size="sm" fw={800} c="white">{r.distance}</Text>
+                                                    <Box style={{ flex: 1, background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', borderRadius: 10, padding: '8px 10px' }}>
+                                                        <Text size="9px" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: 0.8 }}>{routes.distance}</Text>
+                                                        <Text size="sm" fw={800} c={isDark ? 'white' : '#1E293B'}>{r.distance}</Text>
                                                     </Box>
-                                                    <Box style={{ flex: 1, background: 'rgba(33,150,243,0.18)', border: '1px solid rgba(33,150,243,0.25)', borderRadius: 10, padding: '8px 10px' }}>
-                                                        <Text size="9px" c="gray.5" tt="uppercase" fw={600} style={{ letterSpacing: 0.8 }}>{routes.transit}</Text>
-                                                        <Text size="sm" fw={800} c="brand.3">{r.time}</Text>
+                                                    <Box style={{ flex: 1, background: 'rgba(234,88,12,0.12)', border: '1px solid rgba(234,88,12,0.25)', borderRadius: 10, padding: '8px 10px' }}>
+                                                        <Text size="9px" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: 0.8 }}>{routes.transit}</Text>
+                                                        <Text size="sm" fw={800} c="brand.5">{r.time}</Text>
                                                     </Box>
                                                 </Group>
                                             </Box>
@@ -342,15 +349,15 @@ export default function Home() {
             </Box>
 
             {/* ── How It Works ── */}
-            <Box py={100} style={{ background: 'linear-gradient(160deg, #0A1628 0%, #0E4FA0 50%, #0A1628 100%)', position: 'relative', overflow: 'hidden' }}>
-                <motion.div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(ellipse at 30% 50%, rgba(33,150,243,0.08) 0%, transparent 60%)' }}
+            <Box py={100} style={{ background: isDark ? 'linear-gradient(160deg, #0A0400 0%, #7A2800 50%, #0A0400 100%)' : 'linear-gradient(160deg, #fef3ee 0%, #fde8d8 50%, #fff7f0 100%)', position: 'relative', overflow: 'hidden' }}>
+                <motion.div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(ellipse at 30% 50%, rgba(234,88,12,0.08) 0%, transparent 60%)' }}
                     animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 5, repeat: Infinity }} />
                 <Container size="xl" style={{ position: 'relative', zIndex: 1 }}>
                     <ScrollReveal>
                         <Stack align="center" gap="sm" mb={60}>
-                            <Badge color="brand.3" variant="light" size="lg">{howItWorks.badge}</Badge>
-                            <Title order={2} ta="center" c="white" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)' }}>{howItWorks.title}</Title>
-                            <Text c="gray.4" ta="center" maw={500} size="lg">{howItWorks.desc}</Text>
+                            <Badge color="brand" variant="light" size="lg">{howItWorks.badge}</Badge>
+                            <Title order={2} ta="center" c={isDark ? 'white' : undefined} style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)' }}>{howItWorks.title}</Title>
+                            <Text c={isDark ? 'gray.4' : 'dimmed'} ta="center" maw={500} size="lg">{howItWorks.desc}</Text>
                         </Stack>
                     </ScrollReveal>
                     <StaggerContainer delay={0.15}>
@@ -360,15 +367,15 @@ export default function Home() {
                                     <Stack gap="md" align="flex-start">
                                         <Group gap="md" align="center">
                                             <motion.div
-                                                style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(33,150,243,0.15)', border: '2px solid rgba(33,150,243,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem' }}
-                                                whileHover={{ scale: 1.1, background: 'rgba(33,150,243,0.3)' }}
+                                                style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(234,88,12,0.15)', border: '2px solid rgba(234,88,12,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem' }}
+                                                whileHover={{ scale: 1.1, background: 'rgba(234,88,12,0.3)' }}
                                             >
                                                 {step.icon}
                                             </motion.div>
-                                            <Text fw={900} c="rgba(33,150,243,0.4)" style={{ fontSize: '2rem', lineHeight: 1 }}>{step.n}</Text>
+                                            <Text fw={900} c="brand.6" style={{ fontSize: '2rem', lineHeight: 1 }}>{step.n}</Text>
                                         </Group>
-                                        <Text fw={700} c="white" size="lg">{step.title}</Text>
-                                        <Text c="gray.4" size="sm" lh={1.7}>{step.desc}</Text>
+                                        <Text fw={700} c={isDark ? 'white' : '#1E293B'} size="lg">{step.title}</Text>
+                                        <Text c={isDark ? 'gray.4' : 'dimmed'} size="sm" lh={1.7}>{step.desc}</Text>
                                     </Stack>
                                 </motion.div>
                             ))}
@@ -380,12 +387,12 @@ export default function Home() {
             {/* ── CTA ── */}
             <Box py={100} style={{
                 background: isDark
-                    ? 'linear-gradient(135deg, #050E1E 0%, #0A1628 100%)'
-                    : 'linear-gradient(135deg, #f0f6ff 0%, #e8f0fe 100%)',
+                    ? 'linear-gradient(135deg, #0A0400 0%, #1E0800 100%)'
+                    : 'linear-gradient(135deg, #fff7f0 0%, #fde8d8 100%)',
                 position: 'relative', overflow: 'hidden',
             }}>
-                {isDark && <MeshBackground colors={['#1565C0', '#0A3A7A', '#2196F3']} />}
-                {!isDark && <Box style={{ position: 'absolute', top: -80, left: -80, width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(21,101,192,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />}
+                {isDark && <MeshBackground colors={['#C2410C', '#7A2800', '#EA580C']} />}
+                {!isDark && <Box style={{ position: 'absolute', top: -80, left: -80, width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(194,65,12,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />}
                 <Container size="xl" style={{ position: 'relative', zIndex: 1 }}>
                     <SimpleGrid cols={{ base: 1, md: 2 }} spacing={80} style={{ alignItems: 'center' }}>
                         <ScrollReveal variants={fadeLeft}>
@@ -393,14 +400,14 @@ export default function Home() {
                                 <Badge color="brand" variant="light" size="lg" w="fit-content">{cta.badge}</Badge>
                                 <Title order={2} style={{ fontSize: 'clamp(1.8rem, 3vw, 2.6rem)', lineHeight: 1.2 }}>
                                     {cta.title}{' '}
-                                    <Text component="span" style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
+                                    <Text component="span" style={{ background: 'linear-gradient(135deg, #C2410C, #EA580C)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
                                         {cta.highlight}
                                     </Text>
                                 </Title>
                                 <Text c={isDark ? 'gray.4' : 'dimmed'} size="lg" lh={1.8}>{cta.desc}</Text>
                                 <Group gap="md">
                                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-                                        <Button component={Link} href="/contact" size="lg" radius="xl" color="brand.5" style={{ paddingInline: 36, boxShadow: '0 8px 30px rgba(21,101,192,0.35)' }}>
+                                        <Button component={Link} href="/contact" size="lg" radius="xl" color="brand.5" style={{ paddingInline: 36, boxShadow: '0 8px 30px rgba(194,65,12,0.35)' }}>
                                             {T.common.freeQuote}
                                         </Button>
                                     </motion.div>
@@ -420,7 +427,7 @@ export default function Home() {
                                         <motion.div key={item.label} variants={fadeUp}>
                                             <HoverCard>
                                                 <Group gap="lg" style={{ ...(isDark ? glass.white : glass.light), borderRadius: 16, padding: '18px 22px' }}>
-                                                    <Box style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg, #1565C0, #2196F3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', flexShrink: 0 }}>
+                                                    <Box style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg, #C2410C, #EA580C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', flexShrink: 0 }}>
                                                         {item.icon}
                                                     </Box>
                                                     <Stack gap={2}>

@@ -1,116 +1,189 @@
 import PortalLayout from '../../../layouts/PortalLayout';
-import { Box, Text, Group, Stack, Select } from '@mantine/core';
+import { Box, Text, Group, Stack, Select, Pagination } from '@mantine/core';
+import { useMantineColorScheme } from '@mantine/core';
 import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-
-const statusColor = {
-    loading: '#F59E0B', in_transit: '#2196F3', at_border: '#A855F7',
-    delivered: '#22C55E', completed: '#22C55E', cancelled: '#EF4444',
-    planned: 'var(--c-text-secondary)',
-};
+import { motion } from 'framer-motion';
 
 export default function PortalTripsIndex({ client, trips, statuses, filters }) {
+    const { colorScheme } = useMantineColorScheme();
+    const isDark = colorScheme === 'dark';
+    const cardBg     = isDark ? '#1A0900' : '#ffffff';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0';
+    const cardShadow = isDark ? '0 2px 16px rgba(0,0,0,0.35)' : '0 1px 8px rgba(0,0,0,0.06)';
+    const textPri    = isDark ? '#F1F5F9' : '#1E293B';
+    const textSec    = isDark ? '#94A3B8' : '#64748B';
+    const textMut    = isDark ? '#475569' : '#98A2B3';
+    const divider    = isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9';
+    const headBg     = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC';
+    const rowHov     = isDark ? 'rgba(255,255,255,0.04)' : '#FAFAFA';
+
     const [status, setStatus] = useState(filters.status || '');
 
     const applyFilter = (val) => {
-        setStatus(val);
-        router.get('/portal/trips', val ? { status: val } : {}, { preserveState: true, replace: true });
+        setStatus(val ?? '');
+        router.get('/portal/trips', (val && val !== '') ? { status: val } : {}, { preserveState: true, replace: true });
     };
 
     return (
-        <PortalLayout title="My Shipments">
-            {/* Filter */}
-            <Group mb="lg" gap="md">
-                <Select
-                    placeholder="All statuses"
-                    value={status}
-                    onChange={applyFilter}
-                    data={[{ value: '', label: 'All Statuses' }, ...Object.entries(statuses).map(([v, s]) => ({ value: v, label: s.label }))]}
-                    style={{ width: 180 }}
-                    styles={{ input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)' } }}
-                />
-                <Text size="sm" style={{ color: '#64748B' }}>{trips.total} trips total</Text>
-            </Group>
+        <PortalLayout title="">
+            {/* Page Header Banner */}
+            <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+                <Box mb={24} style={{
+                    background: isDark
+                        ? 'linear-gradient(135deg, #1E0800 0%, #3D1200 60%, #C2410C 100%)'
+                        : 'linear-gradient(135deg, #C2410C 0%, #EA580C 60%, #F97316 100%)',
+                    borderRadius: 18, padding: '20px 28px', position: 'relative', overflow: 'hidden',
+                    boxShadow: '0 6px 32px rgba(194,65,12,0.3)',
+                }}>
+                    <Box style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
+                    <Group justify="space-between" align="center" wrap="wrap" gap="md" style={{ position: 'relative', zIndex: 1 }}>
+                        <Group gap={10}>
+                            <Box style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem' }}>🚛</Box>
+                            <Stack gap={1}>
+                                <Text fw={900} size="lg" c="white">My Shipments</Text>
+                                <Text size="xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Track all your cargo trips</Text>
+                            </Stack>
+                        </Group>
+                        <Box style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 12, padding: '6px 16px' }}>
+                            <Text size="sm" fw={700} c="white">{trips.total} trips</Text>
+                        </Box>
+                    </Group>
+                </Box>
+            </motion.div>
 
-            <Stack gap="sm">
-                {trips.data.map(trip => (
-                    <Box
-                        key={trip.id}
-                        component={Link}
-                        href={`/portal/trips/${trip.id}`}
-                        style={{
-                            display: 'block', padding: '18px 20px', borderRadius: 12,
-                            background: 'var(--c-card)', border: '1px solid var(--c-border-color)',
-                            textDecoration: 'none', transition: 'all 0.15s',
+            {/* Filters */}
+            <Box mb={16} style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, padding: '14px 18px', boxShadow: cardShadow }}>
+                <Group gap="md">
+                    <Select
+                        placeholder="All statuses"
+                        value={status || null}
+                        onChange={applyFilter}
+                        clearable
+                        data={Object.entries(statuses).map(([v, s]) => ({ value: v, label: s.label }))}
+                        w={180}
+                        styles={{
+                            input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'}`, color: textPri, borderRadius: 10 },
+                            dropdown: { background: isDark ? '#1A0900' : '#fff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0'}`, borderRadius: 12 },
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(33,150,243,0.35)'; e.currentTarget.style.background = '#132436'; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--c-border-color)'; e.currentTarget.style.background = '#0F1E32'; }}
-                    >
-                        <Group justify="space-between" mb={8}>
-                            <Group gap="sm">
-                                <Text fw={800} size="sm" style={{ color: 'var(--c-text)' }}>{trip.trip_number}</Text>
-                                <Box style={{ padding: '2px 10px', borderRadius: 12, background: `${statusColor[trip.status] || 'var(--c-text-secondary)'}22`, border: `1px solid ${statusColor[trip.status] || 'var(--c-text-secondary)'}55` }}>
-                                    <Text size="xs" fw={700} style={{ color: statusColor[trip.status] || 'var(--c-text-secondary)', textTransform: 'capitalize' }}>{trip.status?.replace('_', ' ')}</Text>
-                                </Box>
-                            </Group>
-                            <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>{trip.departure_date ? new Date(trip.departure_date).toLocaleDateString() : '—'}</Text>
-                        </Group>
-                        <Group gap="xl">
-                            <Box>
-                                <Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 2 }}>Route</Text>
-                                <Text size="sm" fw={600} style={{ color: 'var(--c-text-secondary)' }}>{trip.origin} → {trip.destination}</Text>
-                            </Box>
-                            {trip.driver && (
-                                <Box>
-                                    <Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 2 }}>Driver</Text>
-                                    <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{trip.driver.name}</Text>
-                                </Box>
-                            )}
-                            {trip.vehicle && (
-                                <Box>
-                                    <Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 2 }}>Vehicle</Text>
-                                    <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{trip.vehicle.registration_number}</Text>
-                                </Box>
-                            )}
-                            {trip.cargo?.length > 0 && (
-                                <Box>
-                                    <Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 2 }}>Cargo</Text>
-                                    <Text size="sm" style={{ color: 'var(--c-text-secondary)' }}>{trip.cargo.length} item(s)</Text>
-                                </Box>
-                            )}
-                        </Group>
-                    </Box>
-                ))}
+                    />
+                    <Text size="sm" style={{ color: textSec }}>{trips.total} trips total</Text>
+                </Group>
+            </Box>
 
-                {trips.data.length === 0 && (
-                    <Box style={{ textAlign: 'center', padding: '64px 0', background: 'var(--c-card)', borderRadius: 12, border: '1px solid var(--c-border-subtle)' }}>
-                        <Text style={{ fontSize: '3rem', marginBottom: 12 }}>🚛</Text>
-                        <Text fw={600} style={{ color: 'var(--c-text)' }}>No shipments found</Text>
-                        <Text size="sm" style={{ color: 'var(--c-text-muted)', marginTop: 6 }}>Your trips will appear here</Text>
+            {/* Table card */}
+            <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow }}>
+                {/* Toolbar */}
+                <Box style={{ padding: '14px 20px', borderBottom: `1px solid ${divider}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Group gap={8}>
+                        <Box style={{ width: 8, height: 8, borderRadius: '50%', background: 'linear-gradient(135deg, #EA580C, #F97316)', boxShadow: '0 0 6px rgba(234,88,12,0.5)' }} />
+                        <Text size="sm" fw={700} style={{ color: textPri }}>All Trips</Text>
+                        {trips.data.length > 0 && (
+                            <Box style={{ background: isDark ? 'rgba(234,88,12,0.12)' : '#FFF7F0', border: '1px solid rgba(234,88,12,0.2)', borderRadius: 12, padding: '1px 8px' }}>
+                                <Text size="xs" fw={700} style={{ color: '#EA580C' }}>{trips.total}</Text>
+                            </Box>
+                        )}
+                    </Group>
+                    <Text size="xs" style={{ color: textMut }}>
+                        {trips.data.length > 0 ? `${trips.from ?? 1}–${trips.to ?? trips.data.length} of ${trips.total}` : '0 results'}
+                    </Text>
+                </Box>
+
+                {/* Head */}
+                <Box style={{ display: 'grid', gridTemplateColumns: '140px 1fr 150px 120px 110px', gap: 0, background: headBg, borderBottom: `1px solid ${divider}`, padding: '10px 20px' }}>
+                    {['Trip #', 'Route', 'Driver / Vehicle', 'Departure', 'Status'].map(h => (
+                        <Text key={h} size="10px" fw={800} style={{ color: textMut, letterSpacing: 0.9, textTransform: 'uppercase' }}>{h}</Text>
+                    ))}
+                </Box>
+
+                {trips.data.length === 0 ? (
+                    <Box style={{ textAlign: 'center', padding: '72px 0' }}>
+                        <Box style={{ width: 80, height: 80, borderRadius: '50%', background: isDark ? 'rgba(234,88,12,0.1)' : '#FFF7F0', border: '2px dashed rgba(234,88,12,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.4rem', margin: '0 auto 20px' }}>🚛</Box>
+                        <Text fw={800} size="md" style={{ color: textPri, marginBottom: 6 }}>No shipments found</Text>
+                        <Text size="sm" style={{ color: textMut }}>Your trips will appear here</Text>
+                    </Box>
+                ) : (
+                    trips.data.map((trip, i) => {
+                        const meta = statuses[trip.status] ?? { label: trip.status, color: '#94A3B8' };
+                        return (
+                            <motion.div key={trip.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
+                                <Box
+                                    style={{
+                                        display: 'grid', gridTemplateColumns: '140px 1fr 150px 120px 110px', gap: 0,
+                                        padding: '13px 20px', borderBottom: `1px solid ${divider}`,
+                                        cursor: 'pointer', alignItems: 'center',
+                                        transition: 'background 0.15s, border-left 0.15s',
+                                        borderLeft: '3px solid transparent',
+                                    }}
+                                    onMouseEnter={e => { e.currentTarget.style.background = rowHov; e.currentTarget.style.borderLeft = `3px solid ${meta.color}`; }}
+                                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeft = '3px solid transparent'; }}
+                                    onClick={() => router.visit(`/portal/trips/${trip.id}`)}
+                                >
+                                    {/* Trip # */}
+                                    <Box style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: isDark ? 'rgba(234,88,12,0.12)' : '#FFF7F0', border: '1px solid rgba(234,88,12,0.25)', borderRadius: 8, padding: '4px 10px', width: 'fit-content' }}>
+                                        <Text size="10px" style={{ color: '#EA580C', opacity: 0.7 }}>🚛</Text>
+                                        <Text size="xs" fw={800} style={{ color: '#EA580C', fontFamily: 'monospace', letterSpacing: 0.4 }}>{trip.trip_number}</Text>
+                                    </Box>
+
+                                    {/* Route */}
+                                    <Stack gap={3}>
+                                        <Group gap={5} align="center">
+                                            <Text size="sm" fw={700} style={{ color: textPri }}>{trip.origin}</Text>
+                                            <Text size="xs" style={{ color: '#EA580C', fontWeight: 900 }}>→</Text>
+                                            <Text size="sm" fw={700} style={{ color: textPri }}>{trip.destination}</Text>
+                                        </Group>
+                                        {trip.cargo?.length > 0 && (
+                                            <Text size="xs" style={{ color: textSec }}>{trip.cargo.length} cargo item{trip.cargo.length !== 1 ? 's' : ''}</Text>
+                                        )}
+                                    </Stack>
+
+                                    {/* Driver / Vehicle */}
+                                    <Stack gap={2}>
+                                        {trip.driver ? (
+                                            <Text size="sm" fw={600} style={{ color: textPri }}>{trip.driver.name}</Text>
+                                        ) : (
+                                            <Text size="sm" style={{ color: textMut }}>—</Text>
+                                        )}
+                                        {trip.vehicle && (
+                                            <Box style={{ display: 'inline-flex', background: isDark ? 'rgba(234,88,12,0.1)' : '#FFF7F0', border: '1px solid rgba(234,88,12,0.2)', borderRadius: 5, padding: '2px 8px', width: 'fit-content' }}>
+                                                <Text size="10px" fw={800} style={{ color: '#EA580C', fontFamily: 'monospace', letterSpacing: 0.8 }}>{trip.vehicle.registration_number}</Text>
+                                            </Box>
+                                        )}
+                                    </Stack>
+
+                                    {/* Departure */}
+                                    <Text size="xs" fw={600} style={{ color: textPri }}>
+                                        {trip.departure_date ? new Date(trip.departure_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                                    </Text>
+
+                                    {/* Status */}
+                                    <Box style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: meta.color + '18', border: `1px solid ${meta.color}35`, borderRadius: 20, padding: '4px 12px', whiteSpace: 'nowrap' }}>
+                                        <Box style={{ width: 7, height: 7, borderRadius: '50%', background: meta.color, boxShadow: `0 0 6px ${meta.color}`, flexShrink: 0 }} />
+                                        <Text size="xs" fw={700} style={{ color: meta.color, letterSpacing: 0.4 }}>{meta.label}</Text>
+                                    </Box>
+                                </Box>
+                            </motion.div>
+                        );
+                    })
+                )}
+
+                {trips.data.length > 0 && (
+                    <Box style={{ padding: '10px 20px', borderTop: `1px solid ${divider}`, background: headBg }}>
+                        <Text size="xs" style={{ color: textMut }}>{trips.total} total trip{trips.total !== 1 ? 's' : ''}</Text>
                     </Box>
                 )}
-            </Stack>
+            </Box>
 
             {/* Pagination */}
             {trips.last_page > 1 && (
-                <Group justify="center" mt="xl" gap="xs">
-                    {Array.from({ length: trips.last_page }, (_, i) => i + 1).map(page => (
-                        <Box
-                            key={page}
-                            component={Link}
-                            href={`/portal/trips?page=${page}${status ? `&status=${status}` : ''}`}
-                            style={{
-                                width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                borderRadius: 8, textDecoration: 'none',
-                                background: page === trips.current_page ? '#1565C0' : '#0F1E32',
-                                border: '1px solid var(--c-border-input)',
-                                color: page === trips.current_page ? '#fff' : 'var(--c-text-secondary)',
-                                fontWeight: page === trips.current_page ? 700 : 500, fontSize: 14,
-                            }}
-                        >
-                            {page}
-                        </Box>
-                    ))}
+                <Group justify="center" mt="lg">
+                    <Pagination
+                        value={trips.current_page}
+                        total={trips.last_page}
+                        onChange={p => router.get('/portal/trips', { ...(status ? { status } : {}), page: p })}
+                        size="sm"
+                        styles={{ control: { borderRadius: 8 } }}
+                    />
                 </Group>
             )}
         </PortalLayout>

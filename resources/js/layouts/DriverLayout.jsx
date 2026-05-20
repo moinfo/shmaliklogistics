@@ -1,4 +1,5 @@
 import { Box, Group, Text, Stack } from '@mantine/core';
+import { useMantineColorScheme } from '@mantine/core';
 import { Link, usePage, router, Head } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -38,6 +39,8 @@ function playChime() {
 
 export default function DriverLayout({ title, children }) {
     const { url, props } = usePage();
+    const { colorScheme } = useMantineColorScheme();
+    const isDark = colorScheme === 'dark';
     const flash = props.flash ?? {};
     const auth = props.auth ?? {};
     const user = auth.user;
@@ -83,18 +86,24 @@ export default function DriverLayout({ title, children }) {
     const visibleAlerts = driverAlerts.items.filter(a => !dismissed.has(a.id));
 
     return (
-        <Box style={{ minHeight: '100vh', background: '#0B1627' }}>
+        <Box style={{ minHeight: '100vh', background: isDark ? '#2C1200' : '#F5F0EB' }}>
             {title && <Head title={title} />}
 
             {/* Header */}
-            <Box style={{ background: '#07111F', borderBottom: '1px solid rgba(33,150,243,0.15)', position: 'sticky', top: 0, zIndex: 100 }}>
+            <Box style={{ background: isDark ? '#220D00' : '#ffffff', borderBottom: isDark ? '1px solid rgba(234,88,12,0.15)' : '1px solid #E8DDD4', position: 'sticky', top: 0, zIndex: 100 }}>
                 <Group h={62} px="md" justify="space-between" style={{ maxWidth: 1200, margin: '0 auto' }}>
                     <Group gap="md">
                         <Link href="/driver/dashboard" style={{ textDecoration: 'none' }}>
-                            <img src="/logo-full.png" alt="SH Malik" style={{ height: 32, objectFit: 'contain' }} />
+                            <Group gap={8} align="center">
+                                <img src="/logo.jpeg" alt="Trans-Mas" style={{ height: 34, width: 'auto', objectFit: 'contain', borderRadius: 6 }} />
+                                <Stack gap={0}>
+                                    <Text fw={900} size="xs" style={{ color: isDark ? '#ffffff' : '#1E293B', letterSpacing: 0.5, lineHeight: 1.1 }}>TRANS-MAS</Text>
+                                    <Text size="10px" fw={600} style={{ color: '#EA580C', letterSpacing: 1, textTransform: 'uppercase', lineHeight: 1.2 }}>Logistics Co. Ltd</Text>
+                                </Stack>
+                            </Group>
                         </Link>
-                        <Box style={{ padding: '2px 10px', borderRadius: 6, background: 'rgba(33,150,243,0.1)', border: '1px solid rgba(33,150,243,0.2)' }}>
-                            <Text size="xs" fw={700} style={{ color: '#60A5FA', letterSpacing: 0.5 }}>DRIVER</Text>
+                        <Box style={{ padding: '2px 10px', borderRadius: 6, background: 'rgba(234,88,12,0.1)', border: '1px solid rgba(234,88,12,0.2)' }}>
+                            <Text size="xs" fw={700} style={{ color: '#FB923C', letterSpacing: 0.5 }}>DRIVER</Text>
                         </Box>
                         {driverAlerts.count > 0 && (
                             <Box style={{ background: 'rgba(239,68,68,0.18)', border: '1px solid rgba(239,68,68,0.4)', borderRadius: 12, padding: '2px 10px' }}>
@@ -106,7 +115,7 @@ export default function DriverLayout({ title, children }) {
                         {user?.avatar_url ? (
                             <Box component="img" src={user.avatar_url} alt={user.name} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top' }} />
                         ) : (
-                            <Box style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #1565C0, #2196F3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Box style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #C2410C, #EA580C)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <Text c="white" fw={800} size="xs">{(user?.name || 'D').charAt(0).toUpperCase()}</Text>
                             </Box>
                         )}
@@ -122,7 +131,7 @@ export default function DriverLayout({ title, children }) {
                 </Group>
             </Box>
 
-            <Box style={{ background: '#0F1E32', borderBottom: '1px solid rgba(33,150,243,0.1)' }}>
+            <Box style={{ background: isDark ? '#3A1700' : '#FDF0E8', borderBottom: isDark ? '1px solid rgba(234,88,12,0.1)' : '1px solid #E8DDD4' }}>
                 <Group px="md" gap={4} style={{ maxWidth: 1200, margin: '0 auto', overflowX: 'auto' }}>
                     {navLinks.map(link => {
                         const active = url.startsWith(link.href);
@@ -135,12 +144,12 @@ export default function DriverLayout({ title, children }) {
                                     display: 'flex', alignItems: 'center', gap: 6,
                                     padding: '12px 16px',
                                     textDecoration: 'none', whiteSpace: 'nowrap',
-                                    borderBottom: active ? '2px solid #2196F3' : '2px solid transparent',
-                                    background: active ? 'rgba(33,150,243,0.08)' : 'transparent',
+                                    borderBottom: active ? '2px solid #EA580C' : '2px solid transparent',
+                                    background: active ? 'rgba(234,88,12,0.08)' : 'transparent',
                                 }}
                             >
                                 <Text style={{ fontSize: '1rem' }}>{link.icon}</Text>
-                                <Text size="sm" fw={active ? 700 : 500} style={{ color: active ? '#60A5FA' : '#94A3B8' }}>{link.label}</Text>
+                                <Text size="sm" fw={active ? 700 : 500} style={{ color: active ? '#FB923C' : '#94A3B8' }}>{link.label}</Text>
                             </Box>
                         );
                     })}

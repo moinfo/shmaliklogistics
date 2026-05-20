@@ -1,4 +1,5 @@
 import { Box, Group, Text, Anchor, Stack } from '@mantine/core';
+import { useMantineColorScheme } from '@mantine/core';
 import { Link, usePage, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,6 +14,8 @@ const navLinks = [
 
 export default function PortalLayout({ title = 'Customer Portal', children }) {
     const { url, props } = usePage();
+    const { colorScheme } = useMantineColorScheme();
+    const isDark = colorScheme === 'dark';
     const flash = props.flash ?? {};
     const [toast, setToast] = useState(null);
 
@@ -30,17 +33,23 @@ export default function PortalLayout({ title = 'Customer Portal', children }) {
     const logout = () => router.post('/portal/logout');
 
     return (
-        <Box style={{ minHeight: '100vh', background: '#0B1627' }}>
+        <Box style={{ minHeight: '100vh', background: isDark ? '#2C1200' : '#F5F0EB' }}>
             {/* Header */}
             <Box style={{
-                background: '#07111F',
-                borderBottom: '1px solid rgba(33,150,243,0.15)',
+                background: isDark ? '#220D00' : '#ffffff',
+                borderBottom: isDark ? '1px solid rgba(234,88,12,0.15)' : '1px solid #E8DDD4',
                 position: 'sticky', top: 0, zIndex: 100,
             }}>
                 <Group h={62} px="xl" justify="space-between" style={{ maxWidth: 1200, margin: '0 auto' }}>
                     <Group gap="xl">
                         <Link href="/portal/dashboard" style={{ textDecoration: 'none' }}>
-                            <img src="/logo-full.png" alt="SH Malik" style={{ height: 36, objectFit: 'contain' }} />
+                            <Group gap={8} align="center">
+                                <img src="/logo.jpeg" alt="Trans-Mas" style={{ height: 36, width: 'auto', objectFit: 'contain', borderRadius: 6 }} />
+                                <Stack gap={0}>
+                                    <Text fw={900} size="xs" style={{ color: isDark ? '#ffffff' : '#1E293B', letterSpacing: 0.5, lineHeight: 1.1 }}>TRANS-MAS</Text>
+                                    <Text size="10px" fw={600} style={{ color: '#EA580C', letterSpacing: 1, textTransform: 'uppercase', lineHeight: 1.2 }}>Logistics Co. Ltd</Text>
+                                </Stack>
+                            </Group>
                         </Link>
                         <Group gap="xs" visibleFrom="sm">
                             {navLinks.map(link => {
@@ -54,21 +63,21 @@ export default function PortalLayout({ title = 'Customer Portal', children }) {
                                             display: 'flex', alignItems: 'center', gap: 6,
                                             padding: '6px 14px', borderRadius: 8,
                                             textDecoration: 'none',
-                                            background: active ? 'rgba(33,150,243,0.15)' : 'transparent',
-                                            borderBottom: active ? '2px solid #2196F3' : '2px solid transparent',
+                                            background: active ? 'rgba(234,88,12,0.15)' : 'transparent',
+                                            borderBottom: active ? '2px solid #EA580C' : '2px solid transparent',
                                             transition: 'all 0.15s',
                                         }}
                                     >
                                         <Text style={{ fontSize: '0.9rem' }}>{link.icon}</Text>
-                                        <Text size="sm" fw={active ? 700 : 500} style={{ color: active ? '#60A5FA' : 'var(--c-text-secondary)' }}>{link.label}</Text>
+                                        <Text size="sm" fw={active ? 700 : 500} style={{ color: active ? '#FB923C' : 'var(--c-text-secondary)' }}>{link.label}</Text>
                                     </Box>
                                 );
                             })}
                         </Group>
                     </Group>
                     <Group gap="sm">
-                        <Box style={{ padding: '2px 10px', borderRadius: 6, background: 'rgba(33,150,243,0.1)', border: '1px solid rgba(33,150,243,0.2)' }}>
-                            <Text size="xs" style={{ color: '#60A5FA' }}>Client Portal</Text>
+                        <Box style={{ padding: '2px 10px', borderRadius: 6, background: 'rgba(234,88,12,0.1)', border: '1px solid rgba(234,88,12,0.2)' }}>
+                            <Text size="xs" style={{ color: '#FB923C' }}>Client Portal</Text>
                         </Box>
                         <Box
                             component="button"
@@ -86,12 +95,12 @@ export default function PortalLayout({ title = 'Customer Portal', children }) {
             </Box>
 
             {/* Mobile nav */}
-            <Group px="lg" py="xs" gap="xs" hiddenFrom="sm" style={{ background: '#07111F', borderBottom: '1px solid rgba(33,150,243,0.1)' }}>
+            <Group px="lg" py="xs" gap="xs" hiddenFrom="sm" style={{ background: isDark ? '#220D00' : '#ffffff', borderBottom: isDark ? '1px solid rgba(234,88,12,0.1)' : '1px solid #E8DDD4' }}>
                 {navLinks.map(link => {
                     const active = url.startsWith(link.href);
                     return (
-                        <Box key={link.href} component={Link} href={link.href} style={{ padding: '6px 12px', borderRadius: 8, background: active ? 'rgba(33,150,243,0.15)' : 'transparent', textDecoration: 'none', borderBottom: active ? '2px solid #2196F3' : '2px solid transparent' }}>
-                            <Text size="sm" fw={active ? 700 : 500} style={{ color: active ? '#60A5FA' : 'var(--c-text-secondary)' }}>{link.icon} {link.label}</Text>
+                        <Box key={link.href} component={Link} href={link.href} style={{ padding: '6px 12px', borderRadius: 8, background: active ? 'rgba(234,88,12,0.15)' : 'transparent', textDecoration: 'none', borderBottom: active ? '2px solid #EA580C' : '2px solid transparent' }}>
+                            <Text size="sm" fw={active ? 700 : 500} style={{ color: active ? '#FB923C' : 'var(--c-text-secondary)' }}>{link.icon} {link.label}</Text>
                         </Box>
                     );
                 })}
@@ -113,7 +122,7 @@ export default function PortalLayout({ title = 'Customer Portal', children }) {
             {/* Main content */}
             <Box style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
                 {title && (
-                    <Text fw={700} size="xl" style={{ color: '#E2E8F0', marginBottom: 24 }}>{title}</Text>
+                    <Text fw={700} size="xl" style={{ color: isDark ? '#E2E8F0' : '#1E293B', marginBottom: 24 }}>{title}</Text>
                 )}
                 {children}
             </Box>

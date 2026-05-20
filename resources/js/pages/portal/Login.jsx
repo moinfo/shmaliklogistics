@@ -10,11 +10,17 @@ export default function PortalLogin() {
     };
 
     return (
-        <Box style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #050D18 0%, #0B1627 50%, #07111F 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <Box style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0A0400 0%, #1E0800 50%, #A83200 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
             <Box style={{ width: '100%', maxWidth: 420 }}>
                 {/* Logo */}
                 <Box style={{ textAlign: 'center', marginBottom: 40 }}>
-                    <img src="/logo-full.png" alt="SH Malik Logistics" style={{ height: 52, objectFit: 'contain' }} />
+                    <Group gap={10} justify="center" align="center" mb={4}>
+                        <img src="/logo.jpeg" alt="Trans-Mas" style={{ height: 56, width: 'auto', objectFit: 'contain', borderRadius: 8 }} />
+                        <Stack gap={0} align="flex-start">
+                            <Text fw={900} size="md" style={{ color: '#ffffff', letterSpacing: 0.5, lineHeight: 1.1 }}>TRANS-MAS</Text>
+                            <Text size="xs" fw={600} style={{ color: '#FB923C', letterSpacing: 1, textTransform: 'uppercase', lineHeight: 1.2 }}>Logistics Co. Ltd</Text>
+                        </Stack>
+                    </Group>
                     <Text size="sm" style={{ color: 'var(--c-text-secondary)', marginTop: 10 }}>Customer Portal</Text>
                 </Box>
 
@@ -44,7 +50,7 @@ export default function PortalLogin() {
                                 onChange={e => setData('email', e.target.value)}
                                 styles={{
                                     label: { color: 'var(--c-text-secondary)', marginBottom: 6 },
-                                    input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)', '&:focus': { borderColor: '#2196F3' } },
+                                    input: { background: 'var(--c-input)', border: '1px solid var(--c-border-input)', color: 'var(--c-text)', '&:focus': { borderColor: '#EA580C' } },
                                 }}
                             />
                             <PasswordInput
@@ -63,10 +69,10 @@ export default function PortalLogin() {
                                 fullWidth
                                 loading={processing}
                                 style={{
-                                    background: 'linear-gradient(135deg, #1565C0, #2196F3)',
+                                    background: 'linear-gradient(135deg, #C2410C, #EA580C)',
                                     border: 'none', height: 46, borderRadius: 10,
                                     fontWeight: 700, marginTop: 8,
-                                    boxShadow: '0 4px 16px rgba(33,150,243,0.4)',
+                                    boxShadow: '0 4px 16px rgba(234,88,12,0.4)',
                                 }}
                             >
                                 Sign In
@@ -76,7 +82,7 @@ export default function PortalLogin() {
                 </Box>
 
                 <Text size="xs" style={{ color: 'var(--c-text-muted)', textAlign: 'center', marginTop: 24 }}>
-                    Contact SH Malik Logistics to get portal access
+                    Contact Trans-Mas Logistics to get portal access
                 </Text>
             </Box>
         </Box>

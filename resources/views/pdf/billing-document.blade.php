@@ -9,11 +9,11 @@ body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #1E293B; ba
 
 /* Header */
 .header-table { width: 100%; border-collapse: collapse; margin-bottom: 28px; }
-.company-name  { font-size: 18px; font-weight: bold; color: #1565C0; letter-spacing: -0.5px; }
+.company-name  { font-size: 18px; font-weight: bold; color: #C2410C; letter-spacing: -0.5px; }
 .company-sub   { font-size: 9px; color: #64748B; margin-top: 2px; line-height: 1.5; }
 .doc-badge     { text-align: right; }
 .doc-type      { font-size: 22px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-.doc-type.invoice  { color: #1565C0; }
+.doc-type.invoice  { color: #C2410C; }
 .doc-type.quote    { color: #065F46; }
 .doc-type.proforma { color: #6D28D9; }
 .doc-number    { font-size: 12px; color: #64748B; margin-top: 4px; }
@@ -22,7 +22,7 @@ body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #1E293B; ba
 .status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 9px; font-weight: bold; text-transform: uppercase; margin-top: 4px; }
 
 /* Divider */
-.divider { border: none; border-top: 2px solid #1565C0; margin: 0 0 22px 0; }
+.divider { border: none; border-top: 2px solid #C2410C; margin: 0 0 22px 0; }
 
 /* Info blocks */
 .info-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
@@ -39,7 +39,7 @@ body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #1E293B; ba
 /* Items table */
 .items-section-title { font-size: 9px; font-weight: bold; color: #64748B; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
 .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-.items-table th { background: #1565C0; color: #fff; padding: 8px 10px; text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
+.items-table th { background: #C2410C; color: #fff; padding: 8px 10px; text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
 .items-table th.right { text-align: right; }
 .items-table td { padding: 8px 10px; border-bottom: 1px solid #F1F5F9; vertical-align: top; }
 .items-table td.right { text-align: right; }
@@ -52,7 +52,7 @@ body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #1E293B; ba
 .totals-table td { padding: 5px 10px; font-size: 10px; }
 .totals-table .label { color: #64748B; }
 .totals-table .value { text-align: right; font-weight: 600; color: #1E293B; }
-.totals-table .total-row td { background: #1565C0; color: #fff; font-size: 12px; font-weight: bold; padding: 8px 10px; }
+.totals-table .total-row td { background: #C2410C; color: #fff; font-size: 12px; font-weight: bold; padding: 8px 10px; }
 .totals-table .total-row .value { color: #fff; text-align: right; }
 
 /* Payments */

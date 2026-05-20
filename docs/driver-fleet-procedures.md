@@ -4,6 +4,8 @@ How the driver portal and fleet oversight features work end-to-end.
 
 ---
 
+
+
 ## 1. Account & Login
 
 1. Admin registers a driver under **System → Drivers → Add Driver** (name, phone, licence, birth region/district, etc.).

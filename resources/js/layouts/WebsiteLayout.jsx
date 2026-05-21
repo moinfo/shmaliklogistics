@@ -257,7 +257,7 @@ export default function WebsiteLayout({ children }) {
                                 {[
                                     { icon: '📍', text: 'Handeni, Tanzania' },
                                     { icon: '📞', text: '+255 652 373 434' },
-                                    { icon: '📧', text: 'transmaslogistics@gmail.com' },
+                                    { icon: '📧', text: 'info@transmaslogistics.co.tz' },
                                 ].map(item => (
                                     <Group key={item.text} gap={10} style={{ background: 'rgba(234,88,12,0.07)', border: '1px solid rgba(234,88,12,0.14)', borderRadius: 10, padding: '8px 12px' }}>
                                         <Text size="sm">{item.icon}</Text>

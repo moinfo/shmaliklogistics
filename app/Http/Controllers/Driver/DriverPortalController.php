@@ -43,13 +43,22 @@ class DriverPortalController extends Controller
                 ->first()
             : null;
 
+        $monthQuery = Trip::where('driver_id', $driver->id)
+            ->whereIn('status', ['delivered', 'completed'])
+            ->whereMonth('departure_date', now()->month)
+            ->whereYear('departure_date', now()->year);
+
         $stats = [
             'active_trips'    => $active->count(),
             'upcoming_trips'  => Trip::where('driver_id', $driver->id)->where('status', 'planned')->count(),
-            'completed_month' => Trip::where('driver_id', $driver->id)
+            'completed_month' => (clone $monthQuery)->count(),
+            'completed_week'  => Trip::where('driver_id', $driver->id)
                 ->whereIn('status', ['delivered', 'completed'])
-                ->whereMonth('departure_date', now()->month)
-                ->whereYear('departure_date', now()->year)
+                ->whereBetween('departure_date', [now()->startOfWeek(), now()->endOfWeek()])
+                ->count(),
+            'tons_month'      => (float) (clone $monthQuery)->sum('cargo_weight_tons'),
+            'lifetime_trips'  => Trip::where('driver_id', $driver->id)
+                ->whereIn('status', ['delivered', 'completed'])
                 ->count(),
         ];
 

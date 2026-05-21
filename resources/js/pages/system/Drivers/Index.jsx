@@ -192,137 +192,139 @@ export default function DriversIndex({ drivers, stats, statuses, filters }) {
                 </Group>
             </Box>
 
-            {/* ── Table ── */}
-            <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden', boxShadow: cardShadow }}>
-
-                {/* Toolbar */}
-                <Box style={{ padding: '14px 20px', borderBottom: `1px solid ${divider}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            {/* ── Driver count strip ── */}
+            {drivers.data.length > 0 && (
+                <Group justify="space-between" mb={16} px={2}>
                     <Group gap={8}>
-                        <Box style={{ width: 8, height: 8, borderRadius: '50%', background: 'linear-gradient(135deg, #EA580C, #F97316)', boxShadow: '0 0 6px rgba(234,88,12,0.5)' }} />
+                        <Box style={{ width: 8, height: 8, borderRadius: '50%', background: 'linear-gradient(135deg,#EA580C,#F97316)', boxShadow: '0 0 6px rgba(234,88,12,0.5)' }} />
                         <Text size="sm" fw={700} style={{ color: textPri }}>All Drivers</Text>
                     </Group>
                     <Text size="xs" style={{ color: textMut }}>
-                        {drivers.data.length > 0 ? `Showing ${drivers.from ?? 1}–${drivers.to ?? drivers.data.length} of ${drivers.total ?? drivers.data.length}` : '0 results'}
+                        {drivers.data.length > 0 ? `${drivers.from ?? 1}–${drivers.to ?? drivers.data.length} of ${drivers.total ?? drivers.data.length}` : '0 results'}
                     </Text>
-                </Box>
+                </Group>
+            )}
 
-                {/* Head */}
-                <Box style={{ display: 'grid', gridTemplateColumns: cols, gap: 0, background: headBg, borderBottom: `1px solid ${divider}`, padding: '10px 20px' }}>
-                    {['', 'Name', 'Phone', 'Licence #', 'Licence Exp.', 'Status', ''].map(h => (
-                        <Text key={h} size="10px" fw={800} style={{ color: textMut, letterSpacing: 0.9, textTransform: 'uppercase' }}>{h}</Text>
-                    ))}
-                </Box>
-
-                {drivers.data.length === 0 ? (
-                    <Box style={{ textAlign: 'center', padding: '72px 0' }}>
-                        <Box style={{
-                            width: 80, height: 80, borderRadius: '50%',
-                            background: isDark ? 'rgba(234,88,12,0.1)' : '#FFF7F0',
-                            border: '2px dashed rgba(234,88,12,0.3)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: '2.4rem', margin: '0 auto 20px',
-                        }}>
-                            👤
-                        </Box>
-                        <Text fw={800} size="md" style={{ color: textPri, marginBottom: 6 }}>No drivers registered</Text>
-                        <Text size="sm" style={{ color: textMut }}>Add the first driver to get started</Text>
+            {/* ── Driver cards grid ── */}
+            {drivers.data.length === 0 ? (
+                <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, boxShadow: cardShadow, textAlign: 'center', padding: '72px 0' }}>
+                    <Box style={{ width: 80, height: 80, borderRadius: '50%', background: isDark ? 'rgba(234,88,12,0.1)' : '#FFF7F0', border: '2px dashed rgba(234,88,12,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.4rem', margin: '0 auto 20px' }}>
+                        👤
                     </Box>
-                ) : (
-                    drivers.data.map((d, i) => {
+                    <Text fw={800} size="md" style={{ color: textPri, marginBottom: 6 }}>No drivers registered</Text>
+                    <Text size="sm" style={{ color: textMut }}>Add the first driver to get started</Text>
+                </Box>
+            ) : (
+                <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
+                    {drivers.data.map((d, i) => {
                         const meta = statuses[d.status] ?? { label: d.status, color: '#94A3B8' };
-                        return (
-                            <motion.div key={d.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-                                <Box
-                                    style={{
-                                        display: 'grid', gridTemplateColumns: cols, gap: 0,
-                                        padding: '13px 20px', borderBottom: `1px solid ${divider}`,
-                                        cursor: 'pointer', alignItems: 'center',
-                                        transition: 'background 0.15s, border-left 0.15s',
-                                        borderLeft: '3px solid transparent',
-                                    }}
-                                    onMouseEnter={e => {
-                                        e.currentTarget.style.background = rowHov;
-                                        e.currentTarget.style.borderLeft = `3px solid ${meta.color}`;
-                                    }}
-                                    onMouseLeave={e => {
-                                        e.currentTarget.style.background = 'transparent';
-                                        e.currentTarget.style.borderLeft = '3px solid transparent';
-                                    }}
-                                    onClick={() => router.visit(`/system/drivers/${d.id}`)}
-                                >
-                                    {/* Avatar */}
-                                    <Box style={{ display: 'flex', alignItems: 'center' }}>
-                                        <PersonAvatar name={d.name} photoUrl={d.photo_url} size={34} />
-                                    </Box>
+                        const days = d.license_expiry ? Math.floor((new Date(d.license_expiry) - new Date()) / 86400000) : null;
+                        const expColor = days === null ? '#94A3B8' : days < 0 ? '#EF4444' : days <= 30 ? '#F59E0B' : '#22C55E';
+                        const expLabel = days === null ? '—' : days < 0 ? 'EXPIRED' : days <= 30 ? `${days}d left` : new Date(d.license_expiry).toLocaleDateString('en-TZ', { day: '2-digit', month: 'short', year: '2-digit' });
 
-                                    {/* Name + licence classes */}
-                                    <Stack gap={2}>
-                                        <Text size="sm" fw={700} style={{ color: textPri }}>{d.name}</Text>
-                                        {(d.license_classes ?? []).length > 0 ? (
-                                            <Group gap={4} wrap="nowrap">
+                        return (
+                            <motion.div key={d.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.05 }}
+                                whileHover={{ y: -6, transition: { duration: 0.18 } }}>
+                                <Box style={{
+                                    background: cardBg, border: `1px solid ${cardBorder}`,
+                                    borderRadius: 18, overflow: 'hidden', boxShadow: cardShadow,
+                                    cursor: 'pointer', transition: 'box-shadow 0.2s',
+                                    display: 'flex', flexDirection: 'column',
+                                }}
+                                    onMouseEnter={e => e.currentTarget.style.boxShadow = `0 8px 32px ${meta.color}30, 0 2px 8px rgba(0,0,0,0.1)`}
+                                    onMouseLeave={e => e.currentTarget.style.boxShadow = cardShadow}
+                                    onClick={() => router.visit(`/system/drivers/${d.id}`)}>
+
+                                    {/* Status colour bar */}
+                                    <Box style={{ height: 4, background: `linear-gradient(90deg, ${meta.color}, ${meta.color}99)` }} />
+
+                                    {/* Avatar + name section */}
+                                    <Box style={{ padding: '24px 20px 16px', textAlign: 'center' }}>
+                                        <Box style={{ position: 'relative', display: 'inline-block', marginBottom: 14 }}>
+                                            <PersonAvatar name={d.name} photoUrl={d.photo_url} size={76} />
+                                            {/* Status dot */}
+                                            <Box style={{ position: 'absolute', bottom: 2, right: 2, width: 14, height: 14, borderRadius: '50%', background: meta.color, border: `2px solid ${cardBg}`, boxShadow: `0 0 6px ${meta.color}` }} />
+                                        </Box>
+
+                                        <Text fw={800} size="md" style={{ color: textPri, lineHeight: 1.2, marginBottom: 6 }}>{d.name}</Text>
+
+                                        {/* Status pill */}
+                                        <Box style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: meta.color + '18', border: `1px solid ${meta.color}35`, borderRadius: 20, padding: '3px 12px', marginBottom: 4 }}>
+                                            <Box style={{ width: 6, height: 6, borderRadius: '50%', background: meta.color, boxShadow: `0 0 5px ${meta.color}` }} />
+                                            <Text size="xs" fw={700} style={{ color: meta.color }}>{meta.label}</Text>
+                                        </Box>
+
+                                        {/* Licence class badges */}
+                                        {(d.license_classes ?? []).length > 0 && (
+                                            <Group gap={4} justify="center" mt={6}>
                                                 {(d.license_classes ?? []).map(code => (
-                                                    <Box key={code} style={{ background: isDark ? 'rgba(234,88,12,0.1)' : '#FFF7F0', border: '1px solid rgba(234,88,12,0.22)', borderRadius: 4, padding: '1px 6px', color: '#EA580C', fontWeight: 700, fontSize: 10 }}>
+                                                    <Box key={code} style={{ background: isDark ? 'rgba(234,88,12,0.12)' : '#FFF7F0', border: '1px solid rgba(234,88,12,0.25)', borderRadius: 6, padding: '2px 8px', color: '#EA580C', fontWeight: 800, fontSize: 10, letterSpacing: 0.5 }}>
                                                         {code}
                                                     </Box>
                                                 ))}
                                             </Group>
-                                        ) : (
-                                            <Text size="xs" style={{ color: textMut }}>{d.email || d.address || '—'}</Text>
-                                        )}
-                                    </Stack>
-
-                                    {/* Phone */}
-                                    <Text size="sm" style={{ color: textSec }}>{d.phone ?? '—'}</Text>
-
-                                    {/* Licence # */}
-                                    <Box>
-                                        {d.license_number ? (
-                                            <Box style={{ display: 'inline-flex', background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', borderRadius: 5, padding: '2px 8px' }}>
-                                                <Text size="10px" fw={700} style={{ color: textMut, fontFamily: 'monospace', letterSpacing: 0.8 }}>{d.license_number}</Text>
-                                            </Box>
-                                        ) : (
-                                            <Text size="xs" style={{ color: textMut }}>—</Text>
                                         )}
                                     </Box>
 
-                                    {/* Licence expiry */}
-                                    <LicenceBadge expiry={d.license_expiry} isDark={isDark} textMut={textMut} />
+                                    {/* Info rows */}
+                                    <Box style={{ borderTop: `1px solid ${divider}`, margin: '0 16px', paddingTop: 14, paddingBottom: 14 }}>
+                                        {/* Phone */}
+                                        <Group gap={8} mb={10} align="center">
+                                            <Box style={{ width: 28, height: 28, borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC', border: `1px solid ${cardBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', flexShrink: 0 }}>📞</Box>
+                                            <Text size="sm" style={{ color: d.phone ? textPri : textMut, fontWeight: d.phone ? 600 : 400 }}>{d.phone ?? 'No phone'}</Text>
+                                        </Group>
 
-                                    {/* Status */}
-                                    <StatusPill status={d.status} statuses={statuses} />
+                                        {/* Licence number */}
+                                        <Group gap={8} mb={10} align="center">
+                                            <Box style={{ width: 28, height: 28, borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC', border: `1px solid ${cardBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', flexShrink: 0 }}>🪪</Box>
+                                            {d.license_number ? (
+                                                <Box style={{ background: isDark ? 'rgba(255,255,255,0.07)' : '#F1F5F9', borderRadius: 5, padding: '2px 8px' }}>
+                                                    <Text size="xs" fw={700} style={{ color: textSec, fontFamily: 'monospace', letterSpacing: 0.8 }}>{d.license_number}</Text>
+                                                </Box>
+                                            ) : (
+                                                <Text size="sm" style={{ color: textMut }}>No licence #</Text>
+                                            )}
+                                        </Group>
 
-                                    {/* Actions */}
-                                    <Group gap={4} wrap="nowrap" onClick={e => e.stopPropagation()}>
-                                        <Tooltip label="View" position="top" withArrow>
-                                            <ActionIcon component={Link} href={`/system/drivers/${d.id}`} variant="subtle" size={30}
-                                                style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E2E8F0', borderRadius: 8, color: textSec }}>
-                                                <Text size="xs">👁</Text>
-                                            </ActionIcon>
-                                        </Tooltip>
-                                        {can('drivers.edit') && (
-                                            <Tooltip label="Edit" position="top" withArrow>
-                                                <ActionIcon component={Link} href={`/system/drivers/${d.id}/edit`} variant="subtle" size={30}
-                                                    style={{ background: isDark ? 'rgba(234,88,12,0.1)' : '#FFF7F0', border: '1px solid rgba(234,88,12,0.25)', borderRadius: 8, color: '#EA580C' }}>
-                                                    <Text size="xs">✏️</Text>
-                                                </ActionIcon>
-                                            </Tooltip>
-                                        )}
-                                    </Group>
+                                        {/* Licence expiry */}
+                                        <Group gap={8} align="center">
+                                            <Box style={{ width: 28, height: 28, borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC', border: `1px solid ${cardBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', flexShrink: 0 }}>📅</Box>
+                                            <Box style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: expColor + '15', border: `1px solid ${expColor}30`, borderRadius: 20, padding: '3px 10px' }}>
+                                                <Box style={{ width: 6, height: 6, borderRadius: '50%', background: expColor, flexShrink: 0 }} />
+                                                <Text size="xs" fw={700} style={{ color: expColor }}>{expLabel}</Text>
+                                            </Box>
+                                        </Group>
+                                    </Box>
+
+                                    {/* Action footer */}
+                                    <Box style={{ borderTop: `1px solid ${divider}`, padding: '12px 16px', marginTop: 'auto' }}
+                                        onClick={e => e.stopPropagation()}>
+                                        <Group gap={8}>
+                                            <Box component={Link} href={`/system/drivers/${d.id}`}
+                                                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '8px 0', borderRadius: 10, background: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 12, fontWeight: 700, transition: 'background 0.12s' }}
+                                                onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.09)' : '#F1F5F9'}
+                                                onMouseLeave={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC'}>
+                                                👁 View
+                                            </Box>
+                                            {can('drivers.edit') && (
+                                                <Box component={Link} href={`/system/drivers/${d.id}/edit`}
+                                                    style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '8px 0', borderRadius: 10, background: isDark ? 'rgba(234,88,12,0.1)' : '#FFF7F0', border: '1px solid rgba(234,88,12,0.25)', color: '#EA580C', textDecoration: 'none', fontSize: 12, fontWeight: 700, transition: 'background 0.12s' }}
+                                                    onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(234,88,12,0.18)' : '#FEE8D6'}
+                                                    onMouseLeave={e => e.currentTarget.style.background = isDark ? 'rgba(234,88,12,0.1)' : '#FFF7F0'}>
+                                                    ✏️ Edit
+                                                </Box>
+                                            )}
+                                        </Group>
+                                    </Box>
                                 </Box>
                             </motion.div>
                         );
-                    })
-                )}
-
-                {/* Footer */}
-                {drivers.data.length > 0 && (
-                    <Box style={{ padding: '10px 20px', borderTop: `1px solid ${divider}`, background: headBg }}>
-                        <Text size="xs" style={{ color: textMut }}>
-                            {drivers.total ?? drivers.data.length} total driver{(drivers.total ?? drivers.data.length) !== 1 ? 's' : ''}
-                        </Text>
-                    </Box>
-                )}
-            </Box>
+                    })}
+                </SimpleGrid>
+            )}
 
             {/* ── Pagination ── */}
             {drivers.last_page > 1 && (

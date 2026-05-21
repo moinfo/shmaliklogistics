@@ -146,7 +146,7 @@ const en = {
         team: {
             badge: 'Our Team', title: 'The People Behind', highlight: 'Every Delivery',
             items: [
-                { role: 'CEO', name: 'Abdulmalik Suleiman', icon: '👔', desc: 'Leading Trans-Mas Logistics with vision and dedication, driving the company\'s mission to become a leading logistics provider in East Africa.' },
+                { role: 'CEO', name: 'Mohammed Ahmed', icon: '👔', desc: 'Leading Trans-Mas Logistics with vision and dedication, driving the company\'s mission to become a leading logistics provider in East Africa.' },
                 { role: 'Head of Accounts', name: 'Salim Hilal', icon: '📊', desc: 'Managing financial operations and ensuring full cost transparency for clients across all logistics operations.' },
                 { role: 'Operations', name: 'Said', icon: '🚛', desc: 'Experienced team managing route planning, driver assignments, fleet coordination and day-to-day logistics operations.' },
                 { role: 'Customer Service', name: 'Support Team', icon: '📞', desc: 'Available 24/7 to answer client queries, provide real-time cargo updates and ensure smooth operations for every shipment.' },
@@ -327,7 +327,7 @@ const sw = {
         team: {
             badge: 'Timu Yetu', title: 'Watu Nyuma ya', highlight: 'Kila Utoaji',
             items: [
-                { role: 'Mkurugenzi Mtendaji', name: 'Abdulmalik Suleiman', icon: '👔', desc: 'Kuongoza Trans-Mas Logistics kwa maono na kujitolea, akiendesha dhamira ya kampuni kuwa mtoaji mkuu wa usafirishaji Afrika Mashariki.' },
+                { role: 'Mkurugenzi Mtendaji', name: 'Mohammed Ahmed', icon: '👔', desc: 'Kuongoza Trans-Mas Logistics kwa maono na kujitolea, akiendesha dhamira ya kampuni kuwa mtoaji mkuu wa usafirishaji Afrika Mashariki.' },
                 { role: 'Mkuu wa Hesabu', name: 'Salim Hilal', icon: '📊', desc: 'Kusimamia shughuli za kifedha na kuhakikisha uwazi kamili wa gharama kwa wateja katika shughuli zote za usafirishaji.' },
                 { role: 'Uendeshaji', name: 'Said', icon: '🚛', desc: 'Timu yenye uzoefu inayosimamia upangaji wa njia, mgawanyo wa madereva, uratibu wa gari na shughuli za kila siku za usafirishaji.' },
                 { role: 'Huduma kwa Wateja', name: 'Timu ya Msaada', icon: '📞', desc: 'Inapatikana masaa 24/7 kujibu maswali ya wateja, kutoa masasisho ya mizigo kwa wakati halisi na kuhakikisha shughuli laini.' },

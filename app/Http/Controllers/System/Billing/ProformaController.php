@@ -5,9 +5,11 @@ namespace App\Http\Controllers\System\Billing;
 use App\Http\Controllers\Controller;
 use App\Mail\BillingDocumentMail;
 use App\Models\BillingDocument;
+use App\Models\BillingDocumentEmail;
 use App\Models\Client;
 use App\Models\CompanySetting;
 use App\Models\Trip;
+use Throwable;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
@@ -80,7 +82,7 @@ class ProformaController extends Controller
 
     public function show(BillingDocument $proforma)
     {
-        $proforma->load(['client', 'trip', 'items', 'convertedFrom', 'conversions']);
+        $proforma->load(['client', 'trip', 'items', 'convertedFrom', 'conversions', 'emails.sender:id,name']);
         $proforma->append(['amount_paid', 'balance_due']);
 
         return Inertia::render('system/Billing/Proformas/Show', [
@@ -133,14 +135,28 @@ class ProformaController extends Controller
         $proforma->load(['client', 'trip', 'items']);
         $proforma->append(['amount_paid', 'balance_due']);
 
-        Mail::to($data['to'])->send(
-            new BillingDocumentMail(
-                document:      $proforma,
-                company:       CompanySetting::first(),
-                customMessage: $data['message'] ?? '',
-                emailSubject:  $data['subject'],
-            )
-        );
+        $logBase = [
+            'billing_document_id' => $proforma->id,
+            'recipient'           => $data['to'],
+            'subject'             => $data['subject'],
+            'message'             => $data['message'] ?? null,
+            'sent_by'             => $request->user()?->id,
+        ];
+
+        try {
+            Mail::to($data['to'])->send(
+                new BillingDocumentMail(
+                    document:      $proforma,
+                    company:       CompanySetting::first(),
+                    customMessage: $data['message'] ?? '',
+                    emailSubject:  $data['subject'],
+                )
+            );
+            BillingDocumentEmail::create($logBase + ['status' => 'sent']);
+        } catch (Throwable $e) {
+            BillingDocumentEmail::create($logBase + ['status' => 'failed', 'error' => $e->getMessage()]);
+            return back()->with('error', "Failed to send proforma {$proforma->document_number}: {$e->getMessage()}");
+        }
 
         return back()->with('success', "Proforma {$proforma->document_number} sent to {$data['to']}.");
     }

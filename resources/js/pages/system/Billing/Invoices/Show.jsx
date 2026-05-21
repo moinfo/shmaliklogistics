@@ -7,6 +7,7 @@ import DashboardLayout from '../../../../layouts/DashboardLayout';
 import DatePicker from '../../../../components/DatePicker';
 import { printBillingDoc } from '../../../../utils/billingPrint';
 import SendDocModal from '../../../../components/SendDocModal';
+import EmailHistory from '../../../../components/EmailHistory';
 import { useCan } from '../../../../lib/can';
 
 const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
@@ -288,6 +289,8 @@ export default function ShowInvoice({ invoice, statuses, methods, stages, compan
                     </table>
                 </Box>
             )}
+
+            <EmailHistory emails={invoice.emails ?? []} />
 
             <Group mt="md">
                 <Box component={Link} href="/system/billing/invoices" style={{ color: textSec, textDecoration: 'none', fontSize: 13 }}>← Back to Invoices</Box>

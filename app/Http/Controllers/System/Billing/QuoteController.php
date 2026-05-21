@@ -5,10 +5,12 @@ namespace App\Http\Controllers\System\Billing;
 use App\Http\Controllers\Controller;
 use App\Mail\BillingDocumentMail;
 use App\Models\BillingDocument;
+use App\Models\BillingDocumentEmail;
 use App\Models\BillingItem;
 use App\Models\Client;
 use App\Models\CompanySetting;
 use App\Models\Trip;
+use Throwable;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
@@ -81,7 +83,7 @@ class QuoteController extends Controller
 
     public function show(BillingDocument $quote)
     {
-        $quote->load(['client', 'trip', 'items', 'convertedFrom']);
+        $quote->load(['client', 'trip', 'items', 'convertedFrom', 'emails.sender:id,name']);
         $quote->append(['amount_paid', 'balance_due']);
 
         return Inertia::render('system/Billing/Quotes/Show', [
@@ -172,14 +174,28 @@ class QuoteController extends Controller
         $quote->load(['client', 'trip', 'items']);
         $quote->append(['amount_paid', 'balance_due']);
 
-        Mail::to($data['to'])->send(
-            new BillingDocumentMail(
-                document:      $quote,
-                company:       CompanySetting::first(),
-                customMessage: $data['message'] ?? '',
-                emailSubject:  $data['subject'],
-            )
-        );
+        $logBase = [
+            'billing_document_id' => $quote->id,
+            'recipient'           => $data['to'],
+            'subject'             => $data['subject'],
+            'message'             => $data['message'] ?? null,
+            'sent_by'             => $request->user()?->id,
+        ];
+
+        try {
+            Mail::to($data['to'])->send(
+                new BillingDocumentMail(
+                    document:      $quote,
+                    company:       CompanySetting::first(),
+                    customMessage: $data['message'] ?? '',
+                    emailSubject:  $data['subject'],
+                )
+            );
+            BillingDocumentEmail::create($logBase + ['status' => 'sent']);
+        } catch (Throwable $e) {
+            BillingDocumentEmail::create($logBase + ['status' => 'failed', 'error' => $e->getMessage()]);
+            return back()->with('error', "Failed to send quote {$quote->document_number}: {$e->getMessage()}");
+        }
 
         return back()->with('success', "Quote {$quote->document_number} sent to {$data['to']}.");
     }

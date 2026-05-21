@@ -63,6 +63,11 @@ class BillingDocument extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function emails()
+    {
+        return $this->hasMany(BillingDocumentEmail::class)->latest();
+    }
+
     public function getAmountPaidAttribute(): float
     {
         return (float) $this->payments()->sum('amount');

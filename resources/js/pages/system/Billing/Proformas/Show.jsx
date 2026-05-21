@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { printBillingDoc } from '../../../../utils/billingPrint';
 import SendDocModal from '../../../../components/SendDocModal';
+import EmailHistory from '../../../../components/EmailHistory';
 import { useCan } from '../../../../lib/can';
 
 const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
@@ -143,6 +144,8 @@ export default function ShowProforma({ proforma, statuses, company }) {
                     </Box>
                 </Box>
             </Box>
+
+            <EmailHistory emails={proforma.emails ?? []} />
 
             <Group mt="md">
                 <Box component={Link} href="/system/billing/proformas" style={{ color: textSec, textDecoration: 'none', fontSize: 13 }}>← Back to Proformas</Box>

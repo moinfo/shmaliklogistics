@@ -29,10 +29,7 @@ function Payslip({ slip, run, bankDetail, company, nssfRate }) {
             <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '28px 32px 20px', borderBottom: '3px solid #0F4C75' }}>
                 <Group gap={16} align="flex-start">
                     <Box style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid #0F4C75', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        {company?.company_logo
-                            ? <img src={`/storage/${company.company_logo}`} alt="logo" style={{ width: 54, height: 54, borderRadius: '50%', objectFit: 'contain' }} />
-                            : <Text style={{ fontSize: 22, color: '#1565C0', fontWeight: 800 }}>{(company?.company_name ?? 'C').charAt(0)}</Text>
-                        }
+                        <img src={company?.company_logo ? `/storage/${company.company_logo}` : '/logo.jpeg'} alt="logo" style={{ width: 54, height: 54, borderRadius: '50%', objectFit: 'contain' }} />
                     </Box>
                     <div>
                         <Text style={{ fontSize: 15, fontWeight: 800, color: '#0F4C75', letterSpacing: 0.3, textTransform: 'uppercase' }}>{company?.company_name ?? 'YOUR COMPANY LIMITED'}</Text>

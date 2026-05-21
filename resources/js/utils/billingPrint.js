@@ -21,7 +21,7 @@ function openBlob(html) {
 
 function buildDocHTML(doc, company, docType) {
     const base     = window.location.origin;
-    const logoSrc  = company?.company_logo ? `${base}/storage/${esc(company.company_logo)}` : `${base}/logo-full.png`;
+    const logoSrc  = company?.company_logo ? `${base}/storage/${esc(company.company_logo)}` : `${base}/logo.jpeg`;
     const compName = esc(company?.company_name  ?? 'YOUR COMPANY LIMITED');
     const compAddr = esc([company?.company_address, company?.company_city, company?.company_country].filter(Boolean).join(', '));
     const compPhone= esc(company?.company_phone ?? '');
@@ -211,7 +211,7 @@ export function printBillingDoc(doc, company, docType) {
 
 export function printPaymentsReport(payments, company, filters = {}) {
     const base     = window.location.origin;
-    const logoSrc  = company?.company_logo ? `${base}/storage/${esc(company.company_logo)}` : `${base}/logo-full.png`;
+    const logoSrc  = company?.company_logo ? `${base}/storage/${esc(company.company_logo)}` : `${base}/logo.jpeg`;
     const compName = esc(company?.company_name ?? 'YOUR COMPANY LIMITED');
     const compAddr = esc([company?.company_address, company?.company_city, company?.company_country].filter(Boolean).join(', '));
 

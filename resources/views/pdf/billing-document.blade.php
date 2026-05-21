@@ -2,253 +2,318 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+@php
+  $labels    = ['quote' => 'QUOTATION', 'proforma' => 'PROFORMA INVOICE', 'invoice' => 'TAX INVOICE'];
+  $label     = $labels[$doc->type] ?? strtoupper($doc->type);
+  $currency  = $doc->currency ?? 'TZS';
+  $fmt       = fn($n) => number_format((float) $n, 2);
+  $fmtDate   = fn($d) => $d ? (is_string($d) ? \Carbon\Carbon::parse($d)->format('d M Y') : $d->format('d M Y')) : '—';
+  $brand     = '#1565C0';
+  $brandDk   = '#0A1628';
+  $logoPath  = $company->company_logo && file_exists(storage_path('app/public/' . $company->company_logo))
+    ? storage_path('app/public/' . $company->company_logo)
+    : (file_exists(public_path('logo-full.png')) ? public_path('logo-full.png') : null);
+  $paidSum   = $doc->type === 'invoice' ? (float) ($doc->payments->sum('amount') ?? 0) : 0;
+  $balance   = (float) $doc->total - $paidSum;
+  $isPaid    = $doc->type === 'invoice' && $balance <= 0.01;
+@endphp
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #1E293B; background: #fff; }
-.page { padding: 32px 36px; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DejaVu Sans', sans-serif; font-size: 10px; color: #0F172A; background: #fff; }
+  .page { padding: 28px 34px 26px; }
 
-/* Header */
-.header-table { width: 100%; border-collapse: collapse; margin-bottom: 28px; }
-.company-name  { font-size: 18px; font-weight: bold; color: #1565C0; letter-spacing: -0.5px; }
-.company-sub   { font-size: 9px; color: #64748B; margin-top: 2px; line-height: 1.5; }
-.doc-badge     { text-align: right; }
-.doc-type      { font-size: 22px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-.doc-type.invoice  { color: #1565C0; }
-.doc-type.quote    { color: #065F46; }
-.doc-type.proforma { color: #6D28D9; }
-.doc-number    { font-size: 12px; color: #64748B; margin-top: 4px; }
+  /* Header band */
+  .header { width: 100%; border-collapse: collapse; margin-bottom: 0; }
+  .header td { vertical-align: top; }
+  .logo-cell { width: 60%; }
+  .logo-img  { height: 56px; margin-bottom: 8px; }
+  .company-name { font-size: 14px; font-weight: bold; color: {{ $brandDk }}; letter-spacing: 0.2px; }
+  .company-meta { font-size: 9px; color: #64748B; line-height: 1.55; margin-top: 3px; }
+  .doc-cell { width: 40%; text-align: right; }
+  .doc-type { font-size: 22px; font-weight: bold; color: {{ $brand }}; letter-spacing: 2px; text-transform: uppercase; line-height: 1; margin-bottom: 6px; }
+  .doc-number { font-size: 11px; color: #475569; font-weight: 600; margin-bottom: 6px; }
+  .status-badge { display: inline-block; padding: 3px 10px; font-size: 8.5px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 12px; }
 
-/* Status badge */
-.status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 9px; font-weight: bold; text-transform: uppercase; margin-top: 4px; }
+  /* Accent band below header */
+  .accent { height: 4px; background: {{ $brand }}; margin: 14px 0 20px; }
 
-/* Divider */
-.divider { border: none; border-top: 2px solid #1565C0; margin: 0 0 22px 0; }
+  /* Info row */
+  .info-row { width: 100%; border-collapse: separate; border-spacing: 8px 0; margin-bottom: 16px; }
+  .info-row td { vertical-align: top; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 11px 13px; width: 50%; }
+  .info-label { font-size: 8px; font-weight: bold; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 5px; }
+  .info-value { font-size: 11px; color: #0F172A; font-weight: bold; line-height: 1.4; }
+  .info-sub { font-size: 9px; color: #64748B; line-height: 1.5; margin-top: 2px; }
 
-/* Info blocks */
-.info-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-.info-block { width: 50%; vertical-align: top; }
-.info-label { font-size: 8px; font-weight: bold; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
-.info-value { font-size: 10px; color: #1E293B; font-weight: 600; }
-.info-secondary { font-size: 9px; color: #64748B; margin-top: 2px; }
+  /* Dates strip */
+  .dates { width: 100%; border-collapse: collapse; background: #F1F5F9; margin-bottom: 22px; }
+  .dates td { padding: 9px 14px; border-right: 1px solid #E2E8F0; }
+  .dates td:last-child { border-right: none; }
+  .date-label { font-size: 8px; font-weight: bold; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px; }
+  .date-value { font-size: 10px; font-weight: bold; color: #0F172A; }
 
-.dates-table { width: 100%; border-collapse: collapse; background: #F8FAFC; border: 1px solid #E2E8F0; margin-bottom: 24px; }
-.dates-table td { padding: 8px 14px; }
-.dates-table .date-label { font-size: 8px; font-weight: bold; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; display: block; }
-.dates-table .date-value { font-size: 10px; font-weight: 700; color: #1E293B; }
+  /* Line items */
+  .section-title { font-size: 9px; font-weight: bold; color: #64748B; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 7px; }
+  .items { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+  .items thead th { background: {{ $brand }}; color: #fff; padding: 9px 11px; text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: bold; }
+  .items thead th.right { text-align: right; }
+  .items tbody td { padding: 9px 11px; border-bottom: 1px solid #E2E8F0; vertical-align: top; font-size: 10px; }
+  .items tbody tr:nth-child(even) td { background: #F8FAFC; }
+  .items td.right { text-align: right; }
+  .item-desc { font-weight: 600; color: #0F172A; }
+  .item-sub  { color: #64748B; font-size: 9px; margin-top: 2px; }
 
-/* Items table */
-.items-section-title { font-size: 9px; font-weight: bold; color: #64748B; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
-.items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-.items-table th { background: #1565C0; color: #fff; padding: 8px 10px; text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
-.items-table th.right { text-align: right; }
-.items-table td { padding: 8px 10px; border-bottom: 1px solid #F1F5F9; vertical-align: top; }
-.items-table td.right { text-align: right; }
-.items-table tr:nth-child(even) td { background: #F8FAFC; }
-.item-desc { font-weight: 600; color: #1E293B; font-size: 10px; }
-.item-sub  { color: #64748B; font-size: 9px; margin-top: 2px; }
+  /* Unified totals card (right-aligned) */
+  .totals-wrap { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+  .totals-wrap > tbody > tr > td.spacer { width: auto; }
+  .totals-wrap > tbody > tr > td.totals-col { width: 280px; padding: 0; }
+  .totals { width: 100%; border-collapse: collapse; border: 1px solid #E2E8F0; }
+  .totals td { padding: 7px 13px; font-size: 10px; border-bottom: 1px solid #F1F5F9; }
+  .totals tr:last-child td { border-bottom: none; }
+  .totals .label { color: #64748B; }
+  .totals .value { text-align: right; font-weight: 600; color: #0F172A; }
+  .totals .row-total td { background: {{ $brand }}; color: #fff; padding: 11px 13px; }
+  .totals .row-total .label { color: #fff; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+  .totals .row-total .value { color: #fff; font-size: 14px; font-weight: bold; }
+  .totals .row-paid .value { color: #059669; font-weight: bold; }
+  .totals .row-balance td { background: {{ $isPaid ? '#F0FDF4' : '#FFFBEB' }}; padding: 10px 13px; }
+  .totals .row-balance .label { color: {{ $isPaid ? '#047857' : '#B45309' }}; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; font-size: 9.5px; }
+  .totals .row-balance .value { color: {{ $isPaid ? '#047857' : '#B45309' }}; font-weight: bold; font-size: 12px; }
 
-/* Totals */
-.totals-table { width: 280px; border-collapse: collapse; margin-left: auto; margin-bottom: 24px; }
-.totals-table td { padding: 5px 10px; font-size: 10px; }
-.totals-table .label { color: #64748B; }
-.totals-table .value { text-align: right; font-weight: 600; color: #1E293B; }
-.totals-table .total-row td { background: #1565C0; color: #fff; font-size: 12px; font-weight: bold; padding: 8px 10px; }
-.totals-table .total-row .value { color: #fff; text-align: right; }
+  /* Payments table */
+  .pay { width: 100%; border-collapse: collapse; margin-bottom: 16px; border: 1px solid #E2E8F0; }
+  .pay th { background: #F1F5F9; padding: 7px 11px; font-size: 9px; color: #475569; text-align: left; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+  .pay td { padding: 7px 11px; border-bottom: 1px solid #F1F5F9; font-size: 9.5px; }
+  .pay tr:last-child td { border-bottom: none; }
+  .pay .right { text-align: right; }
 
-/* Payments */
-.pay-table { width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 20px; }
-.pay-table th { background: #F1F5F9; padding: 6px 10px; font-size: 9px; color: #64748B; text-align: left; font-weight: bold; text-transform: uppercase; }
-.pay-table td { padding: 6px 10px; border-bottom: 1px solid #F1F5F9; font-size: 9px; }
-.pay-table .right { text-align: right; }
-.balance-due { background: #FEF2F2; border: 1px solid #FECACA; padding: 10px 14px; text-align: right; font-size: 11px; font-weight: bold; color: #DC2626; margin-bottom: 20px; }
+  /* Paid stamp */
+  .paid-stamp { display: inline-block; padding: 7px 18px; background: #DCFCE7; color: #15803D; border: 1.5px solid #15803D; font-size: 13px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; transform: rotate(-3deg); margin-top: 8px; }
 
-/* Notes/Terms */
-.notes-box { background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 14px; margin-bottom: 16px; }
-.notes-title { font-size: 8px; font-weight: bold; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
-.notes-text  { font-size: 9px; color: #475569; line-height: 1.5; }
+  /* Notes / Terms blocks */
+  .note { background: #F8FAFC; border-left: 3px solid {{ $brand }}; padding: 10px 14px; margin-bottom: 12px; }
+  .note-title { font-size: 8px; font-weight: bold; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px; }
+  .note-text  { font-size: 9.5px; color: #334155; line-height: 1.6; }
 
-/* Footer */
-.footer { border-top: 1px solid #E2E8F0; padding-top: 12px; margin-top: 24px; text-align: center; color: #94A3B8; font-size: 8px; }
+  /* Footer */
+  .footer-wrap { margin-top: 24px; }
+  .footer { background: {{ $brandDk }}; color: rgba(255,255,255,0.85); padding: 12px 14px; font-size: 8.5px; text-align: center; line-height: 1.6; }
+  .footer .strong { color: #fff; font-weight: bold; font-size: 9.5px; letter-spacing: 0.3px; }
+  .footer .muted  { color: rgba(255,255,255,0.45); font-size: 7.5px; margin-top: 4px; }
+
+  /* Page break safety */
+  table { page-break-inside: avoid; }
+  .items tbody tr { page-break-inside: avoid; }
 </style>
 </head>
 <body>
 <div class="page">
 
-{{-- Header --}}
-<table class="header-table">
-  <tr>
-    <td>
-      @if($company->company_logo && file_exists(storage_path('app/public/' . $company->company_logo)))
-        <img src="{{ storage_path('app/public/' . $company->company_logo) }}" alt="{{ $company->company_name }}" style="height:48px; margin-bottom:6px;">
-      @endif
-      <div class="company-name">{{ $company->company_name }}</div>
-      <div class="company-sub">
-        {{ $company->company_address }}@if($company->company_city), {{ $company->company_city }}@endif<br>
-        @if($company->company_country){{ $company->company_country }} @endif
-        @if($company->company_po_box)· P.O. Box {{ $company->company_po_box }}@endif<br>
-        @if($company->company_phone)Tel: {{ $company->company_phone }} @endif
-        @if($company->company_email)· {{ $company->company_email }}@endif<br>
-        @if($company->company_tin)TIN: {{ $company->company_tin }}@endif
-      </div>
-    </td>
-    <td class="doc-badge">
-      <div class="doc-type {{ $doc->type }}">{{ strtoupper($doc->type === 'proforma' ? 'Pro-forma Invoice' : $doc->type) }}</div>
-      <div class="doc-number">{{ $doc->document_number }}</div>
-      <div>
-        @php $st = $statuses[$doc->status] ?? ['label' => $doc->status, 'color' => '#94A3B8']; @endphp
-        <span class="status-badge" style="background:{{ $st['color'] }}22; color:{{ $st['color'] }}; border: 1px solid {{ $st['color'] }}44;">{{ $st['label'] }}</span>
-      </div>
-    </td>
-  </tr>
-</table>
-
-<hr class="divider">
-
-{{-- Bill-to + Dates --}}
-<table class="info-table">
-  <tr>
-    <td class="info-block">
-      <div class="info-label">Bill To</div>
-      <div class="info-value">{{ $doc->client?->name }}</div>
-      @if($doc->client?->address)   <div class="info-secondary">{{ $doc->client->address }}</div> @endif
-      @if($doc->client?->phone)     <div class="info-secondary">{{ $doc->client->phone }}</div> @endif
-      @if($doc->client?->email)     <div class="info-secondary">{{ $doc->client->email }}</div> @endif
-      @if($doc->client?->tax_id)    <div class="info-secondary">TIN: {{ $doc->client->tax_id }}</div> @endif
-    </td>
-    <td class="info-block">
-      @if($doc->trip)
-        <div class="info-label">Trip Reference</div>
-        <div class="info-value">{{ $doc->trip->trip_number }}</div>
-        <div class="info-secondary">{{ $doc->trip->route_from }} → {{ $doc->trip->route_to }}</div>
-      @endif
-    </td>
-  </tr>
-</table>
-
-<table class="dates-table">
-  <tr>
-    <td>
-      <span class="date-label">Issue Date</span>
-      <span class="date-value">{{ $doc->issue_date?->format('d M Y') ?? '—' }}</span>
-    </td>
-    @if($doc->due_date)
-    <td>
-      <span class="date-label">Due Date</span>
-      <span class="date-value">{{ $doc->due_date->format('d M Y') }}</span>
-    </td>
-    @endif
-    @if($doc->valid_until)
-    <td>
-      <span class="date-label">Valid Until</span>
-      <span class="date-value">{{ $doc->valid_until->format('d M Y') }}</span>
-    </td>
-    @endif
-    <td>
-      <span class="date-label">Currency</span>
-      <span class="date-value">{{ $doc->currency ?? 'TZS' }}</span>
-    </td>
-  </tr>
-</table>
-
-{{-- Line Items --}}
-<div class="items-section-title">Line Items</div>
-<table class="items-table">
-  <thead>
+  {{-- Header --}}
+  <table class="header">
     <tr>
-      <th style="width:40%">Description</th>
-      <th style="width:15%" class="right">Qty</th>
-      <th style="width:20%" class="right">Unit Price</th>
-      <th style="width:25%" class="right">Amount</th>
+      <td class="logo-cell">
+        @if($logoPath)
+          <img src="{{ $logoPath }}" alt="{{ $company->company_name }}" class="logo-img">
+        @endif
+        <div class="company-name">{{ $company->company_name }}</div>
+        <div class="company-meta">
+          {{ $company->company_address }}@if($company->company_city), {{ $company->company_city }}@endif@if($company->company_country), {{ $company->company_country }}@endif
+          @if($company->company_po_box) · P.O. Box {{ $company->company_po_box }}@endif<br>
+          @if($company->company_phone)Tel: {{ $company->company_phone }}@endif
+          @if($company->company_phone && $company->company_email) · @endif
+          @if($company->company_email){{ $company->company_email }}@endif
+          @if($company->company_tin)<br>TIN: {{ $company->company_tin }}@endif
+        </div>
+      </td>
+      <td class="doc-cell">
+        <div class="doc-type">{{ $label }}</div>
+        <div class="doc-number">{{ $doc->document_number }}</div>
+        @php $st = $statuses[$doc->status] ?? ['label' => $doc->status, 'color' => '#94A3B8']; @endphp
+        <span class="status-badge" style="background:{{ $st['color'] }}1F; color:{{ $st['color'] }}; border: 1px solid {{ $st['color'] }}55;">{{ $st['label'] }}</span>
+        @if($isPaid)
+          <div><span class="paid-stamp">✓ Paid in Full</span></div>
+        @endif
+      </td>
     </tr>
-  </thead>
-  <tbody>
-    @forelse($doc->items as $item)
+  </table>
+
+  <div class="accent"></div>
+
+  {{-- Bill-to + Trip Reference --}}
+  <table class="info-row">
     <tr>
       <td>
-        <div class="item-desc">{{ $item->description }}</div>
-        @if($item->notes)<div class="item-sub">{{ $item->notes }}</div>@endif
+        <div class="info-label">Bill To</div>
+        <div class="info-value">{{ $doc->client?->name ?? '—' }}</div>
+        @if($doc->client?->company_name)<div class="info-sub">{{ $doc->client->company_name }}</div>@endif
+        @if($doc->client?->address)<div class="info-sub">{{ $doc->client->address }}</div>@endif
+        @if($doc->client?->phone)<div class="info-sub">{{ $doc->client->phone }}</div>@endif
+        @if($doc->client?->email)<div class="info-sub">{{ $doc->client->email }}</div>@endif
+        @if($doc->client?->tax_id)<div class="info-sub">TIN: {{ $doc->client->tax_id }}</div>@endif
       </td>
-      <td class="right">{{ number_format($item->quantity, 2) }} {{ $item->unit }}</td>
-      <td class="right">{{ number_format($item->unit_price, 2) }}</td>
-      <td class="right">{{ number_format($item->quantity * $item->unit_price, 2) }}</td>
+      <td>
+        @if($doc->trip)
+          <div class="info-label">Trip Reference</div>
+          <div class="info-value">{{ $doc->trip->trip_number }}</div>
+          <div class="info-sub">{{ $doc->trip->route_from }} → {{ $doc->trip->route_to }}</div>
+        @else
+          <div class="info-label">Document</div>
+          <div class="info-value">{{ $label }}</div>
+          <div class="info-sub">Reference: {{ $doc->document_number }}</div>
+        @endif
+      </td>
     </tr>
-    @empty
-    <tr><td colspan="4" style="text-align:center; color:#94A3B8; padding:16px;">No line items.</td></tr>
-    @endforelse
-  </tbody>
-</table>
+  </table>
 
-{{-- Totals --}}
-<table class="totals-table">
-  <tr>
-    <td class="label">Subtotal</td>
-    <td class="value">{{ number_format($doc->subtotal, 2) }}</td>
-  </tr>
-  @if($doc->discount_amount > 0)
-  <tr>
-    <td class="label">Discount</td>
-    <td class="value" style="color:#EF4444">− {{ number_format($doc->discount_amount, 2) }}</td>
-  </tr>
-  @endif
-  @if($doc->tax_rate > 0)
-  <tr>
-    <td class="label">VAT ({{ $doc->tax_rate }}%)</td>
-    <td class="value">{{ number_format($doc->tax_amount, 2) }}</td>
-  </tr>
-  @endif
-  <tr class="total-row">
-    <td class="label">TOTAL ({{ $doc->currency ?? 'TZS' }})</td>
-    <td class="value">{{ number_format($doc->total, 2) }}</td>
-  </tr>
-</table>
-
-{{-- Payments (invoices only) --}}
-@if($doc->type === 'invoice' && $doc->payments->count() > 0)
-<div class="items-section-title">Payments Received</div>
-<table class="pay-table">
-  <thead>
+  {{-- Dates strip --}}
+  <table class="dates">
     <tr>
-      <th>Date</th><th>Method</th><th>Reference</th><th class="right">Amount</th>
+      <td>
+        <span class="date-label">Issue Date</span>
+        <span class="date-value">{{ $fmtDate($doc->issue_date) }}</span>
+      </td>
+      @if($doc->due_date)
+      <td>
+        <span class="date-label">Due Date</span>
+        <span class="date-value">{{ $fmtDate($doc->due_date) }}</span>
+      </td>
+      @endif
+      @if($doc->valid_until)
+      <td>
+        <span class="date-label">Valid Until</span>
+        <span class="date-value">{{ $fmtDate($doc->valid_until) }}</span>
+      </td>
+      @endif
+      <td>
+        <span class="date-label">Currency</span>
+        <span class="date-value">{{ $currency }}</span>
+      </td>
     </tr>
-  </thead>
-  <tbody>
-    @foreach($doc->payments as $pay)
+  </table>
+
+  {{-- Line items --}}
+  <div class="section-title">Line Items</div>
+  <table class="items">
+    <thead>
+      <tr>
+        <th style="width:46%">Description</th>
+        <th style="width:14%" class="right">Qty</th>
+        <th style="width:20%" class="right">Unit Price</th>
+        <th style="width:20%" class="right">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      @forelse($doc->items as $item)
+      <tr>
+        <td>
+          <div class="item-desc">{{ $item->description }}</div>
+          @if($item->notes)<div class="item-sub">{{ $item->notes }}</div>@endif
+        </td>
+        <td class="right">{{ number_format($item->quantity, 2) }}{{ $item->unit ? ' ' . $item->unit : '' }}</td>
+        <td class="right">{{ $fmt($item->unit_price) }}</td>
+        <td class="right">{{ $fmt($item->quantity * $item->unit_price) }}</td>
+      </tr>
+      @empty
+      <tr><td colspan="4" style="text-align:center; color:#94A3B8; padding:18px;">No line items.</td></tr>
+      @endforelse
+    </tbody>
+  </table>
+
+  {{-- Unified totals card --}}
+  <table class="totals-wrap">
     <tr>
-      <td>{{ $pay->paid_at?->format('d M Y') }}</td>
-      <td>{{ $pay->method ?? '—' }}</td>
-      <td>{{ $pay->reference ?? '—' }}</td>
-      <td class="right">{{ number_format($pay->amount, 2) }}</td>
+      <td class="spacer">&nbsp;</td>
+      <td class="totals-col">
+        <table class="totals">
+          <tr>
+            <td class="label">Subtotal</td>
+            <td class="value">{{ $currency }} {{ $fmt($doc->subtotal) }}</td>
+          </tr>
+          @if($doc->discount_amount > 0)
+          <tr>
+            <td class="label">Discount</td>
+            <td class="value" style="color:#EF4444">− {{ $currency }} {{ $fmt($doc->discount_amount) }}</td>
+          </tr>
+          @endif
+          @if($doc->tax_rate > 0)
+          <tr>
+            <td class="label">VAT ({{ $doc->tax_rate }}%)</td>
+            <td class="value">{{ $currency }} {{ $fmt($doc->tax_amount) }}</td>
+          </tr>
+          @endif
+          <tr class="row-total">
+            <td class="label">Total</td>
+            <td class="value">{{ $currency }} {{ $fmt($doc->total) }}</td>
+          </tr>
+          @if($doc->type === 'invoice' && $paidSum > 0)
+          <tr class="row-paid">
+            <td class="label">Amount Paid</td>
+            <td class="value">{{ $currency }} {{ $fmt($paidSum) }}</td>
+          </tr>
+          @endif
+          @if($doc->type === 'invoice')
+          <tr class="row-balance">
+            <td class="label">Balance Due</td>
+            <td class="value">{{ $currency }} {{ $fmt(max(0, $balance)) }}</td>
+          </tr>
+          @endif
+        </table>
+      </td>
     </tr>
-    @endforeach
-  </tbody>
-</table>
-@php $balance = $doc->total - $doc->payments->sum('amount'); @endphp
-@if($balance > 0.01)
-<div class="balance-due">Balance Due: {{ $doc->currency ?? 'TZS' }} {{ number_format($balance, 2) }}</div>
-@elseif($balance <= 0.01)
-<div style="background:#F0FDF4; border:1px solid #BBF7D0; padding:10px 14px; text-align:right; font-size:11px; font-weight:bold; color:#15803D; margin-bottom:20px;">✓ PAID IN FULL</div>
-@endif
-@endif
+  </table>
 
-{{-- Notes --}}
-@if($doc->notes)
-<div class="notes-box">
-  <div class="notes-title">Notes</div>
-  <div class="notes-text">{{ $doc->notes }}</div>
-</div>
-@endif
+  {{-- Payments table (invoices only) --}}
+  @if($doc->type === 'invoice' && $doc->payments->count() > 0)
+  <div class="section-title">Payments Received</div>
+  <table class="pay">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Method</th>
+        <th>Reference</th>
+        <th class="right">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach($doc->payments as $pay)
+      <tr>
+        <td>{{ $pay->paid_at?->format('d M Y') ?? '—' }}</td>
+        <td>{{ $pay->method ?? '—' }}</td>
+        <td>{{ $pay->reference ?? '—' }}</td>
+        <td class="right">{{ $currency }} {{ $fmt($pay->amount) }}</td>
+      </tr>
+      @endforeach
+    </tbody>
+  </table>
+  @endif
 
-@if($doc->terms_conditions)
-<div class="notes-box">
-  <div class="notes-title">Terms & Conditions</div>
-  <div class="notes-text">{{ $doc->terms_conditions }}</div>
-</div>
-@endif
+  {{-- Notes & Terms --}}
+  @if($doc->notes)
+  <div class="note">
+    <div class="note-title">Notes</div>
+    <div class="note-text">{{ $doc->notes }}</div>
+  </div>
+  @endif
 
-<div class="footer">
-  {{ $company->company_name }} — {{ $company->company_address }}{{ $company->company_city ? ', ' . $company->company_city : '' }}, {{ $company->company_country ?? 'Tanzania' }}<br>
-  Generated on {{ now()->format('d M Y H:i') }} · {{ $doc->document_number }}
-</div>
+  @if($doc->terms_conditions)
+  <div class="note">
+    <div class="note-title">Terms &amp; Conditions</div>
+    <div class="note-text">{{ $doc->terms_conditions }}</div>
+  </div>
+  @endif
+
+  {{-- Footer --}}
+  <div class="footer-wrap">
+    <div class="footer">
+      <div class="strong">{{ $company->company_name }}</div>
+      <div>
+        @if($company->company_address){{ $company->company_address }}@endif@if($company->company_city), {{ $company->company_city }}@endif@if($company->company_country), {{ $company->company_country }}@endif
+        @if($company->company_phone) · Tel: {{ $company->company_phone }}@endif
+        @if($company->company_email) · {{ $company->company_email }}@endif
+      </div>
+      <div class="muted">Generated {{ now()->format('d M Y H:i') }} · {{ $doc->document_number }} · © {{ date('Y') }} {{ $company->company_name }}</div>
+    </div>
+  </div>
 
 </div>
 </body>

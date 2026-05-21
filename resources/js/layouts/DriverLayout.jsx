@@ -120,8 +120,8 @@ export default function DriverLayout({ title, children }) {
                             </Box>
                         )}
                         <Box visibleFrom="sm">
-                            <Text size="xs" fw={700} c="white">{user?.name}</Text>
-                            <Text size="10px" style={{ color: '#94A3B8' }}>{user?.email}</Text>
+                            <Text size="xs" fw={700} style={{ color: isDark ? '#ffffff' : '#1E293B' }}>{user?.name}</Text>
+                            <Text size="10px" style={{ color: isDark ? '#94A3B8' : '#64748B' }}>{user?.email}</Text>
                         </Box>
                         <Box component="button" onClick={logout}
                             style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', color: '#EF4444', fontSize: 12, fontWeight: 600 }}>

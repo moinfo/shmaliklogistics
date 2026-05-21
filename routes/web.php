@@ -188,6 +188,7 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
     Route::patch('fleet/{vehicle}/gps', [VehicleController::class, 'updateGps'])->name('fleet.update-gps')->middleware('permission:fleet.edit');
 
     // Drivers
+    Route::get('drivers/licence-expiry', [DriverController::class, 'licenceExpiry'])->name('drivers.licence-expiry')->middleware('permission:drivers.view');
     $permResource('drivers', DriverController::class, 'drivers');
     Route::patch('drivers/{driver}/status', [DriverController::class, 'updateStatus'])->name('drivers.update-status')->middleware('permission:drivers.edit');
     Route::patch('drivers/{driver}/vehicle', [DriverController::class, 'assignVehicle'])->name('drivers.assign-vehicle')->middleware('permission:drivers.edit');

@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 use Inertia\Inertia;
 
 class DriverController extends Controller
@@ -201,6 +202,23 @@ class DriverController extends Controller
 
         return redirect()->route('system.drivers.show', $driver)
             ->with('success', "Driver {$driver->name} updated.");
+    }
+
+    public function licenceExpiry()
+    {
+        $drivers = Driver::whereNotNull('license_expiry')
+            ->with('vehicle')
+            ->orderByRaw('license_expiry ASC')
+            ->get(['id', 'name', 'phone', 'license_number', 'license_expiry', 'license_classes', 'status', 'photo_path']);
+
+        $now = now();
+        $expiring = $drivers->filter(fn($d) => \Carbon\Carbon::parse($d->license_expiry)->diffInDays($now, false) <= 60)->count();
+
+        return Inertia::render('system/Drivers/LicenceExpiry', [
+            'drivers'   => $drivers,
+            'statuses'  => Driver::$statuses,
+            'expiring'  => $expiring,
+        ]);
     }
 
     public function destroy(Driver $driver)

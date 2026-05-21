@@ -228,7 +228,7 @@ export default function WebsiteLayout({ children }) {
                             <Stack gap={6}>
                                 <Text c="gray.5" size="sm">📍 Handeni, Tanzania</Text>
                                 <Text c="gray.5" size="sm">📞 +255 652 373 434</Text>
-                                <Text c="gray.5" size="sm">📧 shmaliklogisticscoltd@gmail.com</Text>
+                                <Text c="gray.5" size="sm">📧 info@shmaliklogistics.co.tz</Text>
                             </Stack>
                         </Stack>
 

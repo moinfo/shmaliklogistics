@@ -79,7 +79,7 @@ const en = {
             desc: 'We are ready to support your logistics needs with reliable and efficient solutions. Get in touch with us today to discuss how we can help move your business forward.',
             contacts: [
                 { icon: '📞', label: 'Phone / WhatsApp', value: '+255 652 373 434', sub: 'Call or WhatsApp anytime' },
-                { icon: '📧', label: 'Email Us', value: 'shmaliklogisticscoltd@gmail.com', sub: 'We reply within 2 hours' },
+                { icon: '📧', label: 'Email Us', value: 'info@shmaliklogistics.co.tz', sub: 'We reply within 2 hours' },
                 { icon: '📍', label: 'Location', value: 'Handeni, Tanzania', sub: 'Main operations base' },
             ],
         },
@@ -158,7 +158,7 @@ const en = {
         cards: [
             { icon: '📍', label: 'Address', value: 'Handeni, Tanzania', sub: 'Main operations base' },
             { icon: '📞', label: 'Phone / WhatsApp', value: '+255 652 373 434', sub: 'Call or WhatsApp anytime' },
-            { icon: '📧', label: 'Email', value: 'shmaliklogisticscoltd@gmail.com', sub: 'We reply within 2 hours' },
+            { icon: '📧', label: 'Email', value: 'info@shmaliklogistics.co.tz', sub: 'We reply within 2 hours' },
         ],
         form: {
             title: 'Send a Message', subtitle: 'We respond within 2 hours',
@@ -260,7 +260,7 @@ const sw = {
             desc: 'Tuko tayari kusaidia mahitaji yako ya usafirishaji na suluhisho za kuaminika na bora. Wasiliana nasi leo kujadili jinsi tunavyoweza kusaidia biashara yako kusonga mbele.',
             contacts: [
                 { icon: '📞', label: 'Simu / WhatsApp', value: '+255 652 373 434', sub: 'Piga simu au WhatsApp wakati wowote' },
-                { icon: '📧', label: 'Tutumie Barua Pepe', value: 'shmaliklogisticscoltd@gmail.com', sub: 'Tunajibu ndani ya masaa 2' },
+                { icon: '📧', label: 'Tutumie Barua Pepe', value: 'info@shmaliklogistics.co.tz', sub: 'Tunajibu ndani ya masaa 2' },
                 { icon: '📍', label: 'Mahali', value: 'Handeni, Tanzania', sub: 'Kituo kikuu cha uendeshaji' },
             ],
         },
@@ -339,7 +339,7 @@ const sw = {
         cards: [
             { icon: '📍', label: 'Anwani', value: 'Handeni, Tanzania', sub: 'Kituo kikuu cha uendeshaji' },
             { icon: '📞', label: 'Simu / WhatsApp', value: '+255 652 373 434', sub: 'Piga simu au WhatsApp wakati wowote' },
-            { icon: '📧', label: 'Barua Pepe', value: 'shmaliklogisticscoltd@gmail.com', sub: 'Tunajibu ndani ya masaa 2' },
+            { icon: '📧', label: 'Barua Pepe', value: 'info@shmaliklogistics.co.tz', sub: 'Tunajibu ndani ya masaa 2' },
         ],
         form: {
             title: 'Tuma Ujumbe', subtitle: 'Tunajibu ndani ya masaa 2',

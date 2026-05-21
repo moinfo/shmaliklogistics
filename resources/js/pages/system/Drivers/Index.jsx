@@ -1,8 +1,8 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Box, Text, Group, Stack, SimpleGrid, TextInput, Select, ActionIcon, Tooltip, Pagination } from '@mantine/core';
+import { Box, Text, Group, Stack, SimpleGrid, TextInput, Select, ActionIcon, Tooltip } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
-import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useCan } from '../../../lib/can';
 
@@ -61,10 +61,35 @@ export default function DriversIndex({ drivers, stats, statuses, filters }) {
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
+    const [allDrivers, setAllDrivers] = useState(drivers.data);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const isLoadMore = useRef(false);
     const can = useCan();
+
+    // Append on load-more, reset on filter/search change
+    useEffect(() => {
+        if (isLoadMore.current) {
+            setAllDrivers(prev => [...prev, ...drivers.data]);
+            isLoadMore.current = false;
+        } else {
+            setAllDrivers(drivers.data);
+        }
+        setLoadingMore(false);
+    }, [drivers]);
 
     const applyFilters = (s, st) => {
         router.get('/system/drivers', { search: s, status: st }, { preserveState: true, replace: true });
+    };
+
+    const handleLoadMore = () => {
+        if (drivers.current_page >= drivers.last_page) return;
+        isLoadMore.current = true;
+        setLoadingMore(true);
+        router.get(
+            '/system/drivers',
+            { search, status, page: drivers.current_page + 1 },
+            { preserveState: true, preserveScroll: true, only: ['drivers'] }
+        );
     };
 
     const statCards = [
@@ -184,20 +209,20 @@ export default function DriversIndex({ drivers, stats, statuses, filters }) {
             </Box>
 
             {/* ── Driver count strip ── */}
-            {drivers.data.length > 0 && (
+            {allDrivers.length > 0 && (
                 <Group justify="space-between" mb={16} px={2}>
                     <Group gap={8}>
                         <Box style={{ width: 8, height: 8, borderRadius: '50%', background: 'linear-gradient(135deg,#EA580C,#F97316)', boxShadow: '0 0 6px rgba(234,88,12,0.5)' }} />
                         <Text size="sm" fw={700} style={{ color: textPri }}>All Drivers</Text>
                     </Group>
                     <Text size="xs" style={{ color: textMut }}>
-                        {drivers.data.length > 0 ? `${drivers.from ?? 1}–${drivers.to ?? drivers.data.length} of ${drivers.total ?? drivers.data.length}` : '0 results'}
+                        Showing {allDrivers.length} of {drivers.total ?? allDrivers.length}
                     </Text>
                 </Group>
             )}
 
             {/* ── Driver cards grid ── */}
-            {drivers.data.length === 0 ? (
+            {allDrivers.length === 0 ? (
                 <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, boxShadow: cardShadow, textAlign: 'center', padding: '72px 0' }}>
                     <Box style={{ width: 80, height: 80, borderRadius: '50%', background: isDark ? 'rgba(234,88,12,0.1)' : '#FFF7F0', border: '2px dashed rgba(234,88,12,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.4rem', margin: '0 auto 20px' }}>👤</Box>
                     <Text fw={800} size="md" style={{ color: textPri, marginBottom: 6 }}>No drivers registered</Text>
@@ -205,7 +230,7 @@ export default function DriversIndex({ drivers, stats, statuses, filters }) {
                 </Box>
             ) : (
                 <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
-                    {drivers.data.map((d, i) => {
+                    {allDrivers.map((d, i) => {
                         const meta = statuses[d.status] ?? { label: d.status, color: '#94A3B8' };
                         const days = d.license_expiry ? Math.floor((new Date(d.license_expiry) - new Date()) / 86400000) : null;
                         const expColor = days === null ? '#94A3B8' : days < 0 ? '#EF4444' : days <= 14 ? '#F97316' : days <= 60 ? '#F59E0B' : '#22C55E';
@@ -340,16 +365,59 @@ export default function DriversIndex({ drivers, stats, statuses, filters }) {
                 </SimpleGrid>
             )}
 
-            {/* ── Pagination ── */}
-            {drivers.last_page > 1 && (
-                <Group justify="center" mt="lg">
-                    <Pagination
-                        value={drivers.current_page}
-                        total={drivers.last_page}
-                        onChange={p => router.get('/system/drivers', { ...filters, page: p })}
-                        size="sm"
-                        styles={{ control: { borderRadius: 8 } }}
-                    />
+            {/* ── Load More ── */}
+            {allDrivers.length < (drivers.total ?? 0) && (
+                <Group justify="center" mt={28} direction="column" align="center" gap={10}>
+                    <Text size="xs" style={{ color: textMut }}>
+                        Showing {allDrivers.length} of {drivers.total} drivers
+                    </Text>
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                        <Box
+                            onClick={handleLoadMore}
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 10,
+                                background: loadingMore
+                                    ? (isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC')
+                                    : 'linear-gradient(135deg, #C2410C, #EA580C)',
+                                color: loadingMore ? textMut : 'white',
+                                fontWeight: 800, fontSize: 14,
+                                padding: '12px 36px', borderRadius: 14,
+                                cursor: loadingMore ? 'not-allowed' : 'pointer',
+                                border: loadingMore ? `1px solid ${cardBorder}` : 'none',
+                                boxShadow: loadingMore ? 'none' : '0 6px 24px rgba(194,65,12,0.35)',
+                                transition: 'all 0.2s',
+                                userSelect: 'none',
+                            }}>
+                            {loadingMore ? (
+                                <>
+                                    <motion.div
+                                        animate={{ rotate: 360 }}
+                                        transition={{ repeat: Infinity, duration: 0.9, ease: 'linear' }}
+                                        style={{ display: 'inline-block', fontSize: '1.1rem' }}>
+                                        ⟳
+                                    </motion.div>
+                                    Loading…
+                                </>
+                            ) : (
+                                <>
+                                    ↓ Load More Drivers
+                                    <Box style={{ background: 'rgba(255,255,255,0.22)', borderRadius: 8, padding: '2px 10px', fontSize: 12 }}>
+                                        {drivers.total - allDrivers.length} remaining
+                                    </Box>
+                                </>
+                            )}
+                        </Box>
+                    </motion.div>
+                </Group>
+            )}
+
+            {/* All loaded confirmation */}
+            {allDrivers.length > 0 && allDrivers.length >= (drivers.total ?? 0) && drivers.last_page > 1 && (
+                <Group justify="center" mt={24}>
+                    <Box style={{ display: 'flex', alignItems: 'center', gap: 8, background: isDark ? 'rgba(34,197,94,0.08)' : '#F0FDF4', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 12, padding: '8px 20px' }}>
+                        <Text style={{ fontSize: '1rem' }}>✅</Text>
+                        <Text size="sm" fw={700} style={{ color: '#22C55E' }}>All {drivers.total} drivers loaded</Text>
+                    </Box>
                 </Group>
             )}
         </DashboardLayout>

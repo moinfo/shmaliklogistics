@@ -66,7 +66,9 @@ Route::get('/about', fn () => Inertia::render('website/About'))->name('about');
 Route::get('/contact', fn () => Inertia::render('website/Contact'))->name('contact');
 
 // ── NFC Staff Cards ─────────────────────────────────────────────────────────
-Route::get('/team', [NfcController::class, 'index'])->name('team');
+// Team listing page disabled — re-enable when ready to expose publicly.
+// Individual NFC card route (/team/{slug}) stays active for physical tag scans.
+// Route::get('/team', [NfcController::class, 'index'])->name('team');
 Route::get('/team/{slug}', [NfcController::class, 'show'])->name('team.show');
 
 // ── Auth ────────────────────────────────────────────────────────────────────

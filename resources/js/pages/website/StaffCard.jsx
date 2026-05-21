@@ -124,12 +124,12 @@ export default function StaffCard({ employee }) {
                             </Stack>
                         </motion.div>
 
-                        {/* Back to team */}
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.75 }}>
+                        {/* Back to team — disabled until /team listing is enabled */}
+                        {/* <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.75 }}>
                             <Button component={Link} href="/team" variant="transparent" color="gray" size="xs" style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>
                                 ← View All Team Members
                             </Button>
-                        </motion.div>
+                        </motion.div> */}
 
                     </Stack>
                 </Container>

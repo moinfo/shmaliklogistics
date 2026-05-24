@@ -24,7 +24,7 @@ return new class extends Migration {
             ['name' => 'Administrator', 'slug' => 'administrator', 'description' => 'Full system access', 'permissions' => json_encode(['*'])],
             ['name' => 'Operations Manager', 'slug' => 'operations-manager', 'description' => 'Trips, fleet, drivers, permits, cargo', 'permissions' => json_encode(['trips.*', 'fleet.*', 'fleet_fuel_logs.*', 'drivers.*', 'permits.*', 'cargo.*', 'reports_route_profitability.view', 'reports_fleet_utilization.view'])],
             ['name' => 'Finance Officer', 'slug' => 'finance-officer', 'description' => 'Billing, expenses, payroll view', 'permissions' => json_encode(['billing_quotes.*', 'billing_proformas.*', 'billing_invoices.*', 'billing_payments.*', 'billing_quote_requests.*', 'expenses.*', 'hr_payroll.view', 'reports_financial_summary.view'])],
-            ['name' => 'HR Officer', 'slug' => 'hr-officer', 'description' => 'All HR modules', 'permissions' => json_encode(['hr_employees.*', 'hr_leave.*', 'hr_payroll.*', 'hr_advances.*', 'hr_loans.*', 'hr_attendance.*', 'hr_salary_slips.view'])],
+            ['name' => 'HR Officer', 'slug' => 'hr-officer', 'description' => 'All HR modules', 'permissions' => json_encode(['hr_employees.*', 'hr_leave.*', 'hr_payroll.*', 'hr_advances.*', 'hr_loans.*', 'hr_allowances.*', 'hr_bonus.*', 'hr_attendance.*', 'hr_salary_slips.view'])],
             ['name' => 'Driver', 'slug' => 'driver', 'description' => 'View-only access to own trips', 'permissions' => json_encode(['trips.view'])],
         ];
         foreach ($roles as $role) {

@@ -8,11 +8,12 @@ const inputStyle = { input: { background: 'var(--c-input)', border: '1px solid v
 
 function StockModal({ opened, onClose, item, type, vehicles, inStockSerials }) {
     const tracks = !!item.tracks_serials;
+    const tracksBatch = !!item.tracks_batch;
 
     const { data, setData, post, processing, reset, errors } = useForm(
         tracks
             ? { serials_text: '', serials: [], unit_cost: '', reference: '', vehicle_id: '', notes: '' }
-            : { quantity: '', unit_cost: '', reference: '', vehicle_id: '', notes: '' }
+            : { quantity: '', unit_cost: '', reference: '', batch_number: '', vehicle_id: '', notes: '' }
     );
 
     const parsedSerials = useMemo(() => {
@@ -50,6 +51,7 @@ function StockModal({ opened, onClose, item, type, vehicles, inStockSerials }) {
                 <Stack gap="md">
                     {errors.quantity && <Text size="sm" style={{ color: '#EF4444' }}>{errors.quantity}</Text>}
                     {errors.serials && <Text size="sm" style={{ color: '#EF4444' }}>{errors.serials}</Text>}
+                    {errors.batch_number && <Text size="sm" style={{ color: '#EF4444' }}>{errors.batch_number}</Text>}
 
                     {tracks && type === 'in' && (
                         <>
@@ -101,6 +103,17 @@ function StockModal({ opened, onClose, item, type, vehicles, inStockSerials }) {
                             {type === 'in' && (
                                 <NumberInput label="Unit Cost (TZS)" value={data.unit_cost} onChange={v => setData('unit_cost', v)} min={0} decimalScale={2} styles={inputStyle} placeholder={`Current: ${item.unit_cost || '—'}`} />
                             )}
+                            {tracksBatch && (
+                                <TextInput
+                                    label={`Lot / Batch No.${type === 'in' ? ' *' : ''}`}
+                                    description="Group identifier (e.g. dye-lot / shade). Not unique — many units share it."
+                                    placeholder="e.g. SHADE-2024-A"
+                                    value={data.batch_number}
+                                    onChange={e => setData('batch_number', e.target.value)}
+                                    styles={inputStyle}
+                                    required={type === 'in'}
+                                />
+                            )}
                         </>
                     )}
 
@@ -112,7 +125,7 @@ function StockModal({ opened, onClose, item, type, vehicles, inStockSerials }) {
                         <Button
                             type="submit"
                             loading={processing}
-                            disabled={tracks && type === 'in' && (parsedSerials.length === 0 || duplicates.length > 0)}
+                            disabled={(tracks && type === 'in' && (parsedSerials.length === 0 || duplicates.length > 0)) || (!tracks && tracksBatch && type === 'in' && !data.batch_number.trim())}
                             style={{ background: `linear-gradient(135deg, ${type === 'in' ? '#166534,#22C55E' : '#7F1D1D,#EF4444'})`, border: 'none', borderRadius: 8, fontWeight: 700 }}>
                             {typeLabel}
                         </Button>
@@ -129,16 +142,26 @@ export default function InventoryShow({ item, movements, serials = [], inStockCo
     const [serialFilter, setSerialFilter] = useState('all'); // all | in_stock | issued
     const can = useCan();
 
-    const { data, setData, put, processing } = useForm({
+    const { data, setData, put, processing, errors } = useForm({
         name: item.name, category_id: item.category_id ? String(item.category_id) : '',
         part_number: item.part_number || '', unit: item.unit,
         tracks_serials: !!item.tracks_serials,
+        tracks_batch: !!item.tracks_batch,
         reorder_level: item.reorder_level, unit_cost: item.unit_cost,
         location: item.location || '', notes: item.notes || '', is_active: item.is_active,
     });
 
     const save = (e) => { e.preventDefault(); put(`/system/inventory/${item.id}`, { onSuccess: () => setEditing(false) }); };
     const del = () => { if (confirm('Delete this item?')) router.delete(`/system/inventory/${item.id}`); };
+
+    // Stock tracking mode (edit) — serial and batch are mutually exclusive.
+    const editMode = data.tracks_serials ? 'serial' : data.tracks_batch ? 'batch' : 'none';
+    const setEditMode = (m) => { setData('tracks_serials', m === 'serial'); setData('tracks_batch', m === 'batch'); };
+    const trackingModes = [
+        { key: 'none',   label: 'Quantity only',           desc: 'Plain count' },
+        { key: 'serial', label: 'Serial — unique per unit', desc: '1 number = 1 unit. Cannot be turned off once serials exist.' },
+        { key: 'batch',  label: 'Batch / Lot number',      desc: 'Quantity + a lot number recorded on each movement' },
+    ];
 
     const isLow = item.reorder_level > 0 && Number(item.current_stock) <= Number(item.reorder_level);
     const fmt = (n, d = 0) => n != null ? Number(n).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }) : '—';
@@ -192,6 +215,11 @@ export default function InventoryShow({ item, movements, serials = [], inStockCo
                                     <Text size="xs" fw={700} style={{ color: '#60A5FA' }}>🔖 Serial tracked</Text>
                                 </Box>
                             )}
+                            {item.tracks_batch && (
+                                <Box style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 8, background: 'rgba(245,158,11,0.18)', border: '1px solid rgba(245,158,11,0.4)' }}>
+                                    <Text size="xs" fw={700} style={{ color: '#F59E0B' }}>🏷 Batch / lot</Text>
+                                </Box>
+                            )}
                         </Group>
                     </Box>
                     <Box style={{ textAlign: 'center' }}>
@@ -221,13 +249,25 @@ export default function InventoryShow({ item, movements, serials = [], inStockCo
                             <Grid.Col span={{ base: 12, sm: 4 }}><TextInput label="Location" value={data.location} onChange={e => setData('location', e.target.value)} styles={inputStyle} /></Grid.Col>
                             <Grid.Col span={12}><Textarea label="Notes" rows={2} value={data.notes} onChange={e => setData('notes', e.target.value)} styles={inputStyle} /></Grid.Col>
                             <Grid.Col span={12}>
-                                <Box style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--c-input)', borderRadius: 10, border: '1px solid var(--c-border-input)' }}>
-                                    <Box style={{ flex: 1, paddingRight: 12 }}>
-                                        <Text size="sm" fw={600} style={{ color: 'var(--c-text)' }}>Track by serial number</Text>
-                                        <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>Receive & issue must capture unique serials. Cannot be turned off once serials are recorded.</Text>
-                                    </Box>
-                                    <Switch checked={data.tracks_serials} onChange={e => setData('tracks_serials', e.currentTarget.checked)} />
+                                <Box style={{ padding: '14px 16px', background: 'var(--c-input)', borderRadius: 10, border: '1px solid var(--c-border-input)' }}>
+                                    <Text size="sm" fw={600} style={{ color: 'var(--c-text)' }}>Stock tracking</Text>
+                                    <Text size="xs" style={{ color: 'var(--c-text-muted)', marginBottom: 10 }}>How this item's stock is counted</Text>
+                                    <Stack gap={6}>
+                                        {trackingModes.map(opt => {
+                                            const active = editMode === opt.key;
+                                            return (
+                                                <Box key={opt.key} component="button" type="button" onClick={() => setEditMode(opt.key)}
+                                                    style={{ textAlign: 'left', width: '100%', cursor: 'pointer', padding: '10px 12px', borderRadius: 8,
+                                                        background: active ? 'rgba(33,150,243,0.12)' : 'transparent',
+                                                        border: `1px solid ${active ? 'rgba(33,150,243,0.5)' : 'var(--c-border-input)'}` }}>
+                                                    <Text size="sm" fw={600} style={{ color: active ? '#60A5FA' : 'var(--c-text)' }}>{opt.label}</Text>
+                                                    <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>{opt.desc}</Text>
+                                                </Box>
+                                            );
+                                        })}
+                                    </Stack>
                                 </Box>
+                                {errors?.tracks_serials && <Text size="xs" style={{ color: '#EF4444', marginTop: 6 }}>{errors.tracks_serials}</Text>}
                             </Grid.Col>
                             <Grid.Col span={12}>
                                 <Group gap="sm">
@@ -345,6 +385,9 @@ export default function InventoryShow({ item, movements, serials = [], inStockCo
                                                 <Text size="10px" style={{ color: '#60A5FA', marginTop: 4, fontFamily: 'ui-monospace, monospace' }}>
                                                     🔖 {serialList.join(', ')}
                                                 </Text>
+                                            )}
+                                            {m.batch_number && (
+                                                <Text size="10px" style={{ color: '#F59E0B', marginTop: 4 }}>🏷 Lot: {m.batch_number}</Text>
                                             )}
                                         </td>
                                     </tr>

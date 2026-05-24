@@ -136,49 +136,68 @@ export default function DriversIndex({ drivers, stats, statuses, filters }) {
                 </Group>
             </Box>
 
-            {/* Table */}
-            <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden' }}>
-                <Box style={{ display: 'grid', gridTemplateColumns: '40px 1fr 140px 120px 130px 130px 90px', borderBottom: `1px solid ${divider}`, padding: '10px 20px' }}>
-                    {['', 'Name', 'Phone', 'Licence #', 'Licence Exp.', 'Status', ''].map((h, i) => (
-                        <Text key={i} size="10px" fw={700} style={{ color: textMut, textTransform: 'uppercase', letterSpacing: 1 }}>{h}</Text>
-                    ))}
+            {/* Cards */}
+            {drivers.data.length === 0 ? (
+                <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, textAlign: 'center', padding: '60px 0' }}>
+                    <Text style={{ fontSize: '2.5rem', marginBottom: 12 }}>👤</Text>
+                    <Text fw={600} style={{ color: textPri }}>No drivers registered</Text>
+                    <Text size="sm" style={{ color: textMut }}>Add the first driver to get started</Text>
                 </Box>
-
-                {drivers.data.length === 0 ? (
-                    <Box style={{ textAlign: 'center', padding: '60px 0' }}>
-                        <Text style={{ fontSize: '2.5rem', marginBottom: 12 }}>👤</Text>
-                        <Text fw={600} style={{ color: textPri }}>No drivers registered</Text>
-                        <Text size="sm" style={{ color: textMut }}>Add the first driver to get started</Text>
-                    </Box>
-                ) : (
-                    drivers.data.map((d, i) => (
-                        <motion.div key={d.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.04 }}>
+            ) : (
+                <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="md">
+                    {drivers.data.map((d, i) => (
+                        <motion.div key={d.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} style={{ height: '100%' }}>
                             <Box
-                                style={{ display: 'grid', gridTemplateColumns: '40px 1fr 140px 120px 130px 130px 90px', padding: '12px 20px', borderBottom: `1px solid ${divider}`, cursor: 'pointer', transition: 'background 0.15s' }}
-                                onMouseEnter={e => e.currentTarget.style.background = rowHov}
-                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                 onClick={() => router.visit(`/system/drivers/${d.id}`)}
+                                style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, padding: 18, cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column', gap: 14, transition: 'transform 0.15s, box-shadow 0.15s, border-color 0.15s' }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(33,150,243,0.5)'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 12px 30px rgba(0,0,0,0.18)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = cardBorder; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
                             >
-                                <Box style={{ display: 'flex', alignItems: 'center' }}><Avatar name={d.name} photoUrl={d.photo_url} size={30} /></Box>
-                                <Stack gap={2}>
-                                    <Text size="sm" fw={600} style={{ color: textPri }}>{d.name}</Text>
-                                    {(d.license_classes ?? []).length > 0 ? (
-                                        <Group gap={4} wrap="nowrap">
-                                            {(d.license_classes ?? []).map(code => (
-                                                <Box key={code} style={{ background: 'rgba(33,150,243,0.10)', border: '1px solid rgba(33,150,243,0.22)', borderRadius: 4, padding: '1px 6px', color: '#60A5FA', fontWeight: 700, fontSize: 10 }}>
-                                                    {code}
-                                                </Box>
-                                            ))}
+                                {/* Header: avatar + name + status */}
+                                <Group justify="space-between" align="flex-start" wrap="nowrap">
+                                    <Group gap={12} wrap="nowrap" style={{ minWidth: 0 }}>
+                                        <Avatar name={d.name} photoUrl={d.photo_url} size={52} />
+                                        <Stack gap={5} style={{ minWidth: 0 }}>
+                                            <Text fw={700} size="sm" style={{ color: textPri, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.name}</Text>
+                                            {(d.license_classes ?? []).length > 0 ? (
+                                                <Group gap={4} wrap="wrap">
+                                                    {(d.license_classes ?? []).map(code => (
+                                                        <Box key={code} style={{ background: 'rgba(33,150,243,0.10)', border: '1px solid rgba(33,150,243,0.22)', borderRadius: 4, padding: '1px 6px', color: '#60A5FA', fontWeight: 700, fontSize: 10 }}>
+                                                            {code}
+                                                        </Box>
+                                                    ))}
+                                                </Group>
+                                            ) : (
+                                                <Text size="xs" style={{ color: textMut, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.email || d.address || '—'}</Text>
+                                            )}
+                                        </Stack>
+                                    </Group>
+                                    <StatusPill status={d.status} statuses={statuses} />
+                                </Group>
+
+                                {/* Details */}
+                                <Stack gap={9} style={{ borderTop: `1px solid ${divider}`, paddingTop: 12 }}>
+                                    <Group gap={8} wrap="nowrap">
+                                        <Text size="xs" style={{ width: 16, textAlign: 'center' }}>📞</Text>
+                                        <Text size="sm" style={{ color: textSec }}>{d.phone || '—'}</Text>
+                                    </Group>
+                                    <Group justify="space-between" wrap="nowrap" gap={8}>
+                                        <Group gap={8} wrap="nowrap" style={{ minWidth: 0 }}>
+                                            <Text size="xs" style={{ width: 16, textAlign: 'center' }}>🪪</Text>
+                                            <Text size="sm" style={{ color: textSec, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.license_number || '—'}</Text>
                                         </Group>
-                                    ) : (
-                                        <Text size="xs" style={{ color: textMut }}>{d.email || d.address || '—'}</Text>
-                                    )}
+                                        <LicenceBadge expiry={d.license_expiry} isDark={isDark} />
+                                    </Group>
+                                    <Group gap={8} wrap="nowrap">
+                                        <Text size="xs" style={{ width: 16, textAlign: 'center' }}>🚛</Text>
+                                        <Text size="sm" style={{ color: d.vehicle ? textSec : textMut }}>
+                                            {d.vehicle ? `${d.vehicle.plate}${d.vehicle.make ? ` · ${d.vehicle.make}` : ''}` : 'No vehicle assigned'}
+                                        </Text>
+                                    </Group>
                                 </Stack>
-                                <Text size="sm" style={{ color: textSec }}>{d.phone}</Text>
-                                <Text size="sm" style={{ color: textSec }}>{d.license_number || '—'}</Text>
-                                <LicenceBadge expiry={d.license_expiry} isDark={isDark} />
-                                <StatusPill status={d.status} statuses={statuses} />
-                                <Group gap={4} onClick={e => e.stopPropagation()}>
+
+                                {/* Actions */}
+                                <Group justify="flex-end" gap={4} onClick={e => e.stopPropagation()} style={{ marginTop: 'auto' }}>
                                     <Tooltip label="View">
                                         <ActionIcon component={Link} href={`/system/drivers/${d.id}`} variant="subtle" size="sm" style={{ color: textMut }}>👁️</ActionIcon>
                                     </Tooltip>
@@ -190,9 +209,9 @@ export default function DriversIndex({ drivers, stats, statuses, filters }) {
                                 </Group>
                             </Box>
                         </motion.div>
-                    ))
-                )}
-            </Box>
+                    ))}
+                </SimpleGrid>
+            )}
 
             {drivers.last_page > 1 && (
                 <Group justify="center" mt="lg">

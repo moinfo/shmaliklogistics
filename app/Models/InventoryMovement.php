@@ -11,7 +11,7 @@ class InventoryMovement extends Model
 
     protected $fillable = [
         'item_id', 'type', 'quantity', 'unit_cost', 'balance_after',
-        'reference', 'vehicle_id', 'notes', 'serials', 'created_by',
+        'reference', 'batch_number', 'vehicle_id', 'notes', 'serials', 'created_by',
     ];
 
     protected $casts = [

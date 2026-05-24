@@ -8,7 +8,7 @@ class PayrollSlip extends Model
 {
     protected $fillable = [
         'payroll_run_id', 'employee_id',
-        'basic_salary', 'allowances', 'overtime', 'gross_salary',
+        'basic_salary', 'allowances', 'overtime', 'bonus', 'bonus_penalty', 'gross_salary',
         'paye', 'nssf_employee', 'nhif_employee', 'heslb', 'other_deductions',
         'advance_deduction', 'loan_deduction', 'loan_balance', 'adjustment',
         'total_deductions', 'net_salary',
@@ -19,6 +19,7 @@ class PayrollSlip extends Model
     protected $casts = [
         'basic_salary' => 'decimal:2', 'allowances' => 'decimal:2',
         'overtime' => 'decimal:2', 'gross_salary' => 'decimal:2',
+        'bonus' => 'decimal:2', 'bonus_penalty' => 'decimal:2',
         'paye' => 'decimal:2', 'nssf_employee' => 'decimal:2',
         'nhif_employee' => 'decimal:2', 'heslb' => 'decimal:2',
         'other_deductions' => 'decimal:2', 'adjustment' => 'decimal:2',

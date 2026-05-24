@@ -17,11 +17,11 @@ export const glass = {
         boxShadow: '0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)',
     },
     brand: {
-        background: 'rgba(21,101,192,0.18)',
+        background: 'rgba(199,58,58,0.16)',
         backdropFilter: 'blur(24px)',
         WebkitBackdropFilter: 'blur(24px)',
-        border: '1px solid rgba(33,150,243,0.28)',
-        boxShadow: '0 8px 32px rgba(21,101,192,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+        border: '1px solid rgba(199,58,58,0.28)',
+        boxShadow: '0 8px 32px rgba(199,58,58,0.18), inset 0 1px 0 rgba(255,255,255,0.1)',
     },
     white: {
         background: 'rgba(255,255,255,0.18)',
@@ -33,7 +33,7 @@ export const glass = {
 };
 
 // Mesh blob background — drop inside a relative container
-export function MeshBackground({ colors = ['#1565C0', '#2196F3', '#0A1628'] }) {
+export function MeshBackground({ colors = ['#0E4FA0', '#C73A3A', '#0A1628'] }) {
     return (
         <>
             {colors.map((c, i) => (

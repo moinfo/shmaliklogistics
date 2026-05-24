@@ -23,11 +23,12 @@ export default function WebsiteLayout({ children }) {
 
     const navBg = scrolled
         ? (isDark ? 'rgba(5,13,24,0.97)' : 'rgba(255,255,255,0.92)')
-        : (isDark ? 'linear-gradient(135deg, #0A1628 0%, #1565C0 100%)' : 'linear-gradient(135deg, #0A1628 0%, #1565C0 100%)');
+        : (isDark ? 'linear-gradient(135deg, #0A1628 0%, #0E4FA0 100%)' : 'transparent');
 
     const navTextColor = (active) => {
-        if (scrolled && !isDark) return active ? '#1565C0' : '#1a2a4a';
-        return active ? '#2196F3' : 'rgba(255,255,255,0.85)';
+        if (active) return '#C73A3A';
+        if (!isDark) return '#1a2a4a';
+        return 'rgba(255,255,255,0.85)';
     };
 
     return (
@@ -74,7 +75,7 @@ export default function WebsiteLayout({ children }) {
                                         style={{
                                             textDecoration: 'none',
                                             color: navTextColor(url === link.href),
-                                            borderBottom: url === link.href ? '2px solid #2196F3' : '2px solid transparent',
+                                            borderBottom: url === link.href ? '2px solid #C73A3A' : '2px solid transparent',
                                             paddingBottom: 2,
                                             transition: 'all 0.2s',
                                         }}
@@ -94,7 +95,7 @@ export default function WebsiteLayout({ children }) {
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
                                             style={{
-                                                background: lang === l ? 'rgba(33,150,243,0.85)' : 'transparent',
+                                                background: lang === l ? 'rgba(199,58,58,0.85)' : 'transparent',
                                                 border: 'none', cursor: 'pointer', borderRadius: 16,
                                                 padding: '3px 10px', color: lang === l ? '#fff' : 'rgba(255,255,255,0.65)',
                                                 fontSize: 12, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase',
@@ -152,7 +153,7 @@ export default function WebsiteLayout({ children }) {
                                     color="brand.4"
                                     radius="xl"
                                     size="sm"
-                                    style={{ boxShadow: '0 0 20px rgba(33,150,243,0.4)' }}
+                                    style={{ boxShadow: '0 0 20px rgba(199,58,58,0.4)' }}
                                 >
                                     {T.nav.login}
                                 </Button>
@@ -163,7 +164,7 @@ export default function WebsiteLayout({ children }) {
                             {/* Mobile: compact lang + theme toggles */}
                             <Box style={{ display: 'flex', gap: 1, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 20, padding: '2px 3px' }}>
                                 {['en', 'sw'].map(l => (
-                                    <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? 'rgba(33,150,243,0.85)' : 'transparent', border: 'none', cursor: 'pointer', borderRadius: 16, padding: '3px 8px', color: lang === l ? '#fff' : 'rgba(255,255,255,0.65)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>
+                                    <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? 'rgba(199,58,58,0.85)' : 'transparent', border: 'none', cursor: 'pointer', borderRadius: 16, padding: '3px 8px', color: lang === l ? '#fff' : 'rgba(255,255,255,0.65)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>
                                         {l}
                                     </button>
                                 ))}
@@ -219,7 +220,7 @@ export default function WebsiteLayout({ children }) {
                 pt={60} pb="xl"
             >
                 <Container size="xl">
-                    <Box style={{ height: 2, background: 'linear-gradient(90deg, transparent, #1565C0, #2196F3, transparent)', marginBottom: 48, borderRadius: 2 }} />
+                    <Box style={{ height: 2, background: 'linear-gradient(90deg, transparent, #A82828, #C73A3A, transparent)', marginBottom: 48, borderRadius: 2 }} />
 
                     <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="xl" mb={48}>
                         <Stack gap="md">
@@ -237,7 +238,7 @@ export default function WebsiteLayout({ children }) {
                             {navLinks.map((link) => (
                                 <Anchor key={link.href} component={Link} href={link.href} c="gray.5" size="sm"
                                     style={{ textDecoration: 'none', transition: 'color 0.2s' }}
-                                    onMouseEnter={e => e.target.style.color = '#2196F3'}
+                                    onMouseEnter={e => e.target.style.color = '#C73A3A'}
                                     onMouseLeave={e => e.target.style.color = ''}>
                                     → {link.label}
                                 </Anchor>
@@ -263,7 +264,7 @@ export default function WebsiteLayout({ children }) {
                         <Group justify="space-between" wrap="wrap" gap="sm">
                             <Text c="gray.6" size="xs">{T.footer.copyright}</Text>
                             <Group gap="xs">
-                                <Box style={{ width: 6, height: 6, borderRadius: '50%', background: '#1565C0' }} />
+                                <Box style={{ width: 6, height: 6, borderRadius: '50%', background: '#C73A3A' }} />
                                 <Text c="gray.6" size="xs">Handeni, Tanzania</Text>
                             </Group>
                         </Group>

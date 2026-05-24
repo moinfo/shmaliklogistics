@@ -19,6 +19,8 @@ function EditSlipModal({ slip, run, onClose, isDark, cardBorder }) {
         loan_deduction:    slip.loan_deduction ?? 0,
         heslb:             slip.heslb ?? 0,
         adjustment:        slip.adjustment ?? 0,
+        bonus:             slip.bonus ?? 0,
+        bonus_penalty:     slip.bonus_penalty ?? 0,
         notes:             slip.notes ?? '',
     });
 
@@ -52,6 +54,10 @@ function EditSlipModal({ slip, run, onClose, isDark, cardBorder }) {
             <Group grow gap="md" mb="md">
                 <NumberInput label="HESLB" value={data.heslb} onChange={v => setData('heslb', v ?? 0)} min={0} hideControls styles={inputStyles} />
                 <NumberInput label="Adjustment (± TZS)" value={data.adjustment} onChange={v => setData('adjustment', v ?? 0)} hideControls styles={inputStyles} />
+            </Group>
+            <Group grow gap="md" mb="md">
+                <NumberInput label="Bonus (untaxed)" value={data.bonus} onChange={v => setData('bonus', v ?? 0)} min={0} hideControls styles={inputStyles} />
+                <NumberInput label="Bonus Penalty" value={data.bonus_penalty} onChange={v => setData('bonus_penalty', v ?? 0)} min={0} hideControls styles={inputStyles} />
             </Group>
             <Textarea label="Notes" value={data.notes} onChange={e => setData('notes', e.target.value)} styles={inputStyles} rows={2} mb="md" />
             <Group justify="flex-end" gap="sm">
@@ -94,6 +100,7 @@ export default function ShowPayroll({ run, slips, totals, statuses }) {
     // Summary totals grid
     const summaryCards = [
         ['Gross Payroll', totals.gross, '#3B82F6'],
+        ['Bonus (net)', totals.bonus, '#22C55E'],
         ['PAYE', totals.paye, '#EF4444'],
         ['NSSF (Employee)', totals.nssf_emp, '#F59E0B'],
         ['NHIF (Employee)', totals.nhif, '#F59E0B'],
@@ -183,6 +190,7 @@ export default function ShowPayroll({ run, slips, totals, statuses }) {
                                 <TH right>LOAN DEDUCTION</TH>
                                 <TH right>LOAN BALANCE</TH>
                                 <TH right>ADJUSTMENT</TH>
+                                <TH right>BONUS</TH>
                                 <TH right>NET</TH>
                                 <TH></TH>
                             </tr>
@@ -191,13 +199,13 @@ export default function ShowPayroll({ run, slips, totals, statuses }) {
                             {/* Group label */}
                             {slips.length > 0 && (
                                 <tr>
-                                    <td colSpan={19} style={{ padding: '8px 14px', background: isDark ? 'var(--c-border-row)' : '#F0F9FF', fontSize: 12, fontWeight: 700, color: '#3B82F6' }}>
+                                    <td colSpan={20} style={{ padding: '8px 14px', background: isDark ? 'var(--c-border-row)' : '#F0F9FF', fontSize: 12, fontWeight: 700, color: '#3B82F6' }}>
                                         HQ's Payroll
                                     </td>
                                 </tr>
                             )}
                             {slips.length === 0 ? (
-                                <tr><td colSpan={19} style={{ padding: '40px', textAlign: 'center', color: textSec }}>No employee slips.</td></tr>
+                                <tr><td colSpan={20} style={{ padding: '40px', textAlign: 'center', color: textSec }}>No employee slips.</td></tr>
                             ) : slips.map((slip, idx) => {
                                 const taxable = Math.max(0, (slip.gross_salary ?? 0) - (slip.nssf_employee ?? 0));
                                 return (
@@ -223,6 +231,7 @@ export default function ShowPayroll({ run, slips, totals, statuses }) {
                                         {td(slip.loan_deduction, slip.loan_deduction > 0 ? '#F59E0B' : textSec)}
                                         {td(slip.loan_balance, textSec)}
                                         {td(slip.adjustment, slip.adjustment != 0 ? '#F59E0B' : textSec)}
+                                        {td(Math.max(0, (slip.bonus ?? 0) - (slip.bonus_penalty ?? 0)), (slip.bonus ?? 0) > 0 ? '#22C55E' : textSec)}
                                         {td(slip.net_salary, '#22C55E', true)}
                                         <td style={{ padding: '10px 10px', textAlign: 'right' }}>
                                             {run.status === 'draft' && (
@@ -250,6 +259,7 @@ export default function ShowPayroll({ run, slips, totals, statuses }) {
                                     {td(totals.advances, '#F59E0B', true)}
                                     {td(totals.loans, '#F59E0B', true)}
                                     <td /><td />
+                                    {td(totals.bonus, '#22C55E', true)}
                                     {td(totals.net, '#22C55E', true)}
                                     <td />
                                 </tr>

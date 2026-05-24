@@ -18,10 +18,10 @@ export default function Services() {
 
             {/* ── Hero ── */}
             <Box style={{ position: 'relative', overflow: 'hidden', minHeight: 420, display: 'flex', alignItems: 'center' }}>
-                <Box style={{ position: 'absolute', inset: 0, backgroundImage: 'url(https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1920&q=80)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
-                <Box style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(10,22,40,0.96) 0%, rgba(21,101,192,0.85) 100%)' }} />
+                <Box style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/our_pictures/sh14.jpeg)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                <Box style={{ position: 'absolute', inset: 0, background: isDark ? 'linear-gradient(135deg, rgba(10,22,40,0.96) 0%, rgba(10,22,40,0.72) 100%)' : 'linear-gradient(135deg, rgba(252,248,246,0.95) 0%, rgba(252,233,233,0.70) 100%)' }} />
                 {[...Array(3)].map((_, i) => (
-                    <motion.div key={i} style={{ position: 'absolute', borderRadius: '50%', border: '1px solid rgba(33,150,243,0.15)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}
+                    <motion.div key={i} style={{ position: 'absolute', borderRadius: '50%', border: '1px solid rgba(199,58,58,0.15)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}
                         animate={{ width: [200 + i * 150, 250 + i * 150, 200 + i * 150], height: [200 + i * 150, 250 + i * 150, 200 + i * 150], opacity: [0.3, 0.6, 0.3] }}
                         transition={{ duration: 3 + i, repeat: Infinity, ease: 'easeInOut', delay: i * 0.5 }} />
                 ))}
@@ -31,22 +31,22 @@ export default function Services() {
                             <Badge color="brand.2" variant="light" size="xl" radius="xl">{hero.badge}</Badge>
                         </motion.div>
                         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}>
-                            <Title order={1} c="white" ta="center" style={{ fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', fontWeight: 900 }}>
+                            <Title order={1} c={isDark ? 'white' : '#0A1628'} ta="center" style={{ fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', fontWeight: 900 }}>
                                 {hero.title}{' '}
-                                <Text component="span" style={{ background: 'linear-gradient(135deg, #2196F3, #80B8FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
+                                <Text component="span" style={{ color: isDark ? '#ED8E8E' : '#A82828', WebkitTextFillColor: isDark ? '#ED8E8E' : '#A82828' }} inherit>
                                     {hero.highlight}
                                 </Text>
                             </Title>
                         </motion.div>
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
-                            <Text c="gray.3" ta="center" maw={580} size="lg" lh={1.8}>{hero.desc}</Text>
+                            <Text c={isDark ? 'gray.3' : 'gray.7'} ta="center" maw={580} size="lg" lh={1.8}>{hero.desc}</Text>
                         </motion.div>
                     </Stack>
                 </Container>
             </Box>
 
             {/* ── Highlights bar ── */}
-            <Box style={{ background: 'linear-gradient(90deg, #0A1628, #1565C0, #0A1628)' }} py="xl">
+            <Box style={{ background: 'linear-gradient(90deg, #0A1628, #A82828, #0A1628)' }} py="xl">
                 <Container size="xl">
                     <StaggerContainer delay={0.12}>
                         <SimpleGrid cols={{ base: 2, sm: 4 }}>
@@ -54,7 +54,7 @@ export default function Services() {
                                 <motion.div key={h.label} variants={fadeUp}>
                                     <Stack align="center" gap={4} py="sm">
                                         <Text size="1.6rem">{h.icon}</Text>
-                                        <Text fw={900} style={{ fontSize: '2rem', background: 'linear-gradient(135deg,#fff,#80B8FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{h.value}</Text>
+                                        <Text fw={900} style={{ fontSize: '2rem', color: '#fff' }}>{h.value}</Text>
                                         <Text c="brand.2" size="sm" fw={500}>{h.label}</Text>
                                     </Stack>
                                 </motion.div>
@@ -65,8 +65,8 @@ export default function Services() {
             </Box>
 
             {/* ── Services Grid ── */}
-            <Box py={100} style={{ background: 'linear-gradient(135deg, #0A1628 0%, #0E4FA0 50%, #1565C0 100%)', position: 'relative', overflow: 'hidden' }}>
-                <MeshBackground colors={['#2196F3', '#4D9BFF', '#0A3A7A']} />
+            <Box py={100} style={{ background: 'linear-gradient(135deg, #0A1628 0%, #0E4FA0 50%, #0A3A7A 100%)', position: 'relative', overflow: 'hidden' }}>
+                <MeshBackground colors={['#0E4FA0', '#C73A3A', '#0A3A7A']} />
                 <Container size="xl">
                     <StaggerContainer delay={0.1}>
                         <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl">
@@ -86,7 +86,7 @@ export default function Services() {
                                                 <Stack gap={8}>
                                                     {s.features.map(f => (
                                                         <Group key={f} gap={10} align="center">
-                                                            <Box style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(33,150,243,0.3)', border: '1px solid rgba(33,150,243,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                                            <Box style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(199,58,58,0.3)', border: '1px solid rgba(199,58,58,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                                                 <Text c="white" size="xs" fw={700}>✓</Text>
                                                             </Box>
                                                             <Text size="sm" c="gray.2" fw={500}>{f}</Text>
@@ -104,8 +104,8 @@ export default function Services() {
             </Box>
 
             {/* ── CTA ── */}
-            <Box py={80} style={{ background: 'linear-gradient(135deg, #0A1628 0%, #1565C0 100%)', position: 'relative', overflow: 'hidden' }}>
-                <motion.div style={{ position: 'absolute', top: -100, right: -100, width: 400, height: 400, borderRadius: '50%', background: 'rgba(33,150,243,0.1)' }}
+            <Box py={80} style={{ background: 'linear-gradient(135deg, #0A1628 0%, #0E4FA0 100%)', position: 'relative', overflow: 'hidden' }}>
+                <motion.div style={{ position: 'absolute', top: -100, right: -100, width: 400, height: 400, borderRadius: '50%', background: 'rgba(199,58,58,0.1)' }}
                     animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 4, repeat: Infinity }} />
                 <Container size="xl" style={{ position: 'relative', zIndex: 1 }}>
                     <ScrollReveal>

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Models\BonusPolicy;
 use App\Models\Driver;
+use App\Models\Employee;
 use App\Models\LicenseClass;
 use App\Models\Role;
 use App\Models\Trip;
@@ -112,9 +114,49 @@ class DriverController extends Controller
             $q->whereNull('driver_id')->orWhere('driver_id', $driver->id);
         })->orderBy('plate')->get(['id', 'plate', 'make', 'model_name', 'type']);
 
+        // HR / payroll snapshot. Drivers and employees are separate records
+        // matched on national_id (see DriverEmployeeSeeder).
+        $hr = null;
+        $employee = $driver->national_id
+            ? Employee::where('national_id', $driver->national_id)->with(['advances', 'loans'])->first()
+            : null;
+
+        if ($employee) {
+            // Effective monthly bonus: per-employee override, else department policy.
+            $bonus = $employee->bonus !== null ? (float) $employee->bonus : 0.0;
+            if ($employee->bonus === null && class_exists(BonusPolicy::class)) {
+                $bonus = (float) (BonusPolicy::where('department', $employee->department)
+                    ->where('is_active', true)->value('amount') ?? 0);
+            }
+
+            // Arrears = amounts the driver still owes the company.
+            $advanceArrears = (float) $employee->advances->whereIn('status', ['pending', 'approved'])->sum('amount');
+            $loanArrears    = (float) $employee->loans->where('status', 'active')->sum('balance_remaining');
+
+            $hr = [
+                'employee_id'     => $employee->id,
+                'employee_number' => $employee->employee_number,
+                'department'      => $employee->department,
+                'position'        => $employee->position,
+                'salary'          => (float) $employee->salary,
+                'currency'        => $employee->salary_currency ?? 'TZS',
+                'bonus'           => $bonus,
+                'advance_arrears' => $advanceArrears,
+                'loan_arrears'    => $loanArrears,
+                'arrears_total'   => $advanceArrears + $loanArrears,
+                'advances' => $employee->advances->whereIn('status', ['pending', 'approved'])
+                    ->map(fn ($a) => ['amount' => (float) $a->amount, 'purpose' => $a->purpose, 'status' => $a->status])
+                    ->values(),
+                'loans' => $employee->loans->where('status', 'active')
+                    ->map(fn ($l) => ['loan_number' => $l->loan_number, 'balance' => (float) $l->balance_remaining, 'installment' => (float) $l->monthly_installment])
+                    ->values(),
+            ];
+        }
+
         return Inertia::render('system/Drivers/Show', [
             'driver'            => $driver,
             'trips'             => $trips,
+            'hr'                => $hr,
             'statuses'          => Driver::$statuses,
             'licenseClasses'    => self::licenseClassMap(),
             'vehicleStatuses'   => Vehicle::$statuses,

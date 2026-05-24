@@ -14,7 +14,7 @@ class Employee extends Model
         'employee_number', 'name', 'department', 'position',
         'phone', 'email', 'national_id', 'address',
         'hire_date', 'birth_date',
-        'salary', 'salary_currency', 'status',
+        'salary', 'salary_currency', 'bonus', 'status',
         'emergency_contact_name', 'emergency_contact_phone',
         'notes', 'created_by',
     ];
@@ -23,6 +23,7 @@ class Employee extends Model
         'hire_date'  => 'date',
         'birth_date' => 'date',
         'salary'     => 'decimal:2',
+        'bonus'      => 'decimal:2',
     ];
 
     public function leaveRequests()
@@ -38,6 +39,11 @@ class Employee extends Model
     public function loans()
     {
         return $this->hasMany(EmployeeLoan::class);
+    }
+
+    public function infractions()
+    {
+        return $this->hasMany(EmployeeInfraction::class);
     }
 
     public function creator()

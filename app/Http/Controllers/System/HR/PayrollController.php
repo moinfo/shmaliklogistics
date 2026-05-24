@@ -4,13 +4,16 @@ namespace App\Http\Controllers\System\HR;
 
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
+use App\Models\BonusPolicy;
 use App\Models\EmployeeAdvance;
 use App\Models\EmployeeAllowance;
 use App\Models\EmployeeDeduction;
+use App\Models\EmployeeInfraction;
 use App\Models\EmployeeLoan;
 use App\Models\PayrollRun;
 use App\Models\PayrollSlip;
 use App\Models\PayrollSetting;
+use App\Services\BonusCalculator;
 use App\Services\TanzaniaPayrollCalculator;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -107,6 +110,14 @@ class PayrollController extends Controller
             ->get()
             ->groupBy('employee_id');
 
+        // ── Bonus: department policy + pending infractions for this month ──
+        $bonusCalc = new BonusCalculator(BonusPolicy::activeMap());
+        $infractions = EmployeeInfraction::where('status', 'pending')
+            ->whereYear('occurred_on', $data['year'])
+            ->whereMonth('occurred_on', $data['month'])
+            ->get()
+            ->groupBy('employee_id');
+
         foreach ($employees as $emp) {
             $advanceTotal = collect($advances[$emp->id] ?? [])->sum('amount');
             $loanTotal    = collect($loans[$emp->id] ?? [])->sum('monthly_installment');
@@ -139,6 +150,14 @@ class PayrollController extends Controller
             $loanBalance = collect($loans[$emp->id] ?? [])->sum('balance_remaining');
             $result['loan_balance'] = round(max(0, $loanBalance - $loanTotal), 2);
 
+            // ── Bonus (paid untaxed → added straight to net) ──
+            $empInfractions = $infractions[$emp->id] ?? collect();
+            $penaltyTotal   = (float) $empInfractions->sum('amount');
+            $bonus = $bonusCalc->settle($bonusCalc->baseBonusFor($emp), $penaltyTotal);
+            $result['bonus']         = $bonus['bonus'];
+            $result['bonus_penalty'] = $bonus['bonus_penalty'];
+            $result['net_salary']    = round($result['net_salary'] + $bonus['net_bonus'], 2);
+
             $slip = PayrollSlip::create(array_merge(
                 ['payroll_run_id' => $run->id, 'employee_id' => $emp->id],
                 $result,
@@ -158,6 +177,11 @@ class PayrollController extends Controller
                     'status'            => $newBalance <= 0 ? 'settled' : 'active',
                 ]);
             }
+
+            // Mark infractions as consumed by this slip (so they can't be re-charged)
+            foreach ($empInfractions as $inf) {
+                $inf->update(['status' => 'applied', 'payroll_slip_id' => $slip->id]);
+            }
         }
 
         return redirect()->route('system.hr.payroll.show', $run)
@@ -170,6 +194,7 @@ class PayrollController extends Controller
 
         $totals = [
             'gross'         => $payroll->slips->sum('gross_salary'),
+            'bonus'         => $payroll->slips->sum(fn ($s) => max(0, (float) $s->bonus - (float) $s->bonus_penalty)),
             'paye'          => $payroll->slips->sum('paye'),
             'nssf_emp'      => $payroll->slips->sum('nssf_employee'),
             'nhif'          => $payroll->slips->sum('nhif_employee'),
@@ -202,6 +227,8 @@ class PayrollController extends Controller
             'loan_deduction'    => 'nullable|numeric|min:0',
             'heslb'             => 'nullable|numeric|min:0',
             'adjustment'        => 'nullable|numeric',
+            'bonus'             => 'nullable|numeric|min:0',
+            'bonus_penalty'     => 'nullable|numeric|min:0',
             'notes'             => 'nullable|string',
         ]);
 
@@ -223,6 +250,15 @@ class PayrollController extends Controller
         $result['adjustment']       = round($adjustment, 2);
         $result['total_deductions'] = round($result['total_deductions'] + $heslb + $adjustment, 2);
         $result['net_salary']       = round(max(0, $result['net_salary'] - $heslb - $adjustment), 2);
+
+        // Bonus (untaxed, added to net) — reuse the same settle() rule
+        $bonus = (new BonusCalculator([]))->settle(
+            (float) ($data['bonus'] ?? $slip->bonus),
+            (float) ($data['bonus_penalty'] ?? $slip->bonus_penalty),
+        );
+        $result['bonus']         = $bonus['bonus'];
+        $result['bonus_penalty'] = $bonus['bonus_penalty'];
+        $result['net_salary']    = round($result['net_salary'] + $bonus['net_bonus'], 2);
 
         $slip->update(array_merge($result, ['notes' => $data['notes'] ?? null]));
 

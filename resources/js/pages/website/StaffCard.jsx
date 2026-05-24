@@ -43,21 +43,21 @@ export default function StaffCard({ employee }) {
                     justifyContent: 'center',
                     background: isDark
                         ? 'linear-gradient(135deg, #050D18 0%, #0A1628 60%, #0d1f3c 100%)'
-                        : 'linear-gradient(135deg, #0A1628 0%, #1565C0 100%)',
+                        : 'linear-gradient(135deg, #0A1628 0%, #0E4FA0 100%)',
                     padding: '80px 16px 60px',
                     position: 'relative',
                     overflow: 'hidden',
                 }}
             >
-                <Box style={{ position: 'absolute', top: '20%', left: '10%', width: 400, height: 400, borderRadius: '50%', background: 'rgba(33,150,243,0.06)', filter: 'blur(80px)', pointerEvents: 'none' }} />
-                <Box style={{ position: 'absolute', bottom: '10%', right: '8%', width: 300, height: 300, borderRadius: '50%', background: 'rgba(21,101,192,0.08)', filter: 'blur(60px)', pointerEvents: 'none' }} />
+                <Box style={{ position: 'absolute', top: '20%', left: '10%', width: 400, height: 400, borderRadius: '50%', background: 'rgba(199,58,58,0.06)', filter: 'blur(80px)', pointerEvents: 'none' }} />
+                <Box style={{ position: 'absolute', bottom: '10%', right: '8%', width: 300, height: 300, borderRadius: '50%', background: 'rgba(199,58,58,0.08)', filter: 'blur(60px)', pointerEvents: 'none' }} />
 
                 <Container size="xs" style={{ position: 'relative', zIndex: 1 }}>
                     <Stack align="center" gap="xl">
 
                         {/* Company badge */}
                         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-                            <Badge color="blue" variant="light" size="lg" radius="xl" style={{ letterSpacing: 1.5, textTransform: 'uppercase', fontSize: 11 }}>
+                            <Badge color="brand.2" variant="light" size="lg" radius="xl" style={{ letterSpacing: 1.5, textTransform: 'uppercase', fontSize: 11 }}>
                                 SH Malik Logistics
                             </Badge>
                         </motion.div>
@@ -77,7 +77,7 @@ export default function StaffCard({ employee }) {
                                 </Text>
                                 <Group gap={6} justify="center">
                                     {employee.roles.map((r) => (
-                                        <Badge key={r} color="blue" variant="filled" size="lg" radius="xl" style={{ letterSpacing: 0.5, textTransform: 'none', fontWeight: 600 }}>
+                                        <Badge key={r} color="brand" variant="filled" size="lg" radius="xl" style={{ letterSpacing: 0.5, textTransform: 'none', fontWeight: 600 }}>
                                             {r}
                                         </Badge>
                                     ))}
@@ -89,12 +89,12 @@ export default function StaffCard({ employee }) {
                         </motion.div>
 
                         {/* Divider */}
-                        <Box style={{ width: 60, height: 2, background: 'linear-gradient(90deg, #1565C0, #2196F3)', borderRadius: 2 }} />
+                        <Box style={{ width: 60, height: 2, background: 'linear-gradient(90deg, #A82828, #C73A3A)', borderRadius: 2 }} />
 
                         {/* Contact buttons */}
                         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.45 }} style={{ width: '100%' }}>
                             <Stack gap="sm">
-                                <Button component="a" href={`tel:${employee.phone}`} fullWidth size="md" radius="xl" variant="filled" color="blue" style={{ boxShadow: '0 4px 20px rgba(33,150,243,0.3)' }}>
+                                <Button component="a" href={`tel:${employee.phone}`} fullWidth size="md" radius="xl" variant="filled" color="brand" style={{ boxShadow: '0 4px 20px rgba(199,58,58,0.3)' }}>
                                     📞 Call
                                 </Button>
                                 <Button component="a" href={`https://wa.me/${employee.phone.replace('+', '')}`} target="_blank" rel="noopener noreferrer" fullWidth size="md" radius="xl" variant="light" color="green">

@@ -64,12 +64,18 @@ class InventoryController extends Controller
             'part_number'    => 'nullable|string|max:100',
             'unit'           => 'required|string|max:30',
             'tracks_serials' => 'boolean',
+            'tracks_batch'   => 'boolean',
             'reorder_level'  => 'nullable|numeric|min:0',
             'unit_cost'      => 'nullable|numeric|min:0',
             'location'       => 'nullable|string|max:100',
             'notes'          => 'nullable|string',
             'is_active'      => 'boolean',
         ]);
+
+        // Serial and batch are mutually exclusive; serial wins if both arrive.
+        if (! empty($data['tracks_serials'])) {
+            $data['tracks_batch'] = false;
+        }
 
         $data['created_by'] = $request->user()->id;
         $item = InventoryItem::create($data);
@@ -114,12 +120,17 @@ class InventoryController extends Controller
             'part_number'    => 'nullable|string|max:100',
             'unit'           => 'required|string|max:30',
             'tracks_serials' => 'boolean',
+            'tracks_batch'   => 'boolean',
             'reorder_level'  => 'nullable|numeric|min:0',
             'unit_cost'      => 'nullable|numeric|min:0',
             'location'       => 'nullable|string|max:100',
             'notes'          => 'nullable|string',
             'is_active'      => 'boolean',
         ]);
+
+        if (! empty($data['tracks_serials'])) {
+            $data['tracks_batch'] = false;
+        }
 
         // Block disabling serial tracking once any serial exists for this item.
         if ($item->tracks_serials && empty($data['tracks_serials'])
@@ -148,11 +159,13 @@ class InventoryController extends Controller
         }
 
         $data = $request->validate([
-            'quantity'   => 'required|numeric|min:0.001',
-            'unit_cost'  => 'nullable|numeric|min:0',
-            'reference'  => 'nullable|string|max:100',
-            'vehicle_id' => 'nullable|exists:vehicles,id',
-            'notes'      => 'nullable|string',
+            'quantity'     => 'required|numeric|min:0.001',
+            'unit_cost'    => 'nullable|numeric|min:0',
+            'reference'    => 'nullable|string|max:100',
+            // Lot number is required when the item is batch-tracked (traceability).
+            'batch_number' => ($item->tracks_batch ? 'required' : 'nullable') . '|string|max:100',
+            'vehicle_id'   => 'nullable|exists:vehicles,id',
+            'notes'        => 'nullable|string',
         ]);
 
         $newStock = $item->current_stock + $data['quantity'];
@@ -168,6 +181,7 @@ class InventoryController extends Controller
             'unit_cost'    => $data['unit_cost'] ?? $item->unit_cost,
             'balance_after'=> $newStock,
             'reference'    => $data['reference'] ?? null,
+            'batch_number' => $data['batch_number'] ?? null,
             'vehicle_id'   => $data['vehicle_id'] ?? null,
             'notes'        => $data['notes'] ?? null,
             'created_by'   => $request->user()->id,
@@ -252,10 +266,11 @@ class InventoryController extends Controller
         }
 
         $data = $request->validate([
-            'quantity'   => 'required|numeric|min:0.001',
-            'reference'  => 'nullable|string|max:100',
-            'vehicle_id' => 'nullable|exists:vehicles,id',
-            'notes'      => 'nullable|string',
+            'quantity'     => 'required|numeric|min:0.001',
+            'reference'    => 'nullable|string|max:100',
+            'batch_number' => 'nullable|string|max:100',
+            'vehicle_id'   => 'nullable|exists:vehicles,id',
+            'notes'        => 'nullable|string',
         ]);
 
         if ($data['quantity'] > $item->current_stock) {
@@ -272,6 +287,7 @@ class InventoryController extends Controller
             'unit_cost'    => $item->unit_cost,
             'balance_after'=> $newStock,
             'reference'    => $data['reference'] ?? null,
+            'batch_number' => $data['batch_number'] ?? null,
             'vehicle_id'   => $data['vehicle_id'] ?? null,
             'notes'        => $data['notes'] ?? null,
             'created_by'   => $request->user()->id,

@@ -18,10 +18,10 @@ const en = {
     home: {
         quickStats: 'Quick Stats',
         slides: [
-            { badge: 'With Hustles and Prayers We\'ll Reach Our Destination', title: 'Moving Your Cargo', highlight: 'Across Africa', desc: 'Reliable, efficient, and cost-effective transportation from Handeni, Tanzania to Zambia, DRC and beyond — with real-time tracking and full cost visibility on every trip.', features: ['GPS Fleet Tracking', 'Border Permit Management', 'Real-Time Cost Reporting'] },
-            { badge: 'SH Malik Logistics Company Limited', title: 'Track Every Shipment', highlight: 'From Loading to Delivery', desc: 'Full cargo visibility with GPS tracking and live status updates. Your clients know exactly where their goods are — without calling the office.', features: ['Live GPS Location', 'Customer Self-Service Portal', 'Automated SMS Alerts'] },
-            { badge: 'Road Freight · Cargo Handling · Last-Mile Delivery', title: 'Border Crossings', highlight: 'Made Simple', desc: 'We handle all transit permits, customs documentation and border logistics for Zambia and the DRC — professionally managed without third-party reliance.', features: ['Transit Permits Handled', 'COMESA/SADC Compliance', 'Expiry Date Alerts'] },
-            { badge: 'Based in Handeni, Tanzania', title: 'A Fleet You Can', highlight: 'Rely On', desc: 'Well-maintained Scania trucks, experienced and trained drivers — ensuring safe and timely delivery across all routes with regular maintenance and safety checks.', features: ['Scheduled Maintenance Alerts', 'Experienced Drivers', 'Fuel Cost Monitoring'] },
+            { badge: 'TANZANIA → ZAMBIA · DRC · MALAWI · MOZAMBIQUE', title: 'Cross-Border Freight', highlight: 'From Handeni', desc: 'Four active corridors out of Tanzania — Lusaka, Lubumbashi, Lilongwe, Maputo. GPS-tracked, customs handled in-house, fully insured on every haul.', features: ['4 Active Corridors', 'GPS-Tracked Fleet', 'Customs Handled In-House'] },
+            { badge: 'LIVE GPS TRACKING · CUSTOMER PORTAL', title: 'See Every Truck', highlight: 'In Real Time', desc: 'Clients log in and watch their shipment move across the corridor — no phone calls to the office, no "where is my cargo?" emails at 9 PM.', features: ['Live GPS Position', 'Self-Service Portal', 'Automated SMS Alerts'] },
+            { badge: 'COMESA · SADC · TANZANIA REVENUE AUTHORITY', title: 'Borders Cleared', highlight: 'Without Middlemen', desc: 'Transit permits, customs documentation and border logistics handled directly by our team — no third-party agents, no surprise charges at the post.', features: ['Permits Handled In-House', 'No Agent Markup', 'Expiry Date Alerts'] },
+            { badge: 'SCANIA G-SERIES · HEAVY HAUL', title: 'Built for the Long Haul', highlight: 'Maintained Daily', desc: 'Scania G-series prime movers, trained Tanzanian drivers, scheduled maintenance after every corridor run. Breakdowns are not part of your timeline.', features: ['Scania G-Series Fleet', 'Daily Inspections', 'Trained Tanzanian Drivers'] },
         ],
         stats: [
             { icon: '🚛', value: '550K+', label: 'Shipments Completed' },
@@ -111,6 +111,22 @@ const en = {
                 { value: '1000+', label: 'Testimonials', icon: '⭐' }, { value: '24/7', label: 'Support', icon: '📞' },
             ],
         },
+        intro: {
+            eyebrow: 'Who We Are',
+            title: 'About SH Malik Logistics Company Limited',
+            paragraphs: [
+                'SH Malik Logistics Company Limited is a registered Tanzanian road-freight operator based in Handeni, Tanga Region. We move cross-border cargo on four active corridors — Tanzania to Zambia, DRC, Malawi and Mozambique — handling permits, customs and GPS-tracked transit in-house.',
+                "Founded in 2020 by Mr. Abdulmalik Suleiman, the company was built around one principle: every shipment should be visible, every cost should be transparent, and every border should be cleared without third-party middlemen.",
+            ],
+            // TODO: Replace registration.value with the real TIN / BRELA registration number once available.
+            facts: [
+                { icon: '📅', label: 'Founded', value: '2020' },
+                { icon: '👤', label: 'Founder', value: 'Abdulmalik Suleiman' },
+                { icon: '📄', label: 'Registration', value: 'TIN to be added' },
+                { icon: '📍', label: 'Location', value: 'Handeni, Tanga Region' },
+            ],
+            imagePin: { label: 'Mr. Abdulmalik Suleiman', sub: 'Founder & CEO' },
+        },
         story: {
             badge: 'Our Story', title: 'Built for', highlight: "Africa's Trade Routes",
             imageBadge: '📍 Based in Handeni, Tanzania',
@@ -148,6 +164,7 @@ const en = {
             items: [
                 { role: 'CEO', name: 'Abdulmalik Suleiman', icon: '👔', desc: 'Leading SH Malik Logistics with vision and dedication, driving the company\'s mission to become a leading logistics provider in East Africa.' },
                 { role: 'Head of Accounts', name: 'Salim Hilal', icon: '📊', desc: 'Managing financial operations and ensuring full cost transparency for clients across all logistics operations.' },
+                { role: 'Head of ICT', name: 'Towfiq Seif', icon: '💻', desc: 'Maintaining the GPS tracking systems, customer portal and digital infrastructure that keep every shipment visible and every operation connected.' },
                 { role: 'Operations', name: 'Said', icon: '🚛', desc: 'Experienced team managing route planning, driver assignments, fleet coordination and day-to-day logistics operations.' },
                 { role: 'Customer Service', name: 'Support Team', icon: '📞', desc: 'Available 24/7 to answer client queries, provide real-time cargo updates and ensure smooth operations for every shipment.' },
             ],
@@ -199,10 +216,10 @@ const sw = {
     home: {
         quickStats: 'Takwimu za Haraka',
         slides: [
-            { badge: 'Kwa Bidii na Maombi Tutafikia Marudio Yetu', title: 'Kusafirisha Mizigo Yako', highlight: 'Kote Afrika', desc: 'Usafirishaji wa kuaminika, bora na wa bei nafuu kutoka Handeni, Tanzania hadi Zambia, DRC na zaidi — na ufuatiliaji wa wakati halisi na uonekani kamili wa gharama kwa kila safari.', features: ['Ufuatiliaji wa GPS', 'Usimamizi wa Vibali vya Mpakani', 'Ripoti ya Gharama ya Wakati Halisi'] },
-            { badge: 'SH Malik Logistics Company Limited', title: 'Fuatilia Kila Usafirishaji', highlight: 'Kutoka Kupakia Hadi Kutoa', desc: 'Uonekani kamili wa mizigo na ufuatiliaji wa GPS. Wateja wako wanajua hasa wapi bidhaa zao zipo — bila kupiga simu ofisini.', features: ['Mahali pa GPS kwa Wakati Halisi', 'Lango la Mteja la Kujisaidia', 'Arifa za SMS za Kiotomatiki'] },
-            { badge: 'Usafirishaji · Ushughulikiaji wa Mizigo · Utoaji', title: 'Kuvuka Mipaka', highlight: 'Imefanywa Rahisi', desc: 'Tunashughulikia vibali vyote vya usafiri, nyaraka za forodha na usimamizi wa mipaka kwa Zambia na DRC — inayosimamiwa kitaalamu bila kutegemea washirika wa nje.', features: ['Vibali vya Usafiri Vimeshughulikiwa', 'Uzingatifu wa COMESA/SADC', 'Arifa za Tarehe ya Kuisha'] },
-            { badge: 'Makao Makuu Handeni, Tanzania', title: 'Gari Unaloweza', highlight: 'Kuitegemea', desc: 'Malori ya Scania yaliyodumishwa vizuri, madereva wenye uzoefu na mafunzo — kuhakikisha utoaji salama na wa wakati kwenye njia zote na ukaguzi wa matengenezo mara kwa mara.', features: ['Arifa za Matengenezo Yaliyopangwa', 'Madereva Wenye Uzoefu', 'Ufuatiliaji wa Gharama za Mafuta'] },
+            { badge: 'TANZANIA → ZAMBIA · DRC · MALAWI · MOZAMBIQUE', title: 'Usafirishaji wa Mpakani', highlight: 'Kutoka Handeni', desc: 'Njia nne za usafirishaji kutoka Tanzania — Lusaka, Lubumbashi, Lilongwe, Maputo. Ufuatiliaji wa GPS, forodha inashughulikiwa sisi wenyewe, na bima kamili kwa kila safari.', features: ['Njia 4 za Mpakani', 'Magari yaliyo na GPS', 'Forodha Inashughulikiwa Sisi'] },
+            { badge: 'UFUATILIAJI WA GPS · LANGO LA WATEJA', title: 'Ona Kila Lori', highlight: 'Wakati Halisi', desc: 'Wateja huingia mtandaoni na kuona usafirishaji wao ukisogea kwenye njia — bila simu ofisini, bila barua pepe za "mzigo wangu uko wapi?" usiku.', features: ['Eneo la GPS Wakati Halisi', 'Lango la Kujihudumia', 'Arifa za SMS za Kiotomatiki'] },
+            { badge: 'COMESA · SADC · MAMLAKA YA MAPATO TANZANIA', title: 'Mipaka Imeshafutiwa', highlight: 'Bila Mawakala wa Tatu', desc: 'Vibali vya usafirishaji, nyaraka za forodha na shughuli za mpakani vinashughulikiwa moja kwa moja na timu yetu — bila mawakala wa tatu, bila malipo ya ziada kituoni.', features: ['Vibali Vinashughulikiwa Sisi', 'Bila Markup ya Wakala', 'Arifa za Tarehe ya Kuisha'] },
+            { badge: 'SCANIA G-SERIES · MIZIGO MIKUBWA', title: 'Imejengwa kwa Safari Ndefu', highlight: 'Imehudumiwa Kila Siku', desc: 'Magari makubwa ya Scania G-series, madereva wa Kitanzania waliofunzwa, matengenezo yaliyopangwa baada ya kila safari. Kuvunjika si sehemu ya ratiba yako.', features: ['Magari ya Scania G-Series', 'Ukaguzi wa Kila Siku', 'Madereva wa Kitanzania Waliofunzwa'] },
         ],
         stats: [
             { icon: '🚛', value: '550K+', label: 'Usafirishaji Uliokamilika' },
@@ -292,6 +309,21 @@ const sw = {
                 { value: '1000+', label: 'Maoni', icon: '⭐' }, { value: '24/7', label: 'Msaada', icon: '📞' },
             ],
         },
+        intro: {
+            eyebrow: 'Sisi Ni Nani',
+            title: 'Kuhusu SH Malik Logistics Company Limited',
+            paragraphs: [
+                'SH Malik Logistics Company Limited ni kampuni ya usafirishaji wa barabarani iliyosajiliwa Tanzania, yenye makao makuu Handeni, Mkoa wa Tanga. Tunasafirisha mizigo ya mpakani kwenye njia nne — Tanzania kwenda Zambia, DRC, Malawi na Msumbiji — tukishughulikia vibali, forodha na ufuatiliaji wa GPS sisi wenyewe.',
+                'Ilianzishwa mwaka 2020 na Bwana Abdulmalik Suleiman, kampuni ilijengwa kwenye msingi mmoja: kila usafirishaji unaonekana, kila gharama iko wazi, na kila mpaka unafutiwa bila mawakala wa tatu.',
+            ],
+            facts: [
+                { icon: '📅', label: 'Ilianzishwa', value: '2020' },
+                { icon: '👤', label: 'Mwanzilishi', value: 'Abdulmalik Suleiman' },
+                { icon: '📄', label: 'Usajili', value: 'TIN itaongezwa' },
+                { icon: '📍', label: 'Mahali', value: 'Handeni, Mkoa wa Tanga' },
+            ],
+            imagePin: { label: 'Bwana Abdulmalik Suleiman', sub: 'Mwanzilishi & Mkurugenzi Mtendaji' },
+        },
         story: {
             badge: 'Hadithi Yetu', title: 'Imejengwa kwa', highlight: 'Njia za Biashara za Afrika',
             imageBadge: '📍 Makao Makuu Handeni, Tanzania',
@@ -329,6 +361,7 @@ const sw = {
             items: [
                 { role: 'Mkurugenzi Mtendaji', name: 'Abdulmalik Suleiman', icon: '👔', desc: 'Kuongoza SH Malik Logistics kwa maono na kujitolea, akiendesha dhamira ya kampuni kuwa mtoaji mkuu wa usafirishaji Afrika Mashariki.' },
                 { role: 'Mkuu wa Hesabu', name: 'Salim Hilal', icon: '📊', desc: 'Kusimamia shughuli za kifedha na kuhakikisha uwazi kamili wa gharama kwa wateja katika shughuli zote za usafirishaji.' },
+                { role: 'Mkuu wa TEHAMA', name: 'Towfiq Seif', icon: '💻', desc: 'Kusimamia mifumo ya ufuatiliaji wa GPS, lango la mteja na miundombinu ya kidijitali inayohakikisha kila usafirishaji unaonekana na shughuli zote zimeunganishwa.' },
                 { role: 'Uendeshaji', name: 'Said', icon: '🚛', desc: 'Timu yenye uzoefu inayosimamia upangaji wa njia, mgawanyo wa madereva, uratibu wa gari na shughuli za kila siku za usafirishaji.' },
                 { role: 'Huduma kwa Wateja', name: 'Timu ya Msaada', icon: '📞', desc: 'Inapatikana masaa 24/7 kujibu maswali ya wateja, kutoa masasisho ya mizigo kwa wakati halisi na kuhakikisha shughuli laini.' },
             ],

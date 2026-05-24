@@ -25,17 +25,17 @@ export default function Team({ employees }) {
             <Head title="Our Team — SH Malik Logistics" />
 
             {/* ── Hero ── */}
-            <Box style={{ position: 'relative', overflow: 'hidden', minHeight: 300, display: 'flex', alignItems: 'center', background: 'linear-gradient(135deg, #0A1628 0%, #1565C0 100%)' }}>
+            <Box style={{ position: 'relative', overflow: 'hidden', minHeight: 300, display: 'flex', alignItems: 'center', background: 'linear-gradient(135deg, #0A1628 0%, #0E4FA0 100%)' }}>
                 <Box style={{ position: 'absolute', inset: 0, background: 'rgba(10,22,40,0.4)' }} />
                 <Container size="xl" style={{ position: 'relative', zIndex: 1 }} py={72}>
                     <Stack align="center" gap="md">
                         <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-                            <Badge color="blue" variant="light" size="xl" radius="xl">Our People</Badge>
+                            <Badge color="brand.2" variant="light" size="xl" radius="xl">Our People</Badge>
                         </motion.div>
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.15 }}>
                             <Title order={1} c="white" ta="center" style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900 }}>
                                 Meet the{' '}
-                                <Text component="span" style={{ background: 'linear-gradient(135deg, #2196F3, #80B8FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
+                                <Text component="span" style={{ color: '#ED8E8E', WebkitTextFillColor: '#ED8E8E' }} inherit>
                                     Team
                                 </Text>
                             </Title>
@@ -136,7 +136,7 @@ export default function Team({ employees }) {
                                                 {emp.name}
                                             </Text>
                                             <Text
-                                                c="blue.5"
+                                                c="brand.3"
                                                 size="xs"
                                                 mt={3}
                                                 fw={500}

@@ -18,12 +18,16 @@ export default function Login() {
         <>
             <Head title="Login — SH Malik Logistics" />
 
-            <Box style={{ minHeight: '100vh', display: 'flex', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #050D18 0%, #0A1628 50%, #0E4FA0 100%)' }}>
+            <Box style={{ minHeight: '100vh', display: 'flex', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #050D18 0%, #0A1628 50%, #0A3A7A 100%)' }}>
+
+                {/* Real fleet photo backdrop */}
+                <Box style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/our_pictures/sh17.jpeg)', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.5, pointerEvents: 'none' }} />
+                <Box style={{ position: 'absolute', inset: 0, background: 'linear-gradient(115deg, rgba(5,13,24,0.95) 0%, rgba(10,22,40,0.88) 45%, rgba(10,22,40,0.7) 100%)', pointerEvents: 'none' }} />
 
                 {/* Animated mesh blobs */}
                 {[
-                    { w: 500, h: 500, top: '-10%', left: '-10%', color: 'rgba(21,101,192,0.25)' },
-                    { w: 400, h: 400, top: '50%', right: '-8%', color: 'rgba(33,150,243,0.18)' },
+                    { w: 500, h: 500, top: '-10%', left: '-10%', color: 'rgba(199,58,58,0.22)' },
+                    { w: 400, h: 400, top: '50%', right: '-8%', color: 'rgba(168,40,40,0.18)' },
                     { w: 350, h: 350, bottom: '-5%', left: '30%', color: 'rgba(10,58,122,0.3)' },
                 ].map((b, i) => (
                     <motion.div key={i} style={{ position: 'absolute', borderRadius: '50%', filter: 'blur(80px)', width: b.w, height: b.h, background: b.color, top: b.top, left: b.left, right: b.right, bottom: b.bottom, pointerEvents: 'none' }}
@@ -32,7 +36,7 @@ export default function Login() {
                 ))}
 
                 {/* Dot grid */}
-                <Box style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(33,150,243,0.08) 1px, transparent 1px)', backgroundSize: '32px 32px', pointerEvents: 'none' }} />
+                <Box style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(199,58,58,0.07) 1px, transparent 1px)', backgroundSize: '32px 32px', pointerEvents: 'none' }} />
 
                 {/* Left brand panel (hidden on mobile) */}
                 <Box visibleFrom="md" style={{ width: '45%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '60px 64px', position: 'relative', zIndex: 1 }}>
@@ -42,7 +46,7 @@ export default function Login() {
                         </Link>
                         <Title order={1} c="white" style={{ fontSize: 'clamp(2rem, 3vw, 2.8rem)', fontWeight: 900, lineHeight: 1.2, marginBottom: 20 }}>
                             Welcome to the{' '}
-                            <Text component="span" style={{ background: 'linear-gradient(135deg, #2196F3, #80B8FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
+                            <Text component="span" style={{ color: '#ED8E8E', WebkitTextFillColor: '#ED8E8E' }} inherit>
                                 Logistics System
                             </Text>
                         </Title>
@@ -60,7 +64,7 @@ export default function Login() {
                             ].map((f, i) => (
                                 <motion.div key={f.text} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 + i * 0.1 }}>
                                     <Group gap="md" align="center">
-                                        <Box style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(33,150,243,0.15)', border: '1px solid rgba(33,150,243,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
+                                        <Box style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(199,58,58,0.15)', border: '1px solid rgba(199,58,58,0.32)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
                                             {f.icon}
                                         </Box>
                                         <Text c="gray.3" size="sm">{f.text}</Text>
@@ -113,7 +117,7 @@ export default function Login() {
                                             required
                                             styles={{
                                                 label: { color: 'rgba(255,255,255,0.7)', marginBottom: 6 },
-                                                input: { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'white', borderRadius: 10, '&:focus': { borderColor: '#2196F3' } },
+                                                input: { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'white', borderRadius: 10, '&:focus': { borderColor: '#C73A3A' } },
                                             }}
                                         />
                                         <PasswordInput
@@ -147,9 +151,9 @@ export default function Login() {
                                                 size="lg"
                                                 radius="xl"
                                                 style={{
-                                                    background: 'linear-gradient(135deg, #1565C0, #2196F3)',
+                                                    background: 'linear-gradient(135deg, #A82828, #C73A3A)',
                                                     border: 'none',
-                                                    boxShadow: '0 8px 30px rgba(33,150,243,0.4)',
+                                                    boxShadow: '0 8px 30px rgba(199,58,58,0.4)',
                                                     fontWeight: 700,
                                                     fontSize: 15,
                                                 }}

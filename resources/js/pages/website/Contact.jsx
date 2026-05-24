@@ -28,31 +28,31 @@ export default function Contact() {
 
             {/* ── Hero ── */}
             <Box style={{ position: 'relative', overflow: 'hidden', minHeight: 380, display: 'flex', alignItems: 'center' }}>
-                <Box style={{ position: 'absolute', inset: 0, backgroundImage: 'url(https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1920&q=80)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
-                <Box style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(10,22,40,0.97) 0%, rgba(21,101,192,0.88) 100%)' }} />
-                <Box style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(33,150,243,0.15) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none' }} />
+                <Box style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/our_pictures/sh24.jpeg)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                <Box style={{ position: 'absolute', inset: 0, background: isDark ? 'linear-gradient(135deg, rgba(10,22,40,0.97) 0%, rgba(10,22,40,0.74) 100%)' : 'linear-gradient(135deg, rgba(252,248,246,0.96) 0%, rgba(252,233,233,0.72) 100%)' }} />
+                <Box style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(199,58,58,0.15) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none' }} />
                 <Container size="xl" style={{ position: 'relative', zIndex: 1 }} py={70}>
                     <Stack align="center" gap="lg">
                         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
                             <Badge color="brand.2" variant="light" size="xl" radius="xl">{hero.badge}</Badge>
                         </motion.div>
                         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}>
-                            <Title order={1} c="white" ta="center" style={{ fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', fontWeight: 900 }}>
+                            <Title order={1} c={isDark ? 'white' : '#0A1628'} ta="center" style={{ fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', fontWeight: 900 }}>
                                 {hero.title}{' '}
-                                <Text component="span" style={{ background: 'linear-gradient(135deg, #2196F3, #80B8FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
+                                <Text component="span" style={{ color: isDark ? '#ED8E8E' : '#A82828', WebkitTextFillColor: isDark ? '#ED8E8E' : '#A82828' }} inherit>
                                     {hero.highlight}
                                 </Text>
                             </Title>
                         </motion.div>
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
-                            <Text c="gray.3" ta="center" maw={540} size="lg" lh={1.8}>{hero.desc}</Text>
+                            <Text c={isDark ? 'gray.3' : 'gray.7'} ta="center" maw={540} size="lg" lh={1.8}>{hero.desc}</Text>
                         </motion.div>
                     </Stack>
                 </Container>
             </Box>
 
             {/* ── Contact Cards ── */}
-            <Box py={60} style={{ background: 'linear-gradient(90deg, #0A1628, #1565C0, #0A1628)' }}>
+            <Box py={60} style={{ background: 'linear-gradient(90deg, #0A1628, #A82828, #0A1628)' }}>
                 <Container size="xl">
                     <StaggerContainer delay={0.15}>
                         <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg">
@@ -80,10 +80,10 @@ export default function Contact() {
             <Box py={100} style={{
                 background: isDark
                     ? 'linear-gradient(135deg, #050E1E 0%, #0A1628 100%)'
-                    : 'linear-gradient(135deg, #e8f0fe 0%, #dbeafe 50%, #eff6ff 100%)',
+                    : 'linear-gradient(135deg, #FCE9E9 0%, #FBF1EC 50%, #FCF8F6 100%)',
                 position: 'relative', overflow: 'hidden',
             }}>
-                <MeshBackground colors={['#1565C0', '#2196F3', '#0A3A7A']} />
+                <MeshBackground colors={['#0E4FA0', '#C73A3A', '#0A3A7A']} />
                 <Container size="xl">
                     <SimpleGrid cols={{ base: 1, md: 2 }} spacing={80}>
 
@@ -104,7 +104,7 @@ export default function Contact() {
                                             <TextInput label={form.email} placeholder={form.emailPlaceholder} type="email" value={data.email} onChange={e => setData('email', e.target.value)} error={errors.email} required styles={{ input: { borderRadius: 10 } }} />
                                             <Textarea label={form.message} placeholder={form.messagePlaceholder} rows={6} value={data.message} onChange={e => setData('message', e.target.value)} error={errors.message} required styles={{ input: { borderRadius: 10 } }} />
                                             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                                                <Button type="submit" loading={processing} color="brand.5" radius="xl" size="lg" fullWidth style={{ boxShadow: '0 8px 30px rgba(21,101,192,0.35)' }}>
+                                                <Button type="submit" loading={processing} color="brand.5" radius="xl" size="lg" fullWidth style={{ boxShadow: '0 8px 30px rgba(199,58,58,0.35)' }}>
                                                     {form.submit}
                                                 </Button>
                                             </motion.div>
@@ -121,7 +121,7 @@ export default function Contact() {
                                     <Badge color="brand" variant="light" size="lg" w="fit-content">{faq.badge}</Badge>
                                     <Title order={2} style={{ fontSize: 'clamp(1.6rem, 2.5vw, 2.2rem)' }}>
                                         {faq.title}{' '}
-                                        <Text component="span" style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }} inherit>
+                                        <Text component="span" style={{ color: isDark ? '#ED8E8E' : '#A82828', WebkitTextFillColor: isDark ? '#ED8E8E' : '#A82828' }} inherit>
                                             {faq.highlight}
                                         </Text>
                                     </Title>
@@ -134,7 +134,7 @@ export default function Contact() {
                                                 <HoverCard>
                                                     <Box style={{ ...(isDark ? glass.white : glass.light), borderRadius: 16, padding: '20px 24px' }}>
                                                         <Group gap="sm" align="flex-start" mb={8}>
-                                                            <Box style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #1565C0, #2196F3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                                                            <Box style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #A82828, #C73A3A)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
                                                                 <Text c="white" size="xs" fw={800}>Q</Text>
                                                             </Box>
                                                             <Text fw={700} c={isDark ? 'brand.2' : 'brand.8'} size="sm">{item.q}</Text>

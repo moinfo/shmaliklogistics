@@ -110,11 +110,8 @@ class DriverController extends Controller
         if (! $user || ! $user->hasPermission('hr_employees.view')) {
             return null;
         }
-        if (! $driver->national_id) {
-            return null;
-        }
 
-        $employee = Employee::where('national_id', $driver->national_id)->first();
+        $employee = $this->findEmployeeForNationalId($driver->national_id);
         if (! $employee) {
             return null;
         }

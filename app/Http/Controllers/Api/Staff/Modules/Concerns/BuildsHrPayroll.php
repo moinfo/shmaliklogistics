@@ -26,6 +26,19 @@ trait BuildsHrPayroll
         'waived'  => '#22C55E',
     ];
 
+    /// Resolves the employee a driver maps to by national ID. Returns null
+    /// unless there is EXACTLY one match — drivers and employees share no FK, so
+    /// a duplicate/ambiguous national ID must never silently surface another
+    /// person's salary, bank account and payslips.
+    protected function findEmployeeForNationalId(?string $nationalId): ?Employee
+    {
+        if ($nationalId === null || $nationalId === '') {
+            return null;
+        }
+        $matches = Employee::where('national_id', $nationalId)->take(2)->get();
+        return $matches->count() === 1 ? $matches->first() : null;
+    }
+
     /// Employment terms + the payroll bundle, for records that don't carry
     /// employment data natively (i.e. the Drivers screen and the driver's own
     /// profile). Employees expose employment fields natively, so they call

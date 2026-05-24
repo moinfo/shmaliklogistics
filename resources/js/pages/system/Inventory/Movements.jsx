@@ -78,7 +78,10 @@ export default function InventoryMovements({ movements, items, movTypes, filters
                                         </td>
                                         <td style={{ padding: '12px 16px' }}><Text fw={700} size="sm" style={{ color: qtyColor }}>{qtySign}{fmt(m.quantity)} {m.item?.unit}</Text></td>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: 'var(--c-text)' }}>{fmt(m.balance_after)}</Text></td>
-                                        <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{m.reference || '—'}</Text></td>
+                                        <td style={{ padding: '12px 16px' }}>
+                                            <Text size="sm" style={{ color: '#64748B' }}>{m.reference || '—'}</Text>
+                                            {m.batch_number && <Text size="10px" style={{ color: '#F59E0B', marginTop: 2 }}>🏷 Lot: {m.batch_number}</Text>}
+                                        </td>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{m.vehicle?.plate || '—'}</Text></td>
                                         <td style={{ padding: '12px 16px' }}><Text size="sm" style={{ color: '#64748B' }}>{m.creator?.name || '—'}</Text></td>
                                     </tr>

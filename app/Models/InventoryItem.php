@@ -10,7 +10,7 @@ class InventoryItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'category_id', 'name', 'part_number', 'unit', 'tracks_serials',
+        'category_id', 'name', 'part_number', 'unit', 'tracks_serials', 'tracks_batch',
         'current_stock', 'reorder_level', 'unit_cost',
         'location', 'notes', 'is_active', 'created_by',
     ];
@@ -21,6 +21,7 @@ class InventoryItem extends Model
         'unit_cost'      => 'decimal:2',
         'is_active'      => 'boolean',
         'tracks_serials' => 'boolean',
+        'tracks_batch'   => 'boolean',
     ];
 
     public function category()

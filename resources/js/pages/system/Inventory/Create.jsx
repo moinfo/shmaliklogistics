@@ -28,6 +28,7 @@ export default function InventoryCreate({ categories }) {
         part_number: '',
         unit: 'pcs',
         tracks_serials: false,
+        tracks_batch: false,
         reorder_level: '',
         unit_cost: '',
         location: '',
@@ -39,6 +40,15 @@ export default function InventoryCreate({ categories }) {
     const err = (f) => errors[f] && <Text size="xs" style={{ color: '#EF4444', marginTop: 4 }}>{errors[f]}</Text>;
 
     const units = ['pcs', 'litres', 'kg', 'metres', 'sets', 'pairs', 'boxes', 'drums', 'rolls'];
+
+    // Stock tracking mode — serial and batch are mutually exclusive.
+    const mode = data.tracks_serials ? 'serial' : data.tracks_batch ? 'batch' : 'none';
+    const setMode = (m) => { setData('tracks_serials', m === 'serial'); setData('tracks_batch', m === 'batch'); };
+    const trackingModes = [
+        { key: 'none',   label: 'Quantity only',          desc: 'Plain count — oil, bolts, cement' },
+        { key: 'serial', label: 'Serial — unique per unit', desc: '1 number = 1 unit, must be unique' },
+        { key: 'batch',  label: 'Batch / Lot number',     desc: 'Quantity + a lot number you record — tiles, paint' },
+    ];
 
     return (
         <DashboardLayout title="Add Inventory Item">
@@ -92,12 +102,23 @@ export default function InventoryCreate({ categories }) {
                                     </Box>
                                     <Switch checked={data.is_active} onChange={e => setData('is_active', e.currentTarget.checked)} />
                                 </Box>
-                                <Box style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: inputBg, borderRadius: 10, border: `1px solid ${inputBorder}` }}>
-                                    <Box style={{ flex: 1, paddingRight: 12 }}>
-                                        <Text size="sm" fw={600} style={{ color: textPri }}>Track by serial number</Text>
-                                        <Text size="xs" style={{ color: textMut }}>Receive & issue must capture unique serials</Text>
-                                    </Box>
-                                    <Switch checked={data.tracks_serials} onChange={e => setData('tracks_serials', e.currentTarget.checked)} />
+                                <Box style={{ padding: '14px 16px', background: inputBg, borderRadius: 10, border: `1px solid ${inputBorder}` }}>
+                                    <Text size="sm" fw={600} style={{ color: textPri }}>Stock tracking</Text>
+                                    <Text size="xs" style={{ color: textMut, marginBottom: 10 }}>How this item's stock is counted</Text>
+                                    <Stack gap={6}>
+                                        {trackingModes.map(opt => {
+                                            const active = mode === opt.key;
+                                            return (
+                                                <Box key={opt.key} component="button" type="button" onClick={() => setMode(opt.key)}
+                                                    style={{ textAlign: 'left', width: '100%', cursor: 'pointer', padding: '10px 12px', borderRadius: 8,
+                                                        background: active ? 'rgba(33,150,243,0.12)' : 'transparent',
+                                                        border: `1px solid ${active ? 'rgba(33,150,243,0.5)' : inputBorder}` }}>
+                                                    <Text size="sm" fw={600} style={{ color: active ? '#60A5FA' : textPri }}>{opt.label}</Text>
+                                                    <Text size="xs" style={{ color: textMut }}>{opt.desc}</Text>
+                                                </Box>
+                                            );
+                                        })}
+                                    </Stack>
                                 </Box>
                                 {errors.tracks_serials && <Text size="xs" style={{ color: '#EF4444', marginTop: -8 }}>{errors.tracks_serials}</Text>}
                                 <Box style={{ padding: '12px 16px', background: tipBg, borderRadius: 10, border: `1px solid ${tipBorder}` }}>

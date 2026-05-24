@@ -34,6 +34,7 @@ const MODULES = [
     { key: 'hr_advances',                 label: 'HR: Advances',              actions: ['view', 'create', 'approve'] },
     { key: 'hr_loans',                    label: 'HR: Loans',                 actions: ['view', 'create', 'approve'] },
     { key: 'hr_allowances',               label: 'HR: Allowances',            actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'hr_bonus',                    label: 'HR: Bonus',                 actions: ['view', 'create', 'edit', 'delete'] },
     { key: 'hr_attendance',               label: 'HR: Attendance',            actions: ['view', 'create'] },
     { key: 'hr_salary_slips',             label: 'HR: Salary Slips',          actions: ['view'] },
     { key: 'hr_appraisals',               label: 'HR: Appraisals',            actions: ['view', 'create', 'edit', 'delete'] },

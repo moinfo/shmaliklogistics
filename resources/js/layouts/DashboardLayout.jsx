@@ -52,7 +52,7 @@ const navItems = [
     // ── HR ────────────────────────────────────────────────────────────────────
     {
         icon: '👥', label: 'HR', href: '/system/hr',
-        anyPerm: ['hr_employees.view', 'hr_leave.view', 'hr_payroll.view', 'hr_advances.view', 'hr_loans.view', 'hr_allowances.view', 'hr_attendance.view', 'hr_salary_slips.view', 'hr_appraisals.view', 'hr_recruitment.view'],
+        anyPerm: ['hr_employees.view', 'hr_leave.view', 'hr_payroll.view', 'hr_advances.view', 'hr_loans.view', 'hr_allowances.view', 'hr_bonus.view', 'hr_attendance.view', 'hr_salary_slips.view', 'hr_appraisals.view', 'hr_recruitment.view'],
         children: [
             { icon: '🧑‍💼', label: 'Employees',   href: '/system/hr/employees',    perm: 'hr_employees.view' },
             { icon: '🏖️',  label: 'Leave',       href: '/system/hr/leave',        perm: 'hr_leave.view' },
@@ -60,6 +60,7 @@ const navItems = [
             { icon: '💵',  label: 'Advances',    href: '/system/hr/advances',     perm: 'hr_advances.view' },
             { icon: '🏦',  label: 'Loans',       href: '/system/hr/loans',        perm: 'hr_loans.view' },
             { icon: '🎁',  label: 'Allowances',  href: '/system/hr/allowances',   perm: 'hr_allowances.view' },
+            { icon: '🏆',  label: 'Bonus',       href: '/system/hr/bonus',        perm: 'hr_bonus.view' },
             { icon: '🕐',  label: 'Attendance',  href: '/system/hr/attendance',   perm: 'hr_attendance.view' },
             { icon: '📑',  label: 'Salary Slip', href: '/system/hr/salary-slips', perm: 'hr_salary_slips.view' },
             { icon: '⭐',  label: 'Appraisals',  href: '/system/hr/appraisals',   perm: 'hr_appraisals.view' },

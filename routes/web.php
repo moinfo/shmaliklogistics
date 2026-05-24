@@ -40,6 +40,7 @@ use App\Http\Controllers\Settings\RoleController;
 use App\Http\Controllers\Settings\UserController;
 use App\Http\Controllers\System\Billing\QuoteRequestController;
 use App\Http\Controllers\System\HR\AllowanceController;
+use App\Http\Controllers\System\HR\BonusController;
 use App\Http\Controllers\System\HR\AttendanceController;
 use App\Http\Controllers\System\HR\AttendanceDeviceController;
 use App\Http\Controllers\System\HR\SalarySlipController;
@@ -262,6 +263,17 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
         Route::post('loans/{loan}/reject',  [LoanController::class, 'reject'])->name('loans.reject')->middleware('permission:hr_loans.approve');
 
         $permResource('allowances', AllowanceController::class, 'hr_allowances', ['only' => ['index', 'store', 'update', 'destroy']]);
+
+        // Performance bonus: department policies, rules (sheria), infractions (makosa)
+        Route::get('bonus', [BonusController::class, 'index'])->name('bonus.index')->middleware('permission:hr_bonus.view');
+        Route::post('bonus/policies', [BonusController::class, 'storePolicy'])->name('bonus.policies.store')->middleware('permission:hr_bonus.edit');
+        Route::delete('bonus/policies/{policy}', [BonusController::class, 'destroyPolicy'])->name('bonus.policies.destroy')->middleware('permission:hr_bonus.delete');
+        Route::post('bonus/rules', [BonusController::class, 'storeRule'])->name('bonus.rules.store')->middleware('permission:hr_bonus.create');
+        Route::patch('bonus/rules/{rule}', [BonusController::class, 'updateRule'])->name('bonus.rules.update')->middleware('permission:hr_bonus.edit');
+        Route::delete('bonus/rules/{rule}', [BonusController::class, 'destroyRule'])->name('bonus.rules.destroy')->middleware('permission:hr_bonus.delete');
+        Route::post('bonus/infractions', [BonusController::class, 'storeInfraction'])->name('bonus.infractions.store')->middleware('permission:hr_bonus.create');
+        Route::post('bonus/infractions/{infraction}/waive', [BonusController::class, 'waiveInfraction'])->name('bonus.infractions.waive')->middleware('permission:hr_bonus.edit');
+        Route::delete('bonus/infractions/{infraction}', [BonusController::class, 'destroyInfraction'])->name('bonus.infractions.destroy')->middleware('permission:hr_bonus.delete');
 
         $permResource('attendance', AttendanceController::class, 'hr_attendance', ['only' => ['index', 'store', 'destroy']]);
         Route::get('salary-slips', [SalarySlipController::class, 'index'])->name('salary-slips.index')->middleware('permission:hr_salary_slips.view');

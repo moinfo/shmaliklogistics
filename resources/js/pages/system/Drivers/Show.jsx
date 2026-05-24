@@ -38,6 +38,21 @@ function DocRow({ label, date, isDark }) {
     );
 }
 
+const fmtMoney = (n, cur = 'TZS') => `${cur} ${Number(n ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+
+function Metric({ label, value, color, sub, isDark }) {
+    const bg = isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC';
+    const border = isDark ? dk.border : '#E2E8F0';
+    const mut = isDark ? dk.textMut : '#64748B';
+    return (
+        <Box style={{ background: bg, border: `1px solid ${border}`, borderRadius: 10, padding: '12px 14px' }}>
+            <Text size="10px" fw={700} style={{ color: mut, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</Text>
+            <Text fw={800} size="md" style={{ color, marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</Text>
+            {sub && <Text size="xs" style={{ color: mut, marginTop: 1 }}>{sub}</Text>}
+        </Box>
+    );
+}
+
 function Card({ title, children, isDark, accent }) {
     const cardBg     = isDark ? dk.card : '#ffffff';
     const cardBorder = isDark ? dk.border : '#E2E8F0';
@@ -124,7 +139,7 @@ function PhotoLightbox({ src, alt, onClose }) {
 }
 
 
-export default function ShowDriver({ driver, trips, statuses, licenseClasses, availableVehicles, vehicleStatuses, vehicleTypeIcons }) {
+export default function ShowDriver({ driver, trips, hr, statuses, licenseClasses, availableVehicles, vehicleStatuses, vehicleTypeIcons }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const { props } = usePage();
@@ -144,6 +159,20 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
     const vehicle = driver.vehicle;
     const vMeta   = vehicle ? (vehicleStatuses?.[vehicle.status] ?? { label: vehicle.status, color: '#94A3B8' }) : null;
     const vIcon   = vehicle ? (vehicleTypeIcons?.[vehicle.type] ?? '🚗') : null;
+
+    // At-a-glance summary for the hero header
+    const licDays = driver.license_expiry ? Math.floor((new Date(driver.license_expiry) - new Date()) / 86400000) : null;
+    const licInfo = licDays === null ? { label: 'Not set', color: textMut }
+        : licDays < 0  ? { label: 'Expired', color: '#EF4444' }
+        : licDays <= 30 ? { label: `${licDays}d left`, color: '#F59E0B' }
+        : { label: 'Valid', color: '#22C55E' };
+    const phoneDigits = (driver.phone ?? '').replace(/\D/g, '');
+    const heroChips = [
+        { icon: '🚛', label: 'Vehicle',      value: vehicle ? vehicle.plate : 'Unassigned', color: vehicle ? '#3B82F6' : textMut },
+        { icon: '🪪', label: 'Licence',      value: licInfo.label,                          color: licInfo.color },
+        { icon: '🔑', label: 'Login',        value: driver.user ? 'Active' : 'None',        color: driver.user ? '#22C55E' : textMut },
+        { icon: '🚚', label: 'Recent Trips', value: String(trips.length),                   color: '#60A5FA' },
+    ];
 
     const confirmDelete = () => {
         if (window.confirm(`Remove ${driver.name} from the system?`)) {
@@ -202,79 +231,112 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
                 </motion.div>
             )}
 
-            {/* Header */}
-            <Group justify="space-between" mb="xl" align="flex-start" wrap="wrap" gap="md">
-                <Group gap="md">
-                    <Box style={{ position: 'relative', flexShrink: 0 }}>
-                        <Avatar
-                            name={driver.name}
-                            photoUrl={driver.photo_url}
-                            onClick={driver.photo_url ? () => setPhotoOpen(true) : undefined}
-                        />
-                        {can('drivers.edit') && (
-                            <Tooltip label="Upload photo" position="bottom">
-                                <Box
-                                    component="label"
-                                    htmlFor="driver-photo-input"
-                                    style={{
-                                        position: 'absolute', bottom: 2, right: 2,
-                                        width: 28, height: 28, borderRadius: '50%',
-                                        background: '#1565C0',
-                                        border: '2px solid white',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        cursor: photoUploading ? 'wait' : 'pointer',
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                                    }}
-                                >
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                        <polyline points="17 8 12 3 7 8"/>
-                                        <line x1="12" y1="3" x2="12" y2="15"/>
-                                    </svg>
-                                </Box>
-                            </Tooltip>
-                        )}
-                        <input
-                            id="driver-photo-input"
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp"
-                            style={{ display: 'none' }}
-                            onChange={handlePhotoUpload}
-                            disabled={photoUploading}
-                        />
-                    </Box>
-                    <Stack gap={4}>
-                        <Group gap="sm">
-                            <Text fw={800} size="xl" style={{ color: textPri }}>{driver.name}</Text>
-                            <Box style={{ background: meta.color + '1A', border: `1px solid ${meta.color}40`, borderRadius: 20, padding: '4px 12px' }}>
-                                <Text size="xs" fw={700} style={{ color: meta.color }}>{meta.label}</Text>
+            {/* Hero header */}
+            <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: 'hidden', marginBottom: 16 }}>
+                {/* Cover strip */}
+                <Box style={{ height: 72, background: isDark ? 'linear-gradient(135deg, #0A1628 0%, #0E4FA0 100%)' : 'linear-gradient(135deg, #1565C0, #2196F3)' }} />
+
+                <Box style={{ padding: '0 24px 20px' }}>
+                    <Group justify="space-between" align="flex-end" wrap="wrap" gap="md" style={{ marginTop: -44 }}>
+                        <Group gap="md" align="flex-end" wrap="nowrap" style={{ minWidth: 0 }}>
+                            <Box style={{ position: 'relative', flexShrink: 0, borderRadius: '50%', padding: 4, background: cardBg }}>
+                                <Avatar
+                                    name={driver.name}
+                                    photoUrl={driver.photo_url}
+                                    onClick={driver.photo_url ? () => setPhotoOpen(true) : undefined}
+                                />
+                                {can('drivers.edit') && (
+                                    <Tooltip label="Upload photo" position="bottom">
+                                        <Box
+                                            component="label"
+                                            htmlFor="driver-photo-input"
+                                            style={{
+                                                position: 'absolute', bottom: 4, right: 4,
+                                                width: 28, height: 28, borderRadius: '50%',
+                                                background: '#1565C0',
+                                                border: '2px solid white',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                cursor: photoUploading ? 'wait' : 'pointer',
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                                            }}
+                                        >
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                <polyline points="17 8 12 3 7 8"/>
+                                                <line x1="12" y1="3" x2="12" y2="15"/>
+                                            </svg>
+                                        </Box>
+                                    </Tooltip>
+                                )}
+                                <input
+                                    id="driver-photo-input"
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    style={{ display: 'none' }}
+                                    onChange={handlePhotoUpload}
+                                    disabled={photoUploading}
+                                />
                             </Box>
+                            <Stack gap={5} style={{ paddingBottom: 4, minWidth: 0 }}>
+                                <Group gap="sm" wrap="wrap">
+                                    <Text fw={800} size="xl" style={{ color: textPri }}>{driver.name}</Text>
+                                    <Box style={{ background: meta.color + '1A', border: `1px solid ${meta.color}40`, borderRadius: 20, padding: '4px 12px' }}>
+                                        <Text size="xs" fw={700} style={{ color: meta.color }}>{meta.label}</Text>
+                                    </Box>
+                                </Group>
+                                <Group gap={16} wrap="wrap">
+                                    <Text size="sm" style={{ color: textSec }}>📞 {driver.phone || '—'}</Text>
+                                    {driver.email && <Text size="sm" style={{ color: textSec }}>✉️ {driver.email}</Text>}
+                                </Group>
+                            </Stack>
                         </Group>
-                        <Text size="sm" style={{ color: textSec }}>{driver.phone}</Text>
-                    </Stack>
-                </Group>
-                <Group gap="sm" wrap="wrap">
-                    {can('drivers.edit') && (
-                        <Select
-                            value={driver.status}
-                            onChange={s => router.patch(`/system/drivers/${driver.id}/status`, { status: s })}
-                            data={Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))}
-                            size="sm"
-                            styles={{ input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8, width: 150 }, dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` } }}
-                        />
-                    )}
-                    {can('drivers.edit') && (
-                        <Box component={Link} href={`/system/drivers/${driver.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
-                            ✏️ Edit
-                        </Box>
-                    )}
-                    {can('drivers.delete') && (
-                        <Tooltip label="Remove driver">
-                            <ActionIcon onClick={confirmDelete} size={36} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, color: '#EF4444' }}>🗑️</ActionIcon>
-                        </Tooltip>
-                    )}
-                </Group>
-            </Group>
+
+                        <Group gap="sm" wrap="wrap" style={{ paddingBottom: 4 }}>
+                            {phoneDigits && (
+                                <Box component="a" href={`tel:${driver.phone}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, textDecoration: 'none', fontSize: 13, fontWeight: 700, background: 'rgba(34,197,94,0.10)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.3)' }}>📞 Call</Box>
+                            )}
+                            {phoneDigits && (
+                                <Box component="a" href={`https://wa.me/${phoneDigits}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, textDecoration: 'none', fontSize: 13, fontWeight: 700, background: 'rgba(37,211,102,0.10)', color: '#25D366', border: '1px solid rgba(37,211,102,0.3)' }}>💬 WhatsApp</Box>
+                            )}
+                            {driver.email && (
+                                <Box component="a" href={`mailto:${driver.email}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, textDecoration: 'none', fontSize: 13, fontWeight: 700, background: 'rgba(33,150,243,0.10)', color: '#3B82F6', border: '1px solid rgba(33,150,243,0.3)' }}>✉️ Email</Box>
+                            )}
+                            {can('drivers.edit') && (
+                                <Select
+                                    value={driver.status}
+                                    onChange={s => router.patch(`/system/drivers/${driver.id}/status`, { status: s })}
+                                    data={Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))}
+                                    size="sm"
+                                    styles={{ input: { background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8, width: 150 }, dropdown: { background: isDark ? '#0F1E32' : '#fff', border: `1px solid ${cardBorder}` } }}
+                                />
+                            )}
+                            {can('drivers.edit') && (
+                                <Box component={Link} href={`/system/drivers/${driver.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
+                                    ✏️ Edit
+                                </Box>
+                            )}
+                            {can('drivers.delete') && (
+                                <Tooltip label="Remove driver">
+                                    <ActionIcon onClick={confirmDelete} size={36} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, color: '#EF4444' }}>🗑️</ActionIcon>
+                                </Tooltip>
+                            )}
+                        </Group>
+                    </Group>
+
+                    {/* At-a-glance chips */}
+                    <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm" mt="lg">
+                        {heroChips.map(c => (
+                            <Box key={c.label} style={{ display: 'flex', alignItems: 'center', gap: 10, background: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC', border: `1px solid ${cardBorder}`, borderRadius: 10, padding: '9px 14px' }}>
+                                <Text style={{ fontSize: 18 }}>{c.icon}</Text>
+                                <Stack gap={0} style={{ minWidth: 0 }}>
+                                    <Text size="10px" fw={700} style={{ color: textMut, textTransform: 'uppercase', letterSpacing: 0.5 }}>{c.label}</Text>
+                                    <Text size="sm" fw={700} style={{ color: c.color, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.value}</Text>
+                                </Stack>
+                            </Box>
+                        ))}
+                    </SimpleGrid>
+                </Box>
+            </Box>
 
             <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md" mb="md">
                 <Card title="Personal Details" isDark={isDark} accent={['#1565C0', '#2196F3']}>
@@ -314,6 +376,39 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
                     <DataRow label="Emergency Phone" value={driver.emergency_contact_phone} isDark={isDark} />
                 </Card>
             </SimpleGrid>
+
+            {/* HR & Payroll */}
+            {hr && (
+                <Box mb="md">
+                    <Card title="HR & Payroll" isDark={isDark} accent={['#7C2D12', '#F59E0B']}>
+                        <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm" style={{ paddingTop: 12, paddingBottom: 4 }}>
+                            <Metric label="Monthly Salary" value={fmtMoney(hr.salary, hr.currency)} color="#3B82F6" isDark={isDark} />
+                            <Metric label="Monthly Bonus" value={fmtMoney(hr.bonus, hr.currency)} color="#22C55E" isDark={isDark} />
+                            <Metric label="Arrears (owed)" value={fmtMoney(hr.arrears_total, hr.currency)} color={hr.arrears_total > 0 ? '#EF4444' : '#22C55E'} isDark={isDark} />
+                            <Metric label="Employee" value={hr.employee_number} color={textPri} sub={[hr.department, hr.position].filter(Boolean).join(' · ')} isDark={isDark} />
+                        </SimpleGrid>
+
+                        {(hr.advance_arrears > 0 || hr.loan_arrears > 0) && (
+                            <Box style={{ borderTop: `1px solid ${divider}`, marginTop: 10, paddingTop: 8 }}>
+                                <Text size="10px" fw={700} style={{ color: textMut, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>Arrears Breakdown</Text>
+                                <DataRow label="💵 Salary advances (to recover)" value={fmtMoney(hr.advance_arrears, hr.currency)} isDark={isDark} />
+                                <DataRow label="🏦 Active loan balance" value={fmtMoney(hr.loan_arrears, hr.currency)} isDark={isDark} />
+                                {hr.loans.map((l, i) => (
+                                    <Text key={i} size="xs" style={{ color: textMut, paddingTop: 6 }}>↳ {l.loan_number}: {fmtMoney(l.balance, hr.currency)} remaining · {fmtMoney(l.installment, hr.currency)}/mo</Text>
+                                ))}
+                            </Box>
+                        )}
+
+                        {can('hr_employees.view') && (
+                            <Group justify="flex-end" mt="md">
+                                <Box component={Link} href={`/system/hr/employees/${hr.employee_id}`} style={{ padding: '7px 14px', borderRadius: 8, background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
+                                    View HR record →
+                                </Box>
+                            </Group>
+                        )}
+                    </Card>
+                </Box>
+            )}
 
             {/* Assigned Vehicle */}
             <Box mb="md">

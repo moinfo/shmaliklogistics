@@ -197,7 +197,7 @@
     <td style="background:{{ $brandDk }};padding:24px 40px;text-align:center;">
       <div style="font-size:13px;font-weight:700;color:#ffffff;letter-spacing:.3px;margin-bottom:8px;">{{ $company->company_name }}</div>
       <div style="font-size:11px;color:rgba(255,255,255,.55);line-height:1.9;">
-        @if($company->company_address){{ $company->company_address }}@if($company->company_city), {{ $company->company_city }}@endif@if($company->company_country), {{ $company->company_country }}@endif<br>@endif
+        @if($company->company_address){{ $company->company_address }}@if($company->company_city), {{ $company->company_city }}@endif @if($company->company_country), {{ $company->company_country }}@endif<br>@endif
         @if($company->company_phone)<span style="color:rgba(255,255,255,.7);">Tel:</span> {{ $company->company_phone }}@endif
         @if($company->company_phone && $company->company_email)&nbsp;&nbsp;·&nbsp;&nbsp;@endif
         @if($company->company_email)<a href="mailto:{{ $company->company_email }}" style="color:rgba(255,255,255,.85);text-decoration:none;">{{ $company->company_email }}</a>@endif

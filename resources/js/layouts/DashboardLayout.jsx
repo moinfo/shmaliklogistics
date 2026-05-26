@@ -11,7 +11,14 @@ import { checkPermission } from '../lib/can';
 const navItems = [
     { icon: '📊', label: 'Dashboard', href: '/system/dashboard' },
 
-    { icon: '🚛', label: 'Trips', href: '/system/trips', perm: 'trips.view' },
+    {
+        icon: '🚛', label: 'Trips', href: '/system/trips',
+        anyPerm: ['trips.view'],
+        children: [
+            { icon: '📊', label: 'Dashboard', href: '/system/trips/dashboard', perm: 'trips.view' },
+            { icon: '🚛', label: 'All Trips', href: '/system/trips',           perm: 'trips.view' },
+        ],
+    },
 
     // ── Fleet ─────────────────────────────────────────────────────────────────
     {
@@ -45,7 +52,14 @@ const navItems = [
     },
 
     { icon: '💸', label: 'Expenses',    href: '/system/expenses',    perm: 'expenses.view' },
-    { icon: '🔧', label: 'Maintenance', href: '/system/maintenance', perm: 'maintenance.view' },
+    {
+        icon: '🔧', label: 'Maintenance', href: '/system/maintenance',
+        anyPerm: ['maintenance.view'],
+        children: [
+            { icon: '📊', label: 'Dashboard',      href: '/system/maintenance/dashboard', perm: 'maintenance.view' },
+            { icon: '🔧', label: 'Service Records', href: '/system/maintenance',           perm: 'maintenance.view' },
+        ],
+    },
     { icon: '📁', label: 'Documents',   href: '/system/documents',   perm: 'documents.view' },
     { icon: '📦', label: 'Cargo',       href: '/system/cargo',       perm: 'cargo.view' },
 
@@ -77,7 +91,14 @@ const navItems = [
             { icon: '📋', label: 'Purchase Orders', href: '/system/procurement/orders',    perm: 'procurement_orders.view' },
         ],
     },
-    { icon: '🏗️', label: 'Inventory', href: '/system/inventory', perm: 'inventory.view' },
+    {
+        icon: '🏗️', label: 'Inventory', href: '/system/inventory',
+        anyPerm: ['inventory.view'],
+        children: [
+            { icon: '📊', label: 'Dashboard', href: '/system/inventory/dashboard', perm: 'inventory.view' },
+            { icon: '🏗️', label: 'All Items', href: '/system/inventory',           perm: 'inventory.view' },
+        ],
+    },
 
     // ── Real Estate ───────────────────────────────────────────────────────────
     {

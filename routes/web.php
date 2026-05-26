@@ -65,6 +65,9 @@ use App\Http\Controllers\System\RealEstate\RentController;
 use App\Http\Controllers\System\RealEstate\PropertyExpenseController;
 use App\Http\Controllers\System\RealEstate\ReportController as RealEstateReportController;
 use App\Http\Controllers\System\RealEstate\DashboardController as RealEstateDashboardController;
+use App\Http\Controllers\System\TripDashboardController;
+use App\Http\Controllers\System\MaintenanceDashboardController;
+use App\Http\Controllers\System\InventoryDashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -171,7 +174,8 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
     // Trip check-ins (admin view)
     Route::get('/check-ins',                  [\App\Http\Controllers\System\TripCheckInController::class, 'index'])->name('check-ins.index')->middleware('permission:trip_check_ins.view');
 
-    // Trips
+    // Trips — dashboard must precede the trips/{trip} wildcard
+    Route::get('trips/dashboard', TripDashboardController::class)->name('trips.dashboard')->middleware('permission:trips.view');
     $permResource('trips', TripController::class, 'trips');
     Route::patch('trips/{trip}/status', [TripController::class, 'updateStatus'])->name('trips.update-status')->middleware('permission:trips.edit');
     Route::get('trips/import', [TripImportController::class, 'create'])->name('trips.import')->middleware('permission:trips.create');
@@ -242,7 +246,8 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
     // Expenses
     $permResource('expenses', ExpenseController::class, 'expenses', ['except' => ['show']]);
 
-    // Maintenance
+    // Maintenance — dashboard must precede the maintenance/{maintenance} wildcard
+    Route::get('maintenance/dashboard', MaintenanceDashboardController::class)->name('maintenance.dashboard')->middleware('permission:maintenance.view');
     $permResource('maintenance', MaintenanceController::class, 'maintenance');
 
     // Documents
@@ -334,6 +339,7 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
     Route::get('inventory/create', [InventoryController::class, 'create'])->name('inventory.create')->middleware('permission:inventory.create');
     Route::post('inventory', [InventoryController::class, 'store'])->name('inventory.store')->middleware('permission:inventory.create');
     Route::get('inventory/movements', [InventoryController::class, 'movements'])->name('inventory.movements')->middleware('permission:inventory.view');
+    Route::get('inventory/dashboard', InventoryDashboardController::class)->name('inventory.dashboard')->middleware('permission:inventory.view');
     Route::get('inventory/{item}', [InventoryController::class, 'show'])->name('inventory.show')->middleware('permission:inventory.view');
     Route::put('inventory/{item}', [InventoryController::class, 'update'])->name('inventory.update')->middleware('permission:inventory.edit');
     Route::delete('inventory/{item}', [InventoryController::class, 'destroy'])->name('inventory.destroy')->middleware('permission:inventory.delete');

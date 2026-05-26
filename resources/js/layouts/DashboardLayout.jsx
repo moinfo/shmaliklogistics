@@ -79,6 +79,21 @@ const navItems = [
     },
     { icon: '🏗️', label: 'Inventory', href: '/system/inventory', perm: 'inventory.view' },
 
+    // ── Real Estate ───────────────────────────────────────────────────────────
+    {
+        icon: '🏠', label: 'Real Estate', href: '/system/real-estate',
+        anyPerm: ['realestate_properties.view', 'realestate_tenants.view', 'realestate_leases.view', 'realestate_rent.view', 'realestate_expenses.view', 'realestate_reports.view'],
+        children: [
+            { icon: '📊', label: 'Dashboard',  href: '/system/real-estate/dashboard',           perm: 'realestate_properties.view' },
+            { icon: '🏢', label: 'Properties', href: '/system/real-estate/properties',          perm: 'realestate_properties.view' },
+            { icon: '👤', label: 'Tenants',    href: '/system/real-estate/tenants',             perm: 'realestate_tenants.view' },
+            { icon: '📜', label: 'Leases',     href: '/system/real-estate/leases',              perm: 'realestate_leases.view' },
+            { icon: '💰', label: 'Rent',       href: '/system/real-estate/rent',                perm: 'realestate_rent.view' },
+            { icon: '🔨', label: 'Expenses',   href: '/system/real-estate/expenses',            perm: 'realestate_expenses.view' },
+            { icon: '📈', label: 'Reports',    href: '/system/real-estate/reports/profitability', perm: 'realestate_reports.view' },
+        ],
+    },
+
     // ── Reports ───────────────────────────────────────────────────────────────
     {
         icon: '📈', label: 'Reports', href: '/system/reports',
@@ -94,6 +109,7 @@ const navItems = [
     // ── Customer Portal (coming soon) ─────────────────────────────────────────
     {
         icon: '🌐', label: 'Customer Portal', href: '/system/portal',
+        anyPerm: ['clients.view', 'trips.view', 'billing_invoices.view', 'cargo.view'],
         children: [
             { icon: '📊', label: 'Dashboard',   href: '/portal/dashboard', soon: true },
             { icon: '🚛', label: 'My Shipments', href: '/portal/trips',    soon: true },
@@ -125,9 +141,13 @@ function visibleNav(items, permissions) {
     return items
         .map(item => {
             if (item.children) {
+                // Enforce the group's own permission gate FIRST, so a group with a
+                // perm/anyPerm requirement stays hidden even when it has permissionless
+                // ("soon") children that would otherwise keep it visible.
+                if (item.perm && !checkPermission(permissions, item.perm)) return null;
+                if (item.anyPerm && !item.anyPerm.some(p => checkPermission(permissions, p))) return null;
                 const kids = visibleNav(item.children, permissions);
-                if (kids.length === 0 && item.perm && !checkPermission(permissions, item.perm)) return null;
-                if (kids.length === 0 && item.anyPerm && !item.anyPerm.some(p => checkPermission(permissions, p))) return null;
+                if (kids.length === 0) return null;
                 return { ...item, children: kids };
             }
             if (item.perm && !checkPermission(permissions, item.perm)) return null;

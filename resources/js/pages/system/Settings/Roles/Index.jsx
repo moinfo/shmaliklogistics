@@ -42,6 +42,12 @@ const MODULES = [
     { key: 'reports_route_profitability', label: 'Reports — Route Profitability', actions: ['view'] },
     { key: 'reports_financial_summary',   label: 'Reports — Financial Summary',   actions: ['view'] },
     { key: 'reports_fleet_utilization',   label: 'Reports — Fleet Utilization',   actions: ['view'] },
+    { key: 'realestate_properties',       label: 'Real Estate — Properties',  actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'realestate_tenants',          label: 'Real Estate — Tenants',     actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'realestate_leases',           label: 'Real Estate — Leases',      actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'realestate_rent',             label: 'Real Estate — Rent',        actions: ['view', 'create', 'delete'] },
+    { key: 'realestate_expenses',         label: 'Real Estate — Expenses',    actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'realestate_reports',          label: 'Real Estate — Reports',     actions: ['view'] },
     { key: 'settings',                    label: 'Settings',                  actions: ['view', 'edit'] },
 ];
 

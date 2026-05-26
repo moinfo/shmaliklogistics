@@ -57,6 +57,14 @@ use App\Http\Controllers\Portal\PortalQuoteController;
 use App\Http\Controllers\Portal\PortalCargoController;
 use App\Http\Controllers\Settings\CompanySettingController;
 use App\Http\Controllers\NfcController;
+use App\Http\Controllers\System\RealEstate\PropertyController;
+use App\Http\Controllers\System\RealEstate\PropertyUnitController;
+use App\Http\Controllers\System\RealEstate\TenantController;
+use App\Http\Controllers\System\RealEstate\LeaseController;
+use App\Http\Controllers\System\RealEstate\RentController;
+use App\Http\Controllers\System\RealEstate\PropertyExpenseController;
+use App\Http\Controllers\System\RealEstate\ReportController as RealEstateReportController;
+use App\Http\Controllers\System\RealEstate\DashboardController as RealEstateDashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -334,6 +342,45 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
     Route::post('inventory/categories', [InventoryController::class, 'storeCategory'])->name('inventory.categories.store')->middleware('permission:inventory.create');
     Route::delete('inventory/categories/{category}', [InventoryController::class, 'destroyCategory'])->name('inventory.categories.destroy')->middleware('permission:inventory.delete');
 
+    // ── Real Estate ───────────────────────────────────────────────────────────
+    Route::prefix('real-estate')->name('real-estate.')->group(function () use ($permResource) {
+        // Dashboard (landing page for the Real Estate Manager role)
+        Route::get('/dashboard', RealEstateDashboardController::class)->name('dashboard')->middleware('permission:realestate_properties.view');
+
+        // Properties (+ title deed, status, nested units)
+        $permResource('properties', PropertyController::class, 'realestate_properties');
+        Route::post('properties/{property}/title-deed', [PropertyController::class, 'uploadTitleDeed'])->name('properties.title-deed')->middleware('permission:realestate_properties.edit');
+        Route::patch('properties/{property}/status', [PropertyController::class, 'updateStatus'])->name('properties.status')->middleware('permission:realestate_properties.edit');
+        Route::post('properties/{property}/units', [PropertyUnitController::class, 'store'])->name('units.store')->middleware('permission:realestate_properties.edit');
+        Route::put('units/{unit}', [PropertyUnitController::class, 'update'])->name('units.update')->middleware('permission:realestate_properties.edit');
+        Route::delete('units/{unit}', [PropertyUnitController::class, 'destroy'])->name('units.destroy')->middleware('permission:realestate_properties.delete');
+
+        // Tenants
+        $permResource('tenants', TenantController::class, 'realestate_tenants');
+
+        // Leases (+ contract upload, status)
+        $permResource('leases', LeaseController::class, 'realestate_leases');
+        Route::post('leases/{lease}/contract', [LeaseController::class, 'uploadContract'])->name('leases.contract')->middleware('permission:realestate_leases.edit');
+        Route::patch('leases/{lease}/status', [LeaseController::class, 'updateStatus'])->name('leases.status')->middleware('permission:realestate_leases.edit');
+
+        // Rent — invoices + payments
+        Route::get('rent', [RentController::class, 'index'])->name('rent.index')->middleware('permission:realestate_rent.view');
+        Route::post('rent/generate', [RentController::class, 'generate'])->name('rent.generate')->middleware('permission:realestate_rent.create');
+        Route::post('rent/invoices/{invoice}/payments', [RentController::class, 'storePayment'])->name('rent.payments.store')->middleware('permission:realestate_rent.create');
+        Route::delete('rent/payments/{payment}', [RentController::class, 'destroyPayment'])->name('rent.payments.destroy')->middleware('permission:realestate_rent.delete');
+
+        // Property expenses (matumizi / ukarabati)
+        Route::get('expenses', [PropertyExpenseController::class, 'index'])->name('expenses.index')->middleware('permission:realestate_expenses.view');
+        Route::post('expenses', [PropertyExpenseController::class, 'store'])->name('expenses.store')->middleware('permission:realestate_expenses.create');
+        Route::put('expenses/{expense}', [PropertyExpenseController::class, 'update'])->name('expenses.update')->middleware('permission:realestate_expenses.edit');
+        Route::delete('expenses/{expense}', [PropertyExpenseController::class, 'destroy'])->name('expenses.destroy')->middleware('permission:realestate_expenses.delete');
+
+        // Reports
+        Route::get('reports/profitability', [RealEstateReportController::class, 'profitability'])->name('reports.profitability')->middleware('permission:realestate_reports.view');
+        Route::get('reports/occupancy', [RealEstateReportController::class, 'occupancy'])->name('reports.occupancy')->middleware('permission:realestate_reports.view');
+        Route::get('reports/arrears', [RealEstateReportController::class, 'arrears'])->name('reports.arrears')->middleware('permission:realestate_reports.view');
+    });
+
     // Reports — each report has its own permission
     Route::get('reports/route-profitability', [RouteProfitabilityController::class, 'index'])->name('reports.route-profitability')->middleware('permission:reports_route_profitability.view');
     Route::get('reports/financial-summary',   [FinancialSummaryController::class, 'index'])->name('reports.financial-summary')->middleware('permission:reports_financial_summary.view');
@@ -382,8 +429,9 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
 
 // Redirect /dashboard → role-appropriate landing page
 Route::get('/dashboard', function () {
-    $user = auth()->user();
-    return $user?->role?->slug === 'driver'
-        ? redirect()->route('driver.dashboard')
-        : redirect()->route('system.dashboard');
+    return match (auth()->user()?->role?->slug) {
+        'driver'              => redirect()->route('driver.dashboard'),
+        'real-estate-manager' => redirect()->route('system.real-estate.dashboard'),
+        default               => redirect()->route('system.dashboard'),
+    };
 })->middleware('auth')->name('dashboard');

@@ -118,6 +118,20 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/recruitment/{id}', [\App\Http\Controllers\Api\Staff\Modules\TalentController::class, 'recruitmentShow'])->middleware('permission:hr_recruitment.view');
             Route::get('/appraisals', [\App\Http\Controllers\Api\Staff\Modules\TalentController::class, 'appraisals'])->middleware('permission:hr_appraisals.view');
 
+            // Real Estate (read-only)
+            Route::get('/real-estate/properties', [\App\Http\Controllers\Api\Staff\Modules\RealEstateController::class, 'properties'])->middleware('permission:realestate_properties.view');
+            Route::get('/real-estate/properties/{id}', [\App\Http\Controllers\Api\Staff\Modules\RealEstateController::class, 'propertyShow'])->middleware('permission:realestate_properties.view');
+            Route::get('/real-estate/tenants', [\App\Http\Controllers\Api\Staff\Modules\RealEstateController::class, 'tenants'])->middleware('permission:realestate_tenants.view');
+            Route::get('/real-estate/tenants/{id}', [\App\Http\Controllers\Api\Staff\Modules\RealEstateController::class, 'tenantShow'])->middleware('permission:realestate_tenants.view');
+            Route::get('/real-estate/leases', [\App\Http\Controllers\Api\Staff\Modules\RealEstateController::class, 'leases'])->middleware('permission:realestate_leases.view');
+            Route::get('/real-estate/leases/{id}', [\App\Http\Controllers\Api\Staff\Modules\RealEstateController::class, 'leaseShow'])->middleware('permission:realestate_leases.view');
+            Route::get('/real-estate/rent-invoices', [\App\Http\Controllers\Api\Staff\Modules\RealEstateController::class, 'rentInvoices'])->middleware('permission:realestate_rent.view');
+            Route::get('/real-estate/expenses', [\App\Http\Controllers\Api\Staff\Modules\RealEstateController::class, 'expenses'])->middleware('permission:realestate_expenses.view');
+            // Real Estate — write actions (record payment / add expense / upload mkataba)
+            Route::post('/real-estate/rent-invoices/{id}/payments', [\App\Http\Controllers\Api\Staff\Modules\RealEstateController::class, 'storePayment'])->middleware('permission:realestate_rent.create');
+            Route::post('/real-estate/expenses', [\App\Http\Controllers\Api\Staff\Modules\RealEstateController::class, 'storeExpense'])->middleware('permission:realestate_expenses.create');
+            Route::post('/real-estate/leases/{id}/contract', [\App\Http\Controllers\Api\Staff\Modules\RealEstateController::class, 'uploadContract'])->middleware('permission:realestate_leases.edit');
+
             Route::get('/reports/route-profitability', [\App\Http\Controllers\Api\Staff\Modules\ReportsController::class, 'routeProfitability'])->middleware('permission:reports_route_profitability.view');
             Route::get('/reports/financial-summary', [\App\Http\Controllers\Api\Staff\Modules\ReportsController::class, 'financialSummary'])->middleware('permission:reports_financial_summary.view');
             Route::get('/reports/fleet-utilization', [\App\Http\Controllers\Api\Staff\Modules\ReportsController::class, 'fleetUtilization'])->middleware('permission:reports_fleet_utilization.view');

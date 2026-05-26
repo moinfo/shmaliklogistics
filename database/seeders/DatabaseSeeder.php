@@ -1210,6 +1210,9 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        // ── Real Estate module (self-contained: truncates + seeds its own tables) ──
+        $this->call(RealEstateSeeder::class);
+
         $this->command->info('✅ Seed complete. ' . count($tripIds) . ' trips, ' . (count($employeeIds) * 4) . ' payroll slips.');
     }
 }

@@ -16,6 +16,11 @@ class DashboardController extends Controller
 {
     public function __invoke()
     {
+        // Real Estate Managers have their own scoped dashboard.
+        if (auth()->user()?->role?->slug === 'real-estate-manager') {
+            return redirect()->route('system.real-estate.dashboard');
+        }
+
         $monthRevenue     = (float) Trip::whereMonth('departure_date', now()->month)
             ->whereYear('departure_date', now()->year)
             ->sum('freight_amount');

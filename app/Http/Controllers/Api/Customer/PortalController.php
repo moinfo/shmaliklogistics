@@ -33,8 +33,7 @@ class PortalController extends Controller
             ->with(['items'])
             ->latest()
             ->limit(5)
-            ->get()
-            ->append(['amount_paid', 'balance_due']);
+            ->get();
 
         return response()->json([
             'dashboard' => [
@@ -56,9 +55,9 @@ class PortalController extends Controller
                         ->where('status', 'paid')
                         ->count(),
                 ],
-                'active_trips'    => $activeTrips,
+                'active_trips'    => $activeTrips->map(fn ($t) => $this->publicTrip($t))->all(),
                 'recent_cargo'    => $recentCargo,
-                'recent_invoices' => $recentInvoices,
+                'recent_invoices' => $recentInvoices->map(fn ($i) => $this->publicInvoice($i))->all(),
                 'trip_statuses'   => Trip::$statuses,
             ],
         ]);
@@ -92,6 +91,10 @@ class PortalController extends Controller
             });
         }
 
+        // Project to a customer-safe shape (drops trip cost/profit columns) while
+        // preserving the pagination envelope.
+        $trips->getCollection()->transform(fn ($t) => $this->publicTrip($t));
+
         return response()->json([
             'trips'         => $trips,
             'trip_statuses' => Trip::$statuses,
@@ -103,7 +106,7 @@ class PortalController extends Controller
         $client = $request->user();
         abort_unless($trip->client_id === $client->id, 403);
 
-        $trip->load(['driver:id,name', 'vehicle:id,plate,make,model_name,type', 'expenses']);
+        $trip->load(['driver:id,name', 'vehicle:id,plate,make,model_name,type']);
 
         // Cargo is scoped to this client's own records for this trip (the Trip model
         // exposes no cargo relationship, so query Cargo directly to stay client-scoped).
@@ -112,7 +115,7 @@ class PortalController extends Controller
             ->get();
 
         return response()->json([
-            'trip'          => $trip,
+            'trip'          => $this->publicTrip($trip),
             'cargo'         => $cargo,
             'trip_statuses' => Trip::$statuses,
         ]);
@@ -132,7 +135,7 @@ class PortalController extends Controller
         }
 
         $invoices = $query->paginate(15)->withQueryString();
-        $invoices->getCollection()->each->append(['amount_paid', 'balance_due']);
+        $invoices->getCollection()->transform(fn ($i) => $this->publicInvoice($i));
 
         $summary = [
             'total_billed' => BillingDocument::where('client_id', $client->id)->where('type', 'invoice')->sum('total'),
@@ -152,10 +155,10 @@ class PortalController extends Controller
         $client = $request->user();
         abort_unless($invoice->client_id === $client->id && $invoice->type === 'invoice', 403);
 
-        $invoice->load(['items', 'payments'])->append(['amount_paid', 'balance_due']);
+        $invoice->load(['items', 'payments']);
 
         return response()->json([
-            'invoice'          => $invoice,
+            'invoice'          => $this->publicInvoice($invoice),
             'invoice_statuses' => BillingDocument::$invoiceStatuses,
         ]);
     }
@@ -195,7 +198,7 @@ class PortalController extends Controller
             ->get();
 
         return response()->json([
-            'quote_requests'        => $requests,
+            'quote_requests'        => $requests->map(fn ($r) => $this->publicQuoteRequest($r))->all(),
             'quote_request_statuses' => PortalQuoteRequest::$statuses,
         ]);
     }
@@ -218,7 +221,69 @@ class PortalController extends Controller
 
         return response()->json([
             'message'       => 'Quote request submitted. Our team will contact you shortly.',
-            'quote_request' => $quoteRequest,
+            'quote_request' => $this->publicQuoteRequest($quoteRequest),
         ], 201);
+    }
+
+    // ── Customer-safe projections ─────────────────────────────────────────────
+    // Allow-lists, not deny-lists: only known-safe fields are returned, so a new
+    // column added to a shared table can never silently leak to customers. Trip
+    // cost/profit columns (freight_amount, fuel_cost, driver_allowance,
+    // border_costs, other_costs), internal notes, and staff/reviewer fields are
+    // intentionally omitted.
+
+    private function publicTrip(Trip $trip): array
+    {
+        $data = $trip->only([
+            'id', 'trip_number', 'status', 'route_from', 'route_to',
+            'departure_date', 'arrival_date', 'cargo_description',
+            'cargo_weight_tons', 'driver_name', 'vehicle_plate',
+        ]);
+
+        if ($trip->relationLoaded('driver')) {
+            $data['driver'] = $trip->driver?->only(['id', 'name']);
+        }
+        if ($trip->relationLoaded('vehicle')) {
+            $data['vehicle'] = $trip->vehicle?->only(['id', 'plate', 'make', 'model_name', 'type']);
+        }
+        if ($trip->getAttribute('cargo_count') !== null) {
+            $data['cargo_count'] = (int) $trip->getAttribute('cargo_count');
+        }
+
+        return $data;
+    }
+
+    private function publicInvoice(BillingDocument $invoice): array
+    {
+        $data = $invoice->only([
+            'id', 'type', 'document_number', 'trip_id', 'status',
+            'issue_date', 'due_date', 'valid_until', 'currency',
+            'subtotal', 'discount_amount', 'tax_rate', 'tax_amount', 'total',
+            'terms_conditions',
+        ]);
+        $data['amount_paid'] = $invoice->amount_paid;
+        $data['balance_due'] = $invoice->balance_due;
+
+        if ($invoice->relationLoaded('items')) {
+            $data['items'] = $invoice->items->map(fn ($i) => $i->only([
+                'id', 'description', 'quantity', 'unit', 'unit_price', 'total', 'sort_order',
+            ]))->all();
+        }
+        if ($invoice->relationLoaded('payments')) {
+            $data['payments'] = $invoice->payments->map(fn ($p) => $p->only([
+                'id', 'amount', 'payment_date', 'payment_method', 'reference_number',
+            ]))->all();
+        }
+
+        return $data;
+    }
+
+    private function publicQuoteRequest(PortalQuoteRequest $request): array
+    {
+        return $request->only([
+            'id', 'route_from', 'route_to', 'cargo_description',
+            'cargo_weight_kg', 'cargo_volume_m3', 'preferred_date',
+            'notes', 'status', 'created_at', 'updated_at',
+        ]);
     }
 }

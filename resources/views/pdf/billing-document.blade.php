@@ -16,6 +16,7 @@
   $paidSum   = $doc->type === 'invoice' ? (float) ($doc->payments->sum('amount') ?? 0) : 0;
   $balance   = (float) $doc->total - $paidSum;
   $isPaid    = $doc->type === 'invoice' && $balance <= 0.01;
+  $location  = implode(', ', array_filter([$company->company_address, $company->company_city, $company->company_country]));
 @endphp
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -117,8 +118,7 @@
         @endif
         <div class="company-name">{{ $company->company_name }}</div>
         <div class="company-meta">
-          {{ $company->company_address }}@if($company->company_city), {{ $company->company_city }}@endif@if($company->company_country), {{ $company->company_country }}@endif
-          @if($company->company_po_box) · P.O. Box {{ $company->company_po_box }}@endif<br>
+          {{ $location }}@if($company->company_po_box) · P.O. Box {{ $company->company_po_box }}@endif<br>
           @if($company->company_phone)Tel: {{ $company->company_phone }}@endif
           @if($company->company_phone && $company->company_email) · @endif
           @if($company->company_email){{ $company->company_email }}@endif
@@ -307,8 +307,7 @@
     <div class="footer">
       <div class="strong">{{ $company->company_name }}</div>
       <div>
-        @if($company->company_address){{ $company->company_address }}@endif@if($company->company_city), {{ $company->company_city }}@endif@if($company->company_country), {{ $company->company_country }}@endif
-        @if($company->company_phone) · Tel: {{ $company->company_phone }}@endif
+        {{ $location }}@if($company->company_phone) · Tel: {{ $company->company_phone }}@endif
         @if($company->company_email) · {{ $company->company_email }}@endif
       </div>
       <div class="muted">Generated {{ now()->format('d M Y H:i') }} · {{ $doc->document_number }} · © {{ date('Y') }} {{ $company->company_name }}</div>

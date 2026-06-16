@@ -9,6 +9,26 @@ class NfcController extends Controller
     private const BACK  = '/nfc_cards/card-back.jpeg';
     private const INFO  = 'info@shmaliklogistics.co.tz';
 
+    private const TRANSMAS_BACK = '/nfc_cards/transmas-back.jpeg';
+    private const TRANSMAS_INFO = 'info@transmaslogistics.co.tz';
+
+    // Display metadata per company. An employee's 'company' key (default
+    // 'shmalik') selects one of these; decorate() merges it onto the record.
+    private const COMPANIES = [
+        'shmalik' => [
+            'name'     => 'SH Malik Logistics',
+            'full'     => 'SH Malik Logistics Co. Ltd',
+            'website'  => 'www.shmaliklogistics.co.tz',
+            'location' => 'Handeni, Tanzania',
+        ],
+        'transmas' => [
+            'name'     => 'Trans-Mas Logistics',
+            'full'     => 'Trans-Mas Logistics Company Limited',
+            'website'  => 'www.transmaslogistics.co.tz',
+            'location' => 'P.O. Box 8, Handeni, Tanga',
+        ],
+    ];
+
     private static array $employees = [
 
         // ── Management ──────────────────────────────────────────────────────
@@ -902,7 +922,179 @@ class NfcController extends Controller
             'image'     => '/nfc_cards/shabani-rajabu-ngoma.jpeg',
             'backImage' => self::BACK,
         ],
+
+        // ── SH Malik — new cards (Jun 2026, batch 2) ────────────────────────
+        'abdi-mohamed-rashidi' => [
+            'name'      => 'Abdi Mohamed Rashidi',
+            'roles'     => ['Driver'],
+            'email'     => self::INFO,
+            'phone'     => '+255713741858',
+            'idNo'      => '2506-2022-0044',
+            'slug'      => 'abdi-mohamed-rashidi',
+            'image'     => '/nfc_cards/abdi-mohamed-rashidi.jpeg',
+            'backImage' => self::BACK,
+        ],
+        'makame-rashidi-mangwea' => [
+            'name'      => 'Makame Rashidi Mangwea',
+            'roles'     => ['Driver'],
+            'email'     => self::INFO,
+            'phone'     => '+255658113492',
+            'idNo'      => '2506-2022-0117',
+            'slug'      => 'makame-rashidi-mangwea',
+            'image'     => '/nfc_cards/makame-rashidi-mangwea.jpeg',
+            'backImage' => self::BACK,
+        ],
+        'salum-said-ligonjara' => [
+            'name'      => 'Salum Said Ligonjara',
+            'roles'     => ['Driver'],
+            'email'     => self::INFO,
+            'phone'     => '+255758222780',
+            'idNo'      => '2506-2022-0077',
+            'slug'      => 'salum-said-ligonjara',
+            'image'     => '/nfc_cards/salum-said-ligonjara.jpeg',
+            'backImage' => self::BACK,
+        ],
+        'shabani-ibrahim-hassan' => [
+            'name'      => 'Shabani Ibrahim Hassan',
+            'roles'     => ['Driver'],
+            'email'     => self::INFO,
+            'phone'     => '+255757182792',
+            'idNo'      => '2506-2022-0103',
+            'slug'      => 'shabani-ibrahim-hassan',
+            'image'     => '/nfc_cards/shabani-ibrahim-hassan.jpeg',
+            'backImage' => self::BACK,
+        ],
+        'tadu-hemedi-said' => [
+            'name'      => 'Tadu Hemedi Said',
+            'roles'     => ['Driver'],
+            'email'     => self::INFO,
+            'phone'     => '+255716414848',
+            'idNo'      => '2506-2022-0115',
+            'slug'      => 'tadu-hemedi-said',
+            'image'     => '/nfc_cards/tadu-hemedi-said.jpeg',
+            'backImage' => self::BACK,
+        ],
+
+        // ── Trans-Mas Logistics ─────────────────────────────────────────────
+        'ayman-mahsen' => [
+            'name'      => 'Ayman Mahsen',
+            'roles'     => ['Assistant Director'],
+            'email'     => self::TRANSMAS_INFO,
+            'phone'     => '+255779928882',
+            'company'   => 'transmas',
+            'slug'      => 'ayman-mahsen',
+            'image'     => '/nfc_cards/ayman-mahsen.jpeg',
+            'backImage' => self::TRANSMAS_BACK,
+        ],
+        'cosmas-agostino-chunika' => [
+            'name'      => 'Cosmas Agostino Chunika',
+            'roles'     => ['Mechanical Engineer'],
+            'email'     => self::TRANSMAS_INFO,
+            'phone'     => '+255773963644',
+            'company'   => 'transmas',
+            'slug'      => 'cosmas-agostino-chunika',
+            'image'     => '/nfc_cards/cosmas-agostino-chunika.jpeg',
+            'backImage' => self::TRANSMAS_BACK,
+        ],
+        'fadhili-mussa-samatta' => [
+            'name'      => 'Fadhili Mussa Samatta',
+            'roles'     => ['Welder'],
+            'email'     => self::TRANSMAS_INFO,
+            'phone'     => '+255654347846',
+            'company'   => 'transmas',
+            'slug'      => 'fadhili-mussa-samatta',
+            'image'     => '/nfc_cards/fadhili-mussa-samatta.jpeg',
+            'backImage' => self::TRANSMAS_BACK,
+        ],
+        'halfan-ally-salim' => [
+            'name'      => 'Halfan Ally Salim',
+            'roles'     => ['Supervisor'],
+            'email'     => self::TRANSMAS_INFO,
+            'phone'     => '+255624989909',
+            'company'   => 'transmas',
+            'slug'      => 'halfan-ally-salim',
+            'image'     => '/nfc_cards/halfan-ally-salim.jpeg',
+            'backImage' => self::TRANSMAS_BACK,
+        ],
+        'hassani-abdallah-shaa' => [
+            'name'      => 'Hassani Abdallah Shaa',
+            'roles'     => ['Mechanical Engineer'],
+            'email'     => self::TRANSMAS_INFO,
+            'phone'     => '+255672409272',
+            'company'   => 'transmas',
+            'slug'      => 'hassani-abdallah-shaa',
+            'image'     => '/nfc_cards/hassani-abdallah-shaa.jpeg',
+            'backImage' => self::TRANSMAS_BACK,
+        ],
+        'maheer-ahmed' => [
+            'name'      => 'Maheer Ahmed',
+            'roles'     => ['Assistant Director'],
+            'email'     => self::TRANSMAS_INFO,
+            'phone'     => '+255695573434',
+            'company'   => 'transmas',
+            'slug'      => 'maheer-ahmed',
+            'image'     => '/nfc_cards/maheer-ahmed.jpeg',
+            'backImage' => self::TRANSMAS_BACK,
+        ],
+        'nassor-seif-nassor' => [
+            'name'      => 'Nassor Seif Nassor',
+            'roles'     => ['Head of Account'],
+            'email'     => self::TRANSMAS_INFO,
+            'phone'     => '+255739502240',
+            'company'   => 'transmas',
+            'slug'      => 'nassor-seif-nassor',
+            'image'     => '/nfc_cards/nassor-seif-nassor.jpeg',
+            'backImage' => self::TRANSMAS_BACK,
+        ],
+        'ramadhan-mustapha-abedi' => [
+            'name'      => 'Ramadhan Mustapha Abedi',
+            'roles'     => ['Mechanical Engineer'],
+            'email'     => self::TRANSMAS_INFO,
+            'phone'     => '+255748581808',
+            'company'   => 'transmas',
+            'slug'      => 'ramadhan-mustapha-abedi',
+            'image'     => '/nfc_cards/ramadhan-mustapha-abedi.jpeg',
+            'backImage' => self::TRANSMAS_BACK,
+        ],
+        'sleyman-ally-hemedi' => [
+            'name'      => 'Sleyman Ally Hemedi',
+            'roles'     => ['Accountant'],
+            'email'     => self::TRANSMAS_INFO,
+            'phone'     => '+255689689529',
+            'company'   => 'transmas',
+            'slug'      => 'sleyman-ally-hemedi',
+            'image'     => '/nfc_cards/sleyman-ally-hemedi.jpeg',
+            'backImage' => self::TRANSMAS_BACK,
+        ],
+        'yassir-arafat-suleyman' => [
+            'name'      => 'Yassir Arafat Suleyman',
+            'roles'     => ['Supervisor'],
+            'email'     => self::TRANSMAS_INFO,
+            'phone'     => '+255637413152',
+            'company'   => 'transmas',
+            'slug'      => 'yassir-arafat-suleyman',
+            'image'     => '/nfc_cards/yassir-arafat-suleyman.jpeg',
+            'backImage' => self::TRANSMAS_BACK,
+        ],
     ];
+
+    /**
+     * Merge the employee's company display metadata onto the record so the
+     * frontend never has to hardcode a company. Defaults to 'shmalik'.
+     */
+    private static function decorate(array $emp): array
+    {
+        $code = $emp['company'] ?? 'shmalik';
+        $c    = self::COMPANIES[$code] ?? self::COMPANIES['shmalik'];
+
+        return array_merge($emp, [
+            'company'     => $code,
+            'companyName' => $c['name'],
+            'companyFull' => $c['full'],
+            'website'     => $c['website'],
+            'location'    => $c['location'],
+        ]);
+    }
 
     public function show(string $slug)
     {
@@ -913,24 +1105,38 @@ class NfcController extends Controller
         }
 
         return Inertia::render('website/StaffCard', [
-            'employee' => $employee,
+            'employee' => self::decorate($employee),
         ]);
     }
 
     public function index()
     {
-        // De-duplicate by slug for the grid view
-        $seen = [];
-        $list = [];
+        // De-duplicate by slug, then group by company for the grid view.
+        $seen      = [];
+        $byCompany = [];
         foreach (self::$employees as $emp) {
-            if (! in_array($emp['slug'], $seen)) {
-                $seen[]  = $emp['slug'];
-                $list[]  = $emp;
+            if (in_array($emp['slug'], $seen)) {
+                continue;
+            }
+            $seen[] = $emp['slug'];
+            $code = $emp['company'] ?? 'shmalik';
+            $byCompany[$code][] = self::decorate($emp);
+        }
+
+        // Fixed display order; skip companies that have no members.
+        $groups = [];
+        foreach (['shmalik', 'transmas'] as $code) {
+            if (! empty($byCompany[$code])) {
+                $groups[] = [
+                    'code'      => $code,
+                    'name'      => self::COMPANIES[$code]['name'],
+                    'employees' => $byCompany[$code],
+                ];
             }
         }
 
         return Inertia::render('website/Team', [
-            'employees' => $list,
+            'groups' => $groups,
         ]);
     }
 }

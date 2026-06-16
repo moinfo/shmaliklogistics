@@ -58,7 +58,7 @@ export default function StaffCard({ employee }) {
                         {/* Company badge */}
                         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                             <Badge color="brand.2" variant="light" size="lg" radius="xl" style={{ letterSpacing: 1.5, textTransform: 'uppercase', fontSize: 11 }}>
-                                SH Malik Logistics
+                                {employee.companyName ?? 'SH Malik Logistics'}
                             </Badge>
                         </motion.div>
 
@@ -83,7 +83,7 @@ export default function StaffCard({ employee }) {
                                     ))}
                                 </Group>
                                 <Text c="gray.6" size="xs" style={{ letterSpacing: 0.5 }}>
-                                    ID: {employee.idNo} · SH Malik Logistics Co. Ltd
+                                    {employee.idNo ? `ID: ${employee.idNo} · ` : ''}{employee.companyFull ?? 'SH Malik Logistics Co. Ltd'}
                                 </Text>
                             </Stack>
                         </motion.div>
@@ -119,8 +119,8 @@ export default function StaffCard({ employee }) {
                         {/* Company info */}
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.65 }}>
                             <Stack align="center" gap={4}>
-                                <Text c="gray.6" size="xs">📍 Handeni, Tanzania</Text>
-                                <Text c="gray.6" size="xs">🌐 www.shmaliklogistics.co.tz</Text>
+                                <Text c="gray.6" size="xs">📍 {employee.location ?? 'Handeni, Tanzania'}</Text>
+                                <Text c="gray.6" size="xs">🌐 {employee.website ?? 'www.shmaliklogistics.co.tz'}</Text>
                             </Stack>
                         </motion.div>
 

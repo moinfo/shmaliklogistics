@@ -66,10 +66,11 @@ export default function EmployeesIndex({ employees, stats, statuses, departments
                 )}
             </Group>
 
-            <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md" mb="xl">
+            <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="xl">
                 <StatCard label="Total Employees" value={stats.total} icon="👥" isDark={isDark} />
                 <StatCard label="Active" value={stats.active} icon="✅" color="#22C55E" isDark={isDark} />
                 <StatCard label="On Leave" value={stats.on_leave} icon="🏖️" color="#F59E0B" isDark={isDark} />
+                <StatCard label="Drivers" value={stats.drivers} icon="🚛" color="#3B82F6" isDark={isDark} />
             </SimpleGrid>
 
             <Box style={{ background: isDark ? dk.card : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 12, padding: '16px 20px', marginBottom: 16 }}>
@@ -109,7 +110,20 @@ export default function EmployeesIndex({ employees, stats, statuses, departments
                                         <Text size="xs" fw={700} style={{ color: textSec, fontFamily: 'monospace' }}>{emp.employee_number}</Text>
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
-                                        <Text fw={700} size="sm" style={{ color: textPri }}>{emp.name}</Text>
+                                        <Group gap={8} align="center" wrap="nowrap">
+                                            <Text fw={700} size="sm" style={{ color: textPri }}>{emp.name}</Text>
+                                            {emp.driver_id && (
+                                                <Badge
+                                                    component={Link}
+                                                    href={`/system/drivers/${emp.driver_id}`}
+                                                    size="sm"
+                                                    title="This employee is a registered driver — view driver profile"
+                                                    style={{ background: 'rgba(59,130,246,0.14)', color: '#3B82F6', border: '1px solid rgba(59,130,246,0.35)', cursor: 'pointer', textDecoration: 'none' }}
+                                                >
+                                                    🚛 Driver
+                                                </Badge>
+                                            )}
+                                        </Group>
                                         {emp.hire_date && <Text size="xs" style={{ color: textSec }}>Since {formatDate(emp.hire_date)}</Text>}
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>

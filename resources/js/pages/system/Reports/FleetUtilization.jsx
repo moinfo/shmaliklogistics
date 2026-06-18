@@ -4,6 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import ExportMenu from '../../../components/ExportMenu';
 
 const MONTHS = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -75,6 +76,7 @@ export default function FleetUtilization({ vehicleStats, monthly, totalTrips, to
                                     dropdown: { background: isDark ? '#1A0900' : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 12 },
                                 }}
                             />
+                            <ExportMenu baseUrl="/system/reports/fleet-utilization/export" params={{ year: selYear }} />
                         </Group>
                     </Group>
                 </Box>

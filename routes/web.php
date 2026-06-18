@@ -227,8 +227,10 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
 
         Route::get('payments', [PaymentController::class, 'index'])->name('payments.index')->middleware('permission:billing_payments.view');
         Route::get('debtors', [DebtorsController::class, 'index'])->name('debtors.index')->middleware('permission:billing_invoices.view');
+        Route::get('debtors/export', [DebtorsController::class, 'export'])->name('debtors.export')->middleware('permission:billing_invoices.view');
 
         Route::get('quote-requests', [QuoteRequestController::class, 'index'])->name('quote-requests.index')->middleware('permission:billing_quote_requests.view');
+        Route::get('quote-requests/export', [QuoteRequestController::class, 'export'])->name('quote-requests.export')->middleware('permission:billing_quote_requests.view');
         Route::patch('quote-requests/{quoteRequest}', [QuoteRequestController::class, 'update'])->name('quote-requests.update')->middleware('permission:billing_quote_requests.edit');
         Route::delete('payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy')->middleware('permission:billing_payments.delete');
     });
@@ -238,6 +240,7 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
 
     // Maintenance
     $permResource('maintenance', MaintenanceController::class, 'maintenance');
+    Route::get('maintenance/{maintenance}/export', [MaintenanceController::class, 'export'])->name('maintenance.export')->middleware('permission:maintenance.view');
 
     // Documents
     $permResource('documents', DocumentController::class, 'documents', ['only' => ['index', 'create', 'store', 'destroy']]);
@@ -327,8 +330,11 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
 
     // Reports — each report has its own permission
     Route::get('reports/route-profitability', [RouteProfitabilityController::class, 'index'])->name('reports.route-profitability')->middleware('permission:reports_route_profitability.view');
+    Route::get('reports/route-profitability/export', [RouteProfitabilityController::class, 'export'])->name('reports.route-profitability.export')->middleware('permission:reports_route_profitability.view');
     Route::get('reports/financial-summary',   [FinancialSummaryController::class, 'index'])->name('reports.financial-summary')->middleware('permission:reports_financial_summary.view');
+    Route::get('reports/financial-summary/export',   [FinancialSummaryController::class, 'export'])->name('reports.financial-summary.export')->middleware('permission:reports_financial_summary.view');
     Route::get('reports/fleet-utilization',   [FleetUtilizationController::class, 'index'])->name('reports.fleet-utilization')->middleware('permission:reports_fleet_utilization.view');
+    Route::get('reports/fleet-utilization/export',   [FleetUtilizationController::class, 'export'])->name('reports.fleet-utilization.export')->middleware('permission:reports_fleet_utilization.view');
 
     // Settings — every read = settings.view, every write = settings.edit
     Route::prefix('settings')->name('settings.')->group(function () use ($permResource) {

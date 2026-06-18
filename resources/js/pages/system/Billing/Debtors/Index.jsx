@@ -4,6 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import ExportMenu from '../../../../components/ExportMenu';
 
 const fmt  = (n) => new Intl.NumberFormat('en-TZ').format(Math.round(Number(n) || 0));
 const fmtD = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
@@ -197,6 +198,7 @@ export default function DebtorsIndex({ debtors, totals, filters }) {
                                     🖨 Print Report
                                 </Box>
                             </motion.div>
+                            <ExportMenu baseUrl="/system/billing/debtors/export" params={{ search, age }} />
                         </Group>
                     </Group>
                 </Box>

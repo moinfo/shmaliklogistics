@@ -4,6 +4,7 @@ import { Box, Text, Group, Stack, Select, Textarea } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import ExportMenu from '../../../../components/ExportMenu';
 import { useCan } from '../../../../lib/can';
 import { formatDate } from '../../../../lib/date';
 
@@ -212,6 +213,7 @@ export default function QuoteRequestsIndex({ requests, statuses, filters, pendin
                                     dropdown: { background: isDark ? '#1A0900' : '#fff', border: `1px solid ${cardBorder}`, borderRadius: 12 },
                                 }}
                             />
+                            <ExportMenu baseUrl="/system/billing/quote-requests/export" params={{ status: filters.status ?? '' }} />
                         </Group>
                     </Group>
                 </Box>

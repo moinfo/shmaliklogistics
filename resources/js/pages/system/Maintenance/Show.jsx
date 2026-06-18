@@ -2,6 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Box, Text, Group, Stack, SimpleGrid } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import ExportMenu from '../../../components/ExportMenu';
 import { motion } from 'framer-motion';
 import { useCan } from '../../../lib/can';
 import { formatDate } from '../../../lib/date';
@@ -84,6 +85,7 @@ export default function ShowMaintenance({ record }) {
                             </Stack>
                         </Group>
                         <Group gap={8} wrap="wrap">
+                            <ExportMenu baseUrl={`/system/maintenance/${record.id}/export`} />
                             {can('maintenance.edit') && (
                                 <Box component={Link} href={`/system/maintenance/${record.id}/edit`}
                                     style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', color: 'white', textDecoration: 'none', fontSize: 13, fontWeight: 700, backdropFilter: 'blur(8px)' }}>

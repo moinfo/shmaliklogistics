@@ -5,6 +5,7 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Controller;
 use App\Models\ServiceRecord;
 use App\Models\Vehicle;
+use App\Support\ReportExport;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -99,6 +100,40 @@ class MaintenanceController extends Controller
         return Inertia::render('system/Maintenance/Show', [
             'record' => $maintenance,
         ]);
+    }
+
+    public function export(Request $request, ServiceRecord $maintenance)
+    {
+        $maintenance->load('vehicle');
+        $r = $maintenance;
+        $v = $r->vehicle;
+        $cur = $r->currency ?: 'TZS';
+
+        $fmtDate = fn ($d) => $d ? \Carbon\Carbon::parse($d)->format('d M Y') : '—';
+
+        $report = [
+            'title'       => 'Service Record',
+            'subtitle'    => ($v?->plate ?? 'Vehicle') . ' · ' . $r->service_type . ' · ' . $fmtDate($r->service_date),
+            'filename'    => 'service-record-' . $r->id . ($v?->plate ? '-' . str_replace(' ', '', $v->plate) : ''),
+            'orientation' => 'portrait',
+            'summary'     => [
+                'Vehicle'              => trim(($v?->plate ?? '—') . ' — ' . ($v?->make ?? '') . ' ' . ($v?->model_name ?? '')),
+                'Service Type'         => $r->service_type ?: '—',
+                'Service Date'         => $fmtDate($r->service_date),
+                'Odometer (km)'        => $r->mileage_km !== null ? number_format((float) $r->mileage_km) : '—',
+                'Workshop'             => $r->workshop_name ?: '—',
+                'Cost'                 => $r->cost !== null ? $cur . ' ' . number_format((float) $r->cost, 0) : '—',
+                'Next Service Date'    => $fmtDate($r->next_service_date),
+                'Next Service (km)'    => $r->next_service_mileage !== null ? number_format((float) $r->next_service_mileage) : '—',
+                'Description'          => $r->description ?: '—',
+                'Notes'                => $r->notes ?: '—',
+                'Recorded'             => $fmtDate($r->created_at),
+            ],
+        ];
+
+        return $request->get('format') === 'excel'
+            ? ReportExport::xlsx($report)
+            : ReportExport::pdf($report);
     }
 
     public function edit(ServiceRecord $maintenance)

@@ -4,6 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import ExportMenu from '../../../components/ExportMenu';
 
 const MONTHS = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -93,6 +94,7 @@ export default function RouteProfitability({ routes, summary, monthly, drivers, 
                                 style={{ width: 100 }} styles={inputStylesFrosted} />
                             <Select value={selMonth} onChange={v => { const m = v ?? ''; setSelMonth(m); applyFilters(selYear, m); }}
                                 data={monthOptions} style={{ width: 130 }} styles={inputStylesFrosted} clearable />
+                            <ExportMenu baseUrl="/system/reports/route-profitability/export" params={{ year: selYear, month: selMonth }} />
                         </Group>
                     </Group>
                 </Box>

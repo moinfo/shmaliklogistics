@@ -10,6 +10,7 @@ use App\Http\Controllers\System\TripImportController;
 use App\Http\Controllers\System\VehicleController;
 use App\Http\Controllers\System\FuelLogController;
 use App\Http\Controllers\System\DriverController;
+use App\Http\Controllers\System\GuarantorController;
 use App\Http\Controllers\System\ClientController;
 use App\Http\Controllers\System\PermitController;
 use App\Http\Controllers\System\Billing\QuoteController;
@@ -211,6 +212,11 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
     Route::post('drivers/{driver}/documents/visa', [DriverController::class, 'uploadVisaDoc'])->name('drivers.documents.visa')->middleware('permission:drivers.edit');
     Route::delete('drivers/{driver}/documents/{type}', [DriverController::class, 'deleteDocument'])->name('drivers.documents.delete')->middleware('permission:drivers.delete');
 
+    // Guarantors (wadhamini) — nested under a driver, reuse driver permissions
+    Route::post('drivers/{driver}/guarantors',               [GuarantorController::class, 'store'])->name('drivers.guarantors.store')->middleware('permission:drivers.edit');
+    Route::post('drivers/{driver}/guarantors/{guarantor}',   [GuarantorController::class, 'update'])->name('drivers.guarantors.update')->middleware('permission:drivers.edit');
+    Route::delete('drivers/{driver}/guarantors/{guarantor}', [GuarantorController::class, 'destroy'])->name('drivers.guarantors.destroy')->middleware('permission:drivers.delete');
+
     // Clients
     $permResource('clients', ClientController::class, 'clients');
     Route::patch('clients/{client}/portal', [ClientController::class, 'updatePortal'])->name('clients.portal')->middleware('permission:clients.edit');
@@ -237,8 +243,10 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
 
         Route::get('payments', [PaymentController::class, 'index'])->name('payments.index')->middleware('permission:billing_payments.view');
         Route::get('debtors', [DebtorsController::class, 'index'])->name('debtors.index')->middleware('permission:billing_invoices.view');
+        Route::get('debtors/export', [DebtorsController::class, 'export'])->name('debtors.export')->middleware('permission:billing_invoices.view');
 
         Route::get('quote-requests', [QuoteRequestController::class, 'index'])->name('quote-requests.index')->middleware('permission:billing_quote_requests.view');
+        Route::get('quote-requests/export', [QuoteRequestController::class, 'export'])->name('quote-requests.export')->middleware('permission:billing_quote_requests.view');
         Route::patch('quote-requests/{quoteRequest}', [QuoteRequestController::class, 'update'])->name('quote-requests.update')->middleware('permission:billing_quote_requests.edit');
         Route::delete('payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy')->middleware('permission:billing_payments.delete');
     });
@@ -249,6 +257,7 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
     // Maintenance — dashboard must precede the maintenance/{maintenance} wildcard
     Route::get('maintenance/dashboard', MaintenanceDashboardController::class)->name('maintenance.dashboard')->middleware('permission:maintenance.view');
     $permResource('maintenance', MaintenanceController::class, 'maintenance');
+    Route::get('maintenance/{maintenance}/export', [MaintenanceController::class, 'export'])->name('maintenance.export')->middleware('permission:maintenance.view');
 
     // Documents
     $permResource('documents', DocumentController::class, 'documents', ['only' => ['index', 'create', 'store', 'destroy']]);
@@ -389,8 +398,11 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
 
     // Reports — each report has its own permission
     Route::get('reports/route-profitability', [RouteProfitabilityController::class, 'index'])->name('reports.route-profitability')->middleware('permission:reports_route_profitability.view');
+    Route::get('reports/route-profitability/export', [RouteProfitabilityController::class, 'export'])->name('reports.route-profitability.export')->middleware('permission:reports_route_profitability.view');
     Route::get('reports/financial-summary',   [FinancialSummaryController::class, 'index'])->name('reports.financial-summary')->middleware('permission:reports_financial_summary.view');
+    Route::get('reports/financial-summary/export',   [FinancialSummaryController::class, 'export'])->name('reports.financial-summary.export')->middleware('permission:reports_financial_summary.view');
     Route::get('reports/fleet-utilization',   [FleetUtilizationController::class, 'index'])->name('reports.fleet-utilization')->middleware('permission:reports_fleet_utilization.view');
+    Route::get('reports/fleet-utilization/export',   [FleetUtilizationController::class, 'export'])->name('reports.fleet-utilization.export')->middleware('permission:reports_fleet_utilization.view');
 
     // Settings — every read = settings.view, every write = settings.edit
     Route::prefix('settings')->name('settings.')->group(function () use ($permResource) {

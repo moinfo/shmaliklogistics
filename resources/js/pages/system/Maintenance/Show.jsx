@@ -2,6 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Box, Text, Group, Stack, Badge } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import ExportMenu from '../../../components/ExportMenu';
 import { motion } from 'framer-motion';
 import { useCan } from '../../../lib/can';
 import { formatDate } from '../../../lib/date';
@@ -49,6 +50,7 @@ export default function ShowMaintenance({ record }) {
                     <Box component={Link} href="/system/maintenance" style={{ padding: '9px 18px', borderRadius: 9, border: `1px solid ${cardBorder}`, color: textSec, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
                         ← Back
                     </Box>
+                    <ExportMenu baseUrl={`/system/maintenance/${record.id}/export`} />
                     {can('maintenance.edit') && (
                         <Box component={Link} href={`/system/maintenance/${record.id}/edit`} style={{ padding: '9px 18px', borderRadius: 9, background: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', color: textPri, textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
                             ✏️ Edit

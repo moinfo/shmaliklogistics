@@ -4,6 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import ExportMenu from '../../../../components/ExportMenu';
 
 const dk = {
     card:    '#0F1E32',
@@ -150,6 +151,7 @@ export default function DebtorsIndex({ debtors, totals, filters }) {
                     >
                         🖨 Print Report
                     </Box>
+                    <ExportMenu baseUrl="/system/billing/debtors/export" params={{ search, age }} />
                     <Box
                         component={Link}
                         href="/system/billing/invoices"

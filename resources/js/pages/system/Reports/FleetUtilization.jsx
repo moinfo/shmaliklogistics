@@ -3,6 +3,7 @@ import { Box, Text, Group, Stack, SimpleGrid, Select, Badge } from '@mantine/cor
 import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import ExportMenu from '../../../components/ExportMenu';
 
 const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)' };
 const MONTHS = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -46,9 +47,12 @@ export default function FleetUtilization({ vehicleStats, monthly, totalTrips, to
                     <Text fw={800} size="xl" style={{ color: textPri }}>Fleet Utilization</Text>
                     <Text size="sm" style={{ color: textSec }}>Performance and revenue per vehicle</Text>
                 </Stack>
-                <Select value={selYear} onChange={v => { setSelYear(v); router.get('/system/reports/fleet-utilization', { year: v }, { preserveState: true, replace: true }); }}
-                    data={availableYears.length ? availableYears.map(y => ({ value: String(y), label: String(y) })) : [{ value: String(year), label: String(year) }]}
-                    styles={inputStyles} style={{ width: 110 }} />
+                <Group gap="sm">
+                    <Select value={selYear} onChange={v => { setSelYear(v); router.get('/system/reports/fleet-utilization', { year: v }, { preserveState: true, replace: true }); }}
+                        data={availableYears.length ? availableYears.map(y => ({ value: String(y), label: String(y) })) : [{ value: String(year), label: String(year) }]}
+                        styles={inputStyles} style={{ width: 110 }} />
+                    <ExportMenu baseUrl="/system/reports/fleet-utilization/export" params={{ year: selYear }} />
+                </Group>
             </Group>
 
             <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="xl">

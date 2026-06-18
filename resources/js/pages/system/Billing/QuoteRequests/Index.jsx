@@ -4,6 +4,7 @@ import { Box, Text, Group, Stack, Select, Textarea } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
+import ExportMenu from '../../../../components/ExportMenu';
 import { useCan } from '../../../../lib/can';
 import { formatDate } from '../../../../lib/date';
 
@@ -152,17 +153,20 @@ export default function QuoteRequestsIndex({ requests, statuses, filters, pendin
                     <Text size="sm" style={{ color: textSec }}>Incoming quote requests from the customer portal</Text>
                 </Stack>
 
-                <Select
-                    placeholder="All statuses"
-                    value={filters.status ?? null}
-                    onChange={applyFilter}
-                    clearable
-                    data={Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))}
-                    styles={{
-                        input: { background: inputBg, border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8, width: 170 },
-                        dropdown: { background: isDark ? '#07111F' : '#fff', border: `1px solid ${cardBorder}` },
-                    }}
-                />
+                <Group gap="sm">
+                    <Select
+                        placeholder="All statuses"
+                        value={filters.status ?? null}
+                        onChange={applyFilter}
+                        clearable
+                        data={Object.entries(statuses).map(([k, v]) => ({ value: k, label: v.label }))}
+                        styles={{
+                            input: { background: inputBg, border: `1px solid ${cardBorder}`, color: textPri, borderRadius: 8, width: 170 },
+                            dropdown: { background: isDark ? '#07111F' : '#fff', border: `1px solid ${cardBorder}` },
+                        }}
+                    />
+                    <ExportMenu baseUrl="/system/billing/quote-requests/export" params={{ status: filters.status ?? '' }} />
+                </Group>
             </Group>
 
             <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden' }}>

@@ -3,6 +3,7 @@ import { Box, Text, Group, Stack, SimpleGrid, Select, Badge } from '@mantine/cor
 import { useMantineColorScheme } from '@mantine/core';
 import { useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import ExportMenu from '../../../components/ExportMenu';
 
 const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
@@ -71,6 +72,7 @@ export default function RouteProfitability({ routes, summary, monthly, drivers, 
                 <Group gap="sm">
                     <Select value={selYear} onChange={v => { setSelYear(v); applyFilters(v, selMonth); }} data={yearOptions.length ? yearOptions : [{ value: String(year), label: String(year) }]} styles={inputStyles} style={{ width: 100 }} />
                     <Select value={selMonth} onChange={v => { const m = v ?? ''; setSelMonth(m); applyFilters(selYear, m); }} data={monthOptions} styles={inputStyles} style={{ width: 130 }} clearable />
+                    <ExportMenu baseUrl="/system/reports/route-profitability/export" params={{ year: selYear, month: selMonth }} />
                 </Group>
             </Group>
 

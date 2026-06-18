@@ -5,6 +5,7 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Concerns\UsesDateExtract;
 use App\Http\Controllers\Controller;
 use App\Models\Trip;
+use App\Support\ReportExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -12,7 +13,101 @@ use Inertia\Inertia;
 class RouteProfitabilityController extends Controller
 {
     use UsesDateExtract;
+
     public function index(Request $request)
+    {
+        return Inertia::render('system/Reports/RouteProfitability', $this->compute($request));
+    }
+
+    public function export(Request $request)
+    {
+        $d = $this->compute($request);
+        $scope = 'Year ' . $d['year'] . ($d['month'] ? ' · Month ' . $d['month'] : ' · All months');
+        $suffix = $d['year'] . ($d['month'] ? '-' . $d['month'] : '');
+
+        $report = [
+            'title'    => 'Route Profitability',
+            'subtitle' => $scope,
+            'filename' => 'route-profitability-' . $suffix,
+            'summary'  => [
+                'Total Trips'   => $d['summary']['total_trips'],
+                'Total Revenue (TZS)' => $d['summary']['total_revenue'],
+                'Total Costs (TZS)'   => $d['summary']['total_costs'],
+                'Total Profit (TZS)'  => $d['summary']['total_profit'],
+                'Profit Margin %'     => $d['summary']['margin'],
+            ],
+            'sections' => [
+                [
+                    'heading' => 'Profit by Route',
+                    'columns' => [
+                        ['label' => 'Route',          'key' => 'route',  'type' => 'text'],
+                        ['label' => 'Trips',          'key' => 'trips',  'type' => 'int'],
+                        ['label' => 'Revenue (TZS)',  'key' => 'rev',    'type' => 'money'],
+                        ['label' => 'Costs (TZS)',    'key' => 'cost',   'type' => 'money'],
+                        ['label' => 'Profit (TZS)',   'key' => 'profit', 'type' => 'money'],
+                        ['label' => 'Margin %',       'key' => 'margin', 'type' => 'percent'],
+                        ['label' => 'Avg Rev (TZS)',  'key' => 'avg',    'type' => 'money'],
+                        ['label' => 'Cargo (t)',      'key' => 'tons',   'type' => 'tons'],
+                    ],
+                    'rows' => collect($d['routes'])->map(fn ($r) => [
+                        'route'  => $r->route_from . ' → ' . $r->route_to,
+                        'trips'  => $r->trip_count,
+                        'rev'    => $r->total_revenue,
+                        'cost'   => $r->total_costs,
+                        'profit' => $r->total_profit,
+                        'margin' => $r->total_revenue > 0 ? round($r->total_profit / $r->total_revenue * 100, 1) : 0,
+                        'avg'    => $r->avg_revenue,
+                        'tons'   => $r->total_cargo_tons,
+                    ])->all(),
+                ],
+                [
+                    'heading' => 'Top Drivers by Revenue',
+                    'columns' => [
+                        ['label' => 'Driver',        'key' => 'driver', 'type' => 'text'],
+                        ['label' => 'Trips',         'key' => 'trips',  'type' => 'int'],
+                        ['label' => 'Revenue (TZS)', 'key' => 'rev',    'type' => 'money'],
+                        ['label' => 'Profit (TZS)',  'key' => 'profit', 'type' => 'money'],
+                    ],
+                    'rows' => collect($d['drivers'])->map(fn ($r) => [
+                        'driver' => $r->driver_name ?: '—',
+                        'trips'  => $r->trips,
+                        'rev'    => $r->revenue,
+                        'profit' => $r->profit,
+                    ])->all(),
+                ],
+                [
+                    'heading' => 'Monthly Trend',
+                    'columns' => [
+                        ['label' => 'Month',         'key' => 'month',  'type' => 'text'],
+                        ['label' => 'Trips',         'key' => 'trips',  'type' => 'int'],
+                        ['label' => 'Revenue (TZS)', 'key' => 'rev',    'type' => 'money'],
+                        ['label' => 'Costs (TZS)',   'key' => 'cost',   'type' => 'money'],
+                        ['label' => 'Profit (TZS)',  'key' => 'profit', 'type' => 'money'],
+                    ],
+                    'rows' => collect($d['monthly'])->map(fn ($r) => [
+                        'month'  => self::monthName((int) $r->month),
+                        'trips'  => $r->trips,
+                        'rev'    => $r->revenue,
+                        'cost'   => $r->costs,
+                        'profit' => $r->profit,
+                    ])->all(),
+                ],
+            ],
+        ];
+
+        return $request->get('format') === 'excel'
+            ? ReportExport::xlsx($report)
+            : ReportExport::pdf($report);
+    }
+
+    private static function monthName(int $m): string
+    {
+        return $m >= 1 && $m <= 12
+            ? \Carbon\Carbon::create(null, $m, 1)->format('F')
+            : (string) $m;
+    }
+
+    private function compute(Request $request): array
     {
         $year  = $request->get('year', now()->year);
         $month = $request->get('month', '');
@@ -83,7 +178,7 @@ class RouteProfitabilityController extends Controller
             ->orderByDesc('year')
             ->pluck('year');
 
-        return Inertia::render('system/Reports/RouteProfitability', [
+        return [
             'routes'         => $routes,
             'summary'        => $summary,
             'monthly'        => $monthly,
@@ -91,6 +186,6 @@ class RouteProfitabilityController extends Controller
             'year'           => (int) $year,
             'month'          => $month,
             'availableYears' => $availableYears,
-        ]);
+        ];
     }
 }

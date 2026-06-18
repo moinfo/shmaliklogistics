@@ -5,6 +5,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import DriverDocumentsCard from './DriverDocumentsCard';
+import DriverGuarantorsCard from './DriverGuarantorsCard';
 import { useCan } from '../../../lib/can';
 import { formatDate } from '../../../lib/date';
 
@@ -138,7 +139,7 @@ function PhotoLightbox({ src, alt, onClose }) {
     );
 }
 
-export default function ShowDriver({ driver, trips, statuses, licenseClasses, availableVehicles, vehicleStatuses, vehicleTypeIcons }) {
+export default function ShowDriver({ driver, trips, statuses, licenseClasses, availableVehicles, vehicleStatuses, vehicleTypeIcons, guarantorSummary, guarantorIdTypes, guarantorMax }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const { props } = usePage();
@@ -476,6 +477,18 @@ export default function ShowDriver({ driver, trips, statuses, licenseClasses, av
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
                 <Box mb="md">
                     <DriverDocumentsCard driver={driver} />
+                </Box>
+            </motion.div>
+
+            {/* ── Guarantors (Wadhamini) ── */}
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+                <Box mb="md">
+                    <DriverGuarantorsCard
+                        driver={driver}
+                        summary={guarantorSummary}
+                        idTypes={guarantorIdTypes}
+                        max={guarantorMax}
+                    />
                 </Box>
             </motion.div>
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\System\HR;
 
 use App\Http\Controllers\Controller;
+use App\Models\Driver;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
 use Illuminate\Http\Request;
@@ -32,10 +33,23 @@ class EmployeeController extends Controller
 
         $employees = $query->paginate(20)->withQueryString();
 
+        // Mark which employees are also drivers. Drivers and employees are
+        // separate tables matched on national_id (no FK), so we resolve the
+        // driver id for just the national_ids on this page and tag each row.
+        $driverByNid = Driver::whereIn('national_id', $employees->pluck('national_id')->filter()->unique())
+            ->pluck('id', 'national_id');
+
+        $employees->getCollection()->transform(function (Employee $e) use ($driverByNid) {
+            $e->driver_id = $e->national_id ? ($driverByNid[$e->national_id] ?? null) : null;
+            return $e;
+        });
+
         $stats = [
             'total'  => Employee::count(),
             'active' => Employee::where('status', 'active')->count(),
             'on_leave' => Employee::where('status', 'on_leave')->count(),
+            // Employees who are also registered drivers (matched on national_id).
+            'drivers' => Employee::whereIn('national_id', Driver::whereNotNull('national_id')->pluck('national_id'))->count(),
             'departments' => Employee::groupBy('department')
                 ->selectRaw('department, COUNT(*) as count')
                 ->pluck('count', 'department'),

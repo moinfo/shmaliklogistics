@@ -4,6 +4,7 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\Driver;
+use App\Models\Guarantor;
 use App\Models\LicenseClass;
 use App\Models\Role;
 use App\Models\Trip;
@@ -101,7 +102,7 @@ class DriverController extends Controller
 
     public function show(Driver $driver)
     {
-        $driver->load(['vehicle', 'user:id,name,email,avatar,role_id']);
+        $driver->load(['vehicle', 'user:id,name,email,avatar,role_id', 'guarantors']);
 
         $trips = Trip::where('driver_name', $driver->name)
             ->latest('departure_date')
@@ -116,6 +117,9 @@ class DriverController extends Controller
         return Inertia::render('system/Drivers/Show', [
             'driver'            => $driver,
             'trips'             => $trips,
+            'guarantorSummary'  => $driver->guarantorsSummary(),
+            'guarantorIdTypes'  => Guarantor::$idTypes,
+            'guarantorMax'      => Guarantor::$maxPerDriver,
             'statuses'          => Driver::$statuses,
             'licenseClasses'    => self::licenseClassMap(),
             'vehicleStatuses'   => Vehicle::$statuses,

@@ -63,6 +63,46 @@ class Driver extends Model
         return $this->hasMany(Trip::class)->latest('departure_date');
     }
 
+    public function guarantors()
+    {
+        return $this->hasMany(Guarantor::class)->latest();
+    }
+
+    /**
+     * Summarise this driver's guarantor situation for display and gating.
+     *
+     * Business rules (from the registration policy):
+     *   - A driver may have up to Guarantor::$maxPerDriver (6) guarantors.
+     *   - At least ONE guarantor must own a house (owns_house = true).
+     *   - The driver's guarantor set is only "complete" when it has at
+     *     least one guarantor AND meets the house-owner requirement.
+     *
+     * The UI shows a green "requirements met" banner when `is_complete`
+     * is true, otherwise a warning telling staff what is still missing.
+     *
+     * NOTE: $this->guarantors is already an Eloquent Collection here, so use
+     * collection helpers (->count(), ->contains(), ->where(), ->isNotEmpty()).
+     *
+     * @return array{count:int, has_homeowner:bool, slots_left:int, is_complete:bool}
+     */
+    public function guarantorsSummary(): array
+    {
+        $guarantors = $this->guarantors; // Eloquent Collection of Guarantor models
+
+        $count        = $guarantors->count();
+        $hasHomeowner = $guarantors->contains('owns_house', true);
+
+        return [
+            'count'         => $count,
+            'has_homeowner' => $hasHomeowner,
+            'slots_left'    => max(0, Guarantor::$maxPerDriver - $count),
+            // Policy: a driver's guarantor set is complete once it has at least
+            // one guarantor AND at least one of them owns a house. We deliberately
+            // do NOT require the full 6 — registration allows 1–6.
+            'is_complete'   => $count >= 1 && $hasHomeowner,
+        ];
+    }
+
     public function getLicenseDaysAttribute(): ?int
     {
         return $this->license_expiry

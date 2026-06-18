@@ -71,6 +71,7 @@ export default function EmployeesIndex({ employees, stats, statuses, departments
         { icon: '👥', label: 'Total Employees', value: String(stats.total),    grad: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 60%, #3B82F6 100%)', glow: '0 8px 28px rgba(37,99,235,0.4)' },
         { icon: '✅', label: 'Active',           value: String(stats.active),   grad: 'linear-gradient(135deg, #065F46 0%, #047857 60%, #10B981 100%)', glow: '0 8px 28px rgba(16,185,129,0.4)' },
         { icon: '🏖️', label: 'On Leave',         value: String(stats.on_leave), grad: 'linear-gradient(135deg, #92400E 0%, #B45309 60%, #F59E0B 100%)', glow: '0 8px 28px rgba(245,158,11,0.4)' },
+        { icon: '🚛', label: 'Drivers',          value: String(stats.drivers ?? 0), grad: 'linear-gradient(135deg, #1D4ED8 0%, #2563EB 60%, #3B82F6 100%)', glow: '0 8px 28px rgba(37,99,235,0.4)' },
     ];
 
     const cols = '140px 1fr 200px 180px 160px 140px 80px';
@@ -117,7 +118,7 @@ export default function EmployeesIndex({ employees, stats, statuses, departments
             </motion.div>
 
             {/* ── Stat cards ── */}
-            <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md" mb={24}>
+            <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb={24}>
                 {statCards.map((s, i) => (
                     <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} whileHover={{ y: -4 }}>
                         <Box style={{ background: s.grad, borderRadius: 16, padding: '18px 20px', boxShadow: s.glow, position: 'relative', overflow: 'hidden', minHeight: 110 }}>
@@ -225,7 +226,16 @@ export default function EmployeesIndex({ employees, stats, statuses, departments
                                     <Group gap={10} align="center">
                                         <PersonAvatar name={emp.name} />
                                         <Stack gap={2}>
-                                            <Text size="sm" fw={700} style={{ color: textPri, lineHeight: 1.2 }}>{emp.name}</Text>
+                                            <Group gap={6} align="center" wrap="nowrap">
+                                                <Text size="sm" fw={700} style={{ color: textPri, lineHeight: 1.2 }}>{emp.name}</Text>
+                                                {emp.driver_id && (
+                                                    <Box component={Link} href={`/system/drivers/${emp.driver_id}`} onClick={e => e.stopPropagation()}
+                                                        title="This employee is a registered driver — view driver profile"
+                                                        style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 8px', borderRadius: 20, background: 'rgba(59,130,246,0.14)', border: '1px solid rgba(59,130,246,0.35)', color: '#3B82F6', fontSize: 11, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                                                        🚛 Driver
+                                                    </Box>
+                                                )}
+                                            </Group>
                                             {emp.hire_date && <Text size="xs" style={{ color: textMut }}>Since {formatDate(emp.hire_date)}</Text>}
                                         </Stack>
                                     </Group>

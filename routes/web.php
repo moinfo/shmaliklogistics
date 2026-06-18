@@ -10,6 +10,7 @@ use App\Http\Controllers\System\TripImportController;
 use App\Http\Controllers\System\VehicleController;
 use App\Http\Controllers\System\FuelLogController;
 use App\Http\Controllers\System\DriverController;
+use App\Http\Controllers\System\GuarantorController;
 use App\Http\Controllers\System\ClientController;
 use App\Http\Controllers\System\PermitController;
 use App\Http\Controllers\System\Billing\QuoteController;
@@ -200,6 +201,11 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
     Route::post('drivers/{driver}/documents/license', [DriverController::class, 'uploadLicenseDoc'])->name('drivers.documents.license')->middleware('permission:drivers.edit');
     Route::post('drivers/{driver}/documents/visa', [DriverController::class, 'uploadVisaDoc'])->name('drivers.documents.visa')->middleware('permission:drivers.edit');
     Route::delete('drivers/{driver}/documents/{type}', [DriverController::class, 'deleteDocument'])->name('drivers.documents.delete')->middleware('permission:drivers.delete');
+
+    // Guarantors (wadhamini) — nested under a driver, reuse driver permissions
+    Route::post('drivers/{driver}/guarantors',               [GuarantorController::class, 'store'])->name('drivers.guarantors.store')->middleware('permission:drivers.edit');
+    Route::post('drivers/{driver}/guarantors/{guarantor}',   [GuarantorController::class, 'update'])->name('drivers.guarantors.update')->middleware('permission:drivers.edit');
+    Route::delete('drivers/{driver}/guarantors/{guarantor}', [GuarantorController::class, 'destroy'])->name('drivers.guarantors.destroy')->middleware('permission:drivers.delete');
 
     // Clients
     $permResource('clients', ClientController::class, 'clients');

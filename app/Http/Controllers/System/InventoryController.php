@@ -10,6 +10,7 @@ use App\Models\InventorySerial;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class InventoryController extends Controller
@@ -52,7 +53,7 @@ class InventoryController extends Controller
     public function create()
     {
         return Inertia::render('system/Inventory/Create', [
-            'categories' => InventoryCategory::orderBy('name')->get(),
+            'categories' => InventoryCategory::withCount('items')->orderBy('name')->get(),
         ]);
     }
 
@@ -387,12 +388,127 @@ class InventoryController extends Controller
         ]);
     }
 
+    // ── Movement edit / delete ──────────────────────────────────────────────
+    // Editing or removing a movement shifts every later balance and the item's
+    // live stock, so we replay the whole chain afterwards (recalcAndGuard).
+    public function updateMovement(Request $request, InventoryMovement $movement)
+    {
+        $item = $movement->item;
+
+        $rules = [
+            'reference'  => 'nullable|string|max:100',
+            'vehicle_id' => 'nullable|exists:vehicles,id',
+            'notes'      => 'nullable|string',
+        ];
+        // Quantity is locked for serial items (it equals the serial count).
+        if (! $item->tracks_serials) {
+            $rules['quantity'] = 'required|numeric|min:0.001';
+            if ($item->tracks_batch) {
+                $rules['batch_number'] = 'nullable|string|max:100';
+            }
+        }
+        $data = $request->validate($rules);
+
+        DB::transaction(function () use ($movement, $item, $data) {
+            $movement->reference  = $data['reference'] ?? null;
+            $movement->vehicle_id = $data['vehicle_id'] ?? null;
+            $movement->notes      = $data['notes'] ?? null;
+            if (! $item->tracks_serials) {
+                $movement->quantity = $data['quantity'];
+                if ($item->tracks_batch) {
+                    $movement->batch_number = $data['batch_number'] ?? null;
+                }
+            }
+            $movement->save();
+            $this->recalcAndGuard($item);
+        });
+
+        return back()->with('success', 'Movement updated.');
+    }
+
+    public function destroyMovement(InventoryMovement $movement)
+    {
+        $item = $movement->item;
+
+        DB::transaction(function () use ($movement, $item) {
+            // Reverse serial side-effects before removing the movement.
+            if ($item->tracks_serials) {
+                if ($movement->type === 'in') {
+                    $issuedExists = InventorySerial::where('received_movement_id', $movement->id)
+                        ->where('status', '!=', 'in_stock')->exists();
+                    if ($issuedExists) {
+                        throw ValidationException::withMessages([
+                            'movement' => 'Cannot delete — some serials received here have already been issued.',
+                        ]);
+                    }
+                    InventorySerial::where('received_movement_id', $movement->id)->delete();
+                } elseif ($movement->type === 'out') {
+                    InventorySerial::where('issued_movement_id', $movement->id)->update([
+                        'status'             => 'in_stock',
+                        'issued_movement_id' => null,
+                        'issued_at'          => null,
+                        'vehicle_id'         => null,
+                    ]);
+                }
+            }
+
+            $movement->delete();
+            $this->recalcAndGuard($item);
+        });
+
+        return back()->with('success', 'Movement deleted.');
+    }
+
+    /**
+     * Replay all movements oldest→newest, rewriting each balance_after and the
+     * item's current_stock. Throws (rolling back the transaction) if the running
+     * balance would ever go negative.
+     */
+    private function recalcAndGuard(InventoryItem $item): void
+    {
+        $balance = 0.0;
+        $min     = 0.0;
+
+        $movements = InventoryMovement::where('item_id', $item->id)
+            ->orderBy('created_at')->orderBy('id')->get();
+
+        foreach ($movements as $m) {
+            $balance += $m->type === 'out' ? -(float) $m->quantity : (float) $m->quantity;
+            $min = min($min, $balance);
+            $m->balance_after = $balance;
+        }
+
+        if ($min < -0.0001) {
+            throw ValidationException::withMessages([
+                'quantity' => 'This change would make the stock balance negative somewhere in the history.',
+            ]);
+        }
+
+        foreach ($movements as $m) {
+            $m->saveQuietly();
+        }
+        $item->update(['current_stock' => $balance]);
+    }
+
     // Category management
     public function storeCategory(Request $request)
     {
-        $data = $request->validate(['name' => 'required|string|max:100', 'color' => 'nullable|string|max:7']);
+        $data = $request->validate([
+            'name'  => 'required|string|max:100|unique:inventory_categories,name',
+            'color' => 'nullable|string|max:7',
+        ]);
         InventoryCategory::create($data);
         return back()->with('success', 'Category created.');
+    }
+
+    public function updateCategory(Request $request, InventoryCategory $category)
+    {
+        $data = $request->validate([
+            'name'  => 'required|string|max:100|unique:inventory_categories,name,' . $category->id,
+            'color' => 'nullable|string|max:7',
+        ]);
+        $category->update($data);
+        return back()->with('success', 'Category updated.');
     }
 
     public function destroyCategory(InventoryCategory $category)

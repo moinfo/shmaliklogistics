@@ -1,6 +1,7 @@
 import DashboardLayout from '../../../layouts/DashboardLayout';
-import { Box, Grid, Text, Group, Select, TextInput, NumberInput, Textarea, Button, Stack, Switch, useMantineColorScheme } from '@mantine/core';
-import { useForm, Link } from '@inertiajs/react';
+import { Box, Grid, Text, Group, Select, TextInput, NumberInput, Textarea, Button, Stack, Switch, Modal, ColorInput, ColorSwatch, ActionIcon, Divider, useMantineColorScheme } from '@mantine/core';
+import { useForm, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function InventoryCreate({ categories }) {
     const { colorScheme } = useMantineColorScheme();
@@ -39,6 +40,33 @@ export default function InventoryCreate({ categories }) {
     const submit = (e) => { e.preventDefault(); post('/system/inventory'); };
     const err = (f) => errors[f] && <Text size="xs" style={{ color: '#EF4444', marginTop: 4 }}>{errors[f]}</Text>;
 
+    // ── Category management (add / edit / delete) ──
+    // preserveState keeps the half-filled item form intact while categories mutate.
+    const [mgrOpen, setMgrOpen] = useState(false);
+    const [newCat, setNewCat] = useState({ name: '', color: '#2196F3' });
+    const [editing, setEditing] = useState(null); // { id, name, color }
+    const [catErr, setCatErr] = useState('');
+    const catOpts = { preserveState: true, preserveScroll: true, errorBag: 'category', onError: (e) => setCatErr(e.name || 'Something went wrong.') };
+
+    const addCategory = () => {
+        if (!newCat.name.trim()) return;
+        setCatErr('');
+        router.post('/system/inventory/categories', newCat, { ...catOpts, onSuccess: () => setNewCat({ name: '', color: '#2196F3' }) });
+    };
+    const saveCategory = () => {
+        if (!editing?.name.trim()) return;
+        setCatErr('');
+        router.put(`/system/inventory/categories/${editing.id}`, { name: editing.name, color: editing.color }, { ...catOpts, onSuccess: () => setEditing(null) });
+    };
+    const deleteCategory = (c) => {
+        const msg = c.items_count > 0
+            ? `Delete "${c.name}"? ${c.items_count} item(s) using it will become uncategorized.`
+            : `Delete category "${c.name}"?`;
+        if (!window.confirm(msg)) return;
+        setCatErr('');
+        router.delete(`/system/inventory/categories/${c.id}`, catOpts);
+    };
+
     const units = ['pcs', 'litres', 'kg', 'metres', 'sets', 'pairs', 'boxes', 'drums', 'rolls'];
 
     // Stock tracking mode — serial and batch are mutually exclusive.
@@ -67,7 +95,13 @@ export default function InventoryCreate({ categories }) {
                                     {err('name')}
                                 </Grid.Col>
                                 <Grid.Col span={{ base: 12, sm: 6 }}>
-                                    <Select label="Category" placeholder="Select category" value={data.category_id} onChange={v => setData('category_id', v || '')} data={[{ value: '', label: 'None' }, ...categories.map(c => ({ value: String(c.id), label: c.name }))]} clearable styles={inputStyle} comboboxProps={{ zIndex: 1100 }} />
+                                    <Group justify="space-between" mb={6}>
+                                        <Text style={{ color: textSec, fontSize: 13, fontWeight: 600 }}>Category</Text>
+                                        <Box component="button" type="button" onClick={() => { setCatErr(''); setMgrOpen(true); }} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2196F3', fontSize: 12, fontWeight: 600 }}>
+                                            Manage
+                                        </Box>
+                                    </Group>
+                                    <Select placeholder="Select category" value={data.category_id} onChange={v => setData('category_id', v || '')} data={[{ value: '', label: 'None' }, ...categories.map(c => ({ value: String(c.id), label: c.name }))]} clearable styles={inputStyle} comboboxProps={{ zIndex: 1100 }} />
                                 </Grid.Col>
                                 <Grid.Col span={{ base: 12, sm: 6 }}>
                                     <TextInput label="Part Number" placeholder="e.g. OPT-D1234" value={data.part_number} onChange={e => setData('part_number', e.target.value)} styles={inputStyle} />
@@ -132,6 +166,51 @@ export default function InventoryCreate({ categories }) {
                     </Grid.Col>
                 </Grid>
             </form>
+
+            <Modal
+                opened={mgrOpen}
+                onClose={() => { setMgrOpen(false); setEditing(null); setCatErr(''); }}
+                title="Manage Categories"
+                centered
+                styles={{ content: { background: cardBg }, header: { background: cardBg }, title: { color: textPri, fontWeight: 700 } }}
+            >
+                <Stack gap="sm">
+                    {/* Add new */}
+                    <Group align="flex-end" gap="xs" wrap="nowrap">
+                        <TextInput label="New category" placeholder="e.g. Filters" value={newCat.name} onChange={e => setNewCat({ ...newCat, name: e.target.value })} styles={inputStyle} style={{ flex: 1 }} />
+                        <ColorInput label="Color" value={newCat.color} onChange={v => setNewCat({ ...newCat, color: v })} format="hex" styles={inputStyle} w={130} comboboxProps={{ zIndex: 1300 }} />
+                        <Button onClick={addCategory} style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none' }}>Add</Button>
+                    </Group>
+
+                    {catErr && <Text size="xs" style={{ color: '#EF4444' }}>{catErr}</Text>}
+                    <Divider my={2} />
+
+                    {/* Existing categories */}
+                    {categories.length === 0 && <Text size="sm" style={{ color: textMut }}>No categories yet — add one above.</Text>}
+                    <Stack gap={8}>
+                        {categories.map(c => editing?.id === c.id ? (
+                            <Group key={c.id} gap="xs" wrap="nowrap" align="center">
+                                <TextInput value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} styles={inputStyle} style={{ flex: 1 }} />
+                                <ColorInput value={editing.color || '#2196F3'} onChange={v => setEditing({ ...editing, color: v })} format="hex" styles={inputStyle} w={130} comboboxProps={{ zIndex: 1300 }} />
+                                <Button size="xs" variant="light" color="green" onClick={saveCategory}>Save</Button>
+                                <Button size="xs" variant="subtle" color="gray" onClick={() => { setEditing(null); setCatErr(''); }}>Cancel</Button>
+                            </Group>
+                        ) : (
+                            <Group key={c.id} justify="space-between" wrap="nowrap" style={{ padding: '8px 12px', background: inputBg, borderRadius: 8, border: `1px solid ${inputBorder}` }}>
+                                <Group gap="sm" wrap="nowrap">
+                                    <ColorSwatch color={c.color || '#94A3B8'} size={16} />
+                                    <Text size="sm" style={{ color: textPri }}>{c.name}</Text>
+                                    {c.items_count > 0 && <Text size="xs" style={{ color: textMut }}>· {c.items_count} item{c.items_count !== 1 ? 's' : ''}</Text>}
+                                </Group>
+                                <Group gap={4} wrap="nowrap">
+                                    <ActionIcon variant="subtle" color="blue" onClick={() => { setCatErr(''); setEditing({ id: c.id, name: c.name, color: c.color || '#2196F3' }); }} aria-label="Edit">✎</ActionIcon>
+                                    <ActionIcon variant="subtle" color="red" onClick={() => deleteCategory(c)} aria-label="Delete">🗑</ActionIcon>
+                                </Group>
+                            </Group>
+                        ))}
+                    </Stack>
+                </Stack>
+            </Modal>
         </DashboardLayout>
     );
 }

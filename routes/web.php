@@ -8,6 +8,7 @@ use App\Http\Controllers\System\TripController;
 use App\Http\Controllers\System\TripExpenseLineController;
 use App\Http\Controllers\System\TripImportController;
 use App\Http\Controllers\System\VehicleController;
+use App\Http\Controllers\System\VehicleHandoverController;
 use App\Http\Controllers\System\FuelLogController;
 use App\Http\Controllers\System\DriverController;
 use App\Http\Controllers\System\GuarantorController;
@@ -200,6 +201,14 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
     Route::patch('fleet/{vehicle}/status', [VehicleController::class, 'updateStatus'])->name('fleet.update-status')->middleware('permission:fleet.edit');
     Route::patch('fleet/{vehicle}/driver', [VehicleController::class, 'assignDriver'])->name('fleet.assign-driver')->middleware('permission:fleet.edit');
     Route::patch('fleet/{vehicle}/gps', [VehicleController::class, 'updateGps'])->name('fleet.update-gps')->middleware('permission:fleet.edit');
+    Route::post('fleet/{vehicle}/maintenance', [VehicleController::class, 'storeMaintenance'])->name('fleet.maintenance.store')->middleware('permission:maintenance.create');
+    Route::delete('fleet/{vehicle}/maintenance/{maintenance}', [VehicleController::class, 'destroyMaintenance'])->name('fleet.maintenance.destroy')->middleware('permission:maintenance.delete');
+    // Vehicle handover reports
+    Route::get('fleet/{vehicle}/handovers/create', [VehicleHandoverController::class, 'create'])->name('fleet.handovers.create')->middleware('permission:fleet.edit');
+    Route::post('fleet/{vehicle}/handovers', [VehicleHandoverController::class, 'store'])->name('fleet.handovers.store')->middleware('permission:fleet.edit');
+    Route::get('fleet/handovers/{handover}', [VehicleHandoverController::class, 'show'])->name('fleet.handovers.show')->middleware('permission:fleet.view');
+    Route::get('fleet/handovers/{handover}/export', [VehicleHandoverController::class, 'export'])->name('fleet.handovers.export')->middleware('permission:fleet.view');
+    Route::delete('fleet/handovers/{handover}', [VehicleHandoverController::class, 'destroy'])->name('fleet.handovers.destroy')->middleware('permission:fleet.delete');
 
     // Drivers
     $permResource('drivers', DriverController::class, 'drivers');
@@ -348,6 +357,8 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
     Route::get('inventory/create', [InventoryController::class, 'create'])->name('inventory.create')->middleware('permission:inventory.create');
     Route::post('inventory', [InventoryController::class, 'store'])->name('inventory.store')->middleware('permission:inventory.create');
     Route::get('inventory/movements', [InventoryController::class, 'movements'])->name('inventory.movements')->middleware('permission:inventory.view');
+    Route::put('inventory/movements/{movement}', [InventoryController::class, 'updateMovement'])->name('inventory.movements.update')->middleware('permission:inventory_movements.edit');
+    Route::delete('inventory/movements/{movement}', [InventoryController::class, 'destroyMovement'])->name('inventory.movements.destroy')->middleware('permission:inventory_movements.delete');
     Route::get('inventory/dashboard', InventoryDashboardController::class)->name('inventory.dashboard')->middleware('permission:inventory.view');
     Route::get('inventory/{item}', [InventoryController::class, 'show'])->name('inventory.show')->middleware('permission:inventory.view');
     Route::put('inventory/{item}', [InventoryController::class, 'update'])->name('inventory.update')->middleware('permission:inventory.edit');
@@ -355,6 +366,7 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
     Route::post('inventory/{item}/stock-in', [InventoryController::class, 'stockIn'])->name('inventory.stock-in')->middleware('permission:inventory.edit');
     Route::post('inventory/{item}/stock-out', [InventoryController::class, 'stockOut'])->name('inventory.stock-out')->middleware('permission:inventory.edit');
     Route::post('inventory/categories', [InventoryController::class, 'storeCategory'])->name('inventory.categories.store')->middleware('permission:inventory.create');
+    Route::put('inventory/categories/{category}', [InventoryController::class, 'updateCategory'])->name('inventory.categories.update')->middleware('permission:inventory.edit');
     Route::delete('inventory/categories/{category}', [InventoryController::class, 'destroyCategory'])->name('inventory.categories.destroy')->middleware('permission:inventory.delete');
 
     // ── Real Estate ───────────────────────────────────────────────────────────

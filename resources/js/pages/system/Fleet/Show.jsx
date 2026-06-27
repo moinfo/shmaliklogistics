@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage, useForm } from '@inertiajs/react';
 import { Box, Text, Group, Stack, SimpleGrid, Select, Tooltip, ActionIcon } from '@mantine/core';
 import { useMantineColorScheme } from '@mantine/core';
 import { motion } from 'framer-motion';
@@ -116,7 +116,146 @@ function GpsPanel({ vehicle, isDark, cardBg, cardBorder, textPri, textSec, textM
     );
 }
 
-export default function ShowVehicle({ vehicle, trips, statuses, typeIcons, availableDrivers, driverStatuses, licenseClasses, customDocumentTypes = [] }) {
+function MaintenancePanel({ vehicle, records, totalCost, serviceTypes, isDark, cardBg, cardBorder, textPri, textSec, textMut, divider, canAdd, canDelete }) {
+    const [showForm, setShowForm] = useState(false);
+    const blankRow = () => ({ service_type: serviceTypes?.[0] ?? '', service_date: '', mileage_km: '', workshop_name: '', cost: '', currency: 'TZS', next_service_date: '', next_service_mileage: '', description: '' });
+    const { data, setData, post, processing, errors, reset } = useForm({ records: [blankRow()] });
+
+    const setRow = (i, field, value) => setData('records', data.records.map((r, idx) => (idx === i ? { ...r, [field]: value } : r)));
+    const addRow = () => setData('records', [...data.records, blankRow()]);
+    const removeRow = (i) => setData('records', data.records.length > 1 ? data.records.filter((_, idx) => idx !== i) : data.records);
+    const firstError = Object.values(errors)[0];
+
+    const submit = (e) => {
+        e.preventDefault();
+        post(`/system/fleet/${vehicle.id}/maintenance`, { preserveScroll: true, onSuccess: () => { reset(); setShowForm(false); } });
+    };
+    const del = (id) => {
+        if (!confirm('Delete this service record?')) return;
+        router.delete(`/system/fleet/${vehicle.id}/maintenance/${id}`, { preserveScroll: true });
+    };
+
+    const inputStyle = { width: '100%', padding: '8px 12px', borderRadius: 8, border: `1px solid ${cardBorder}`, background: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC', color: textPri, fontSize: 13, outline: 'none', boxSizing: 'border-box' };
+    const lbl = { color: textMut, marginBottom: 4 };
+    const cols = '104px 1fr 96px 1fr 128px 104px 36px';
+
+    return (
+        <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden' }}>
+            <Box style={{ padding: '14px 20px', borderBottom: `1px solid ${divider}` }}>
+                <Group justify="space-between">
+                    <Text fw={700} size="sm" style={{ color: textPri }}>🔧 Maintenance & Service History</Text>
+                    <Group gap="sm">
+                        <Text size="xs" style={{ color: textMut }}>{records.length} record{records.length !== 1 ? 's' : ''} · TZS {Number(totalCost || 0).toLocaleString()}</Text>
+                        {canAdd && (
+                            <button type="button" onClick={() => setShowForm(s => !s)} style={{ padding: '6px 14px', borderRadius: 8, background: showForm ? 'transparent' : 'linear-gradient(135deg,#1565C0,#2196F3)', color: showForm ? textSec : '#fff', border: showForm ? `1px solid ${cardBorder}` : 'none', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>
+                                {showForm ? 'Cancel' : '+ Add Service'}
+                            </button>
+                        )}
+                    </Group>
+                </Group>
+            </Box>
+            <Box style={{ padding: 20 }}>
+                {canAdd && showForm && (
+                    <form onSubmit={submit} style={{ marginBottom: records.length ? 20 : 0 }}>
+                        <Stack gap="sm">
+                            {data.records.map((row, i) => (
+                                <Box key={i} style={{ border: `1px solid ${cardBorder}`, borderRadius: 10, padding: 14, background: isDark ? 'rgba(255,255,255,0.02)' : '#FBFCFE' }}>
+                                    <Group justify="space-between" mb={8}>
+                                        <Text size="xs" fw={700} style={{ color: textSec }}>Service #{i + 1}</Text>
+                                        {data.records.length > 1 && (
+                                            <button type="button" onClick={() => removeRow(i)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>Remove</button>
+                                        )}
+                                    </Group>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
+                                        <div>
+                                            <Text size="xs" fw={600} style={lbl}>Service type *</Text>
+                                            <select value={row.service_type} onChange={e => setRow(i, 'service_type', e.target.value)} style={inputStyle} required>
+                                                {serviceTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <Text size="xs" fw={600} style={lbl}>Service date *</Text>
+                                            <input type="date" value={row.service_date} onChange={e => setRow(i, 'service_date', e.target.value)} style={inputStyle} required />
+                                        </div>
+                                        <div>
+                                            <Text size="xs" fw={600} style={lbl}>Mileage (km)</Text>
+                                            <input type="number" min="0" value={row.mileage_km} onChange={e => setRow(i, 'mileage_km', e.target.value)} style={inputStyle} />
+                                        </div>
+                                        <div>
+                                            <Text size="xs" fw={600} style={lbl}>Workshop</Text>
+                                            <input type="text" value={row.workshop_name} onChange={e => setRow(i, 'workshop_name', e.target.value)} style={inputStyle} />
+                                        </div>
+                                        <div>
+                                            <Text size="xs" fw={600} style={lbl}>Cost</Text>
+                                            <input type="number" min="0" step="0.01" value={row.cost} onChange={e => setRow(i, 'cost', e.target.value)} style={inputStyle} />
+                                        </div>
+                                        <div>
+                                            <Text size="xs" fw={600} style={lbl}>Currency *</Text>
+                                            <select value={row.currency} onChange={e => setRow(i, 'currency', e.target.value)} style={inputStyle}>
+                                                <option value="TZS">TZS</option>
+                                                <option value="USD">USD</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <Text size="xs" fw={600} style={lbl}>Next service date</Text>
+                                            <input type="date" value={row.next_service_date} onChange={e => setRow(i, 'next_service_date', e.target.value)} style={inputStyle} />
+                                        </div>
+                                        <div>
+                                            <Text size="xs" fw={600} style={lbl}>Next service mileage</Text>
+                                            <input type="number" min="0" value={row.next_service_mileage} onChange={e => setRow(i, 'next_service_mileage', e.target.value)} style={inputStyle} />
+                                        </div>
+                                    </div>
+                                    <div style={{ marginTop: 10 }}>
+                                        <Text size="xs" fw={600} style={lbl}>Notes / description</Text>
+                                        <textarea rows={2} value={row.description} onChange={e => setRow(i, 'description', e.target.value)} style={{ ...inputStyle, resize: 'vertical' }} />
+                                    </div>
+                                </Box>
+                            ))}
+                        </Stack>
+                        {firstError && <Text size="xs" style={{ color: '#EF4444', marginTop: 8 }}>{firstError}</Text>}
+                        <Group justify="space-between" mt={12}>
+                            <button type="button" onClick={addRow} style={{ padding: '7px 14px', borderRadius: 8, background: 'transparent', color: '#2196F3', border: `1px dashed ${cardBorder}`, cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>
+                                + Add another service
+                            </button>
+                            <button type="submit" disabled={processing} style={{ padding: '8px 18px', borderRadius: 8, background: 'linear-gradient(135deg,#166534,#22C55E)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 13 }}>
+                                {processing ? 'Saving…' : `Save ${data.records.length} record${data.records.length !== 1 ? 's' : ''}`}
+                            </button>
+                        </Group>
+                    </form>
+                )}
+
+                {records.length === 0 ? (
+                    <Text size="sm" style={{ color: textMut, padding: '4px 0' }}>No service records yet.</Text>
+                ) : (
+                    <Box style={{ overflowX: 'auto' }}>
+                        <Box style={{ display: 'grid', gridTemplateColumns: cols, borderBottom: `1px solid ${divider}`, padding: '8px 0', minWidth: 720 }}>
+                            {['Date', 'Type', 'Mileage', 'Workshop', 'Cost', 'Next', ''].map((h, i) => (
+                                <Text key={i} size="10px" fw={700} style={{ color: textMut, textTransform: 'uppercase', letterSpacing: 1 }}>{h}</Text>
+                            ))}
+                        </Box>
+                        {records.map(r => (
+                            <Box key={r.id} style={{ display: 'grid', gridTemplateColumns: cols, padding: '10px 0', borderBottom: `1px solid ${divider}`, alignItems: 'center', minWidth: 720 }}>
+                                <Text size="sm" style={{ color: textSec }}>{formatDate(r.service_date)}</Text>
+                                <Tooltip label={r.description || r.notes || r.service_type} disabled={!r.description && !r.notes} withArrow>
+                                    <Text size="sm" fw={600} style={{ color: textPri }}>{r.service_type}</Text>
+                                </Tooltip>
+                                <Text size="sm" style={{ color: textSec }}>{r.mileage_km != null ? Number(r.mileage_km).toLocaleString() : '—'}</Text>
+                                <Text size="sm" style={{ color: textSec }}>{r.workshop_name || '—'}</Text>
+                                <Text size="sm" fw={600} style={{ color: textPri }}>{r.cost != null ? `${r.currency || 'TZS'} ${Number(r.cost).toLocaleString()}` : '—'}</Text>
+                                <Text size="sm" style={{ color: textSec }}>{r.next_service_date ? formatDate(r.next_service_date) : '—'}</Text>
+                                <div>
+                                    {canDelete && <ActionIcon variant="subtle" color="red" size="sm" onClick={() => del(r.id)} aria-label="Delete record">🗑</ActionIcon>}
+                                </div>
+                            </Box>
+                        ))}
+                    </Box>
+                )}
+            </Box>
+        </Box>
+    );
+}
+
+export default function ShowVehicle({ vehicle, trips, maintenance = [], maintenanceCost = 0, serviceTypes = [], handovers = [], statuses, typeIcons, availableDrivers, driverStatuses, licenseClasses, customDocumentTypes = [] }) {
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
     const { props } = usePage();
@@ -325,6 +464,52 @@ export default function ShowVehicle({ vehicle, trips, statuses, typeIcons, avail
                     </Box>
                 )}
             </Card>
+
+            {/* Maintenance & Service History */}
+            <Box mt="md">
+                <MaintenancePanel
+                    vehicle={vehicle} records={maintenance} totalCost={maintenanceCost} serviceTypes={serviceTypes}
+                    isDark={isDark} cardBg={cardBg} cardBorder={cardBorder} textPri={textPri} textSec={textSec} textMut={textMut} divider={divider}
+                    canAdd={can('maintenance.create')} canDelete={can('maintenance.delete')}
+                />
+            </Box>
+
+            {/* Handover Reports */}
+            <Box mt="md">
+                <Box style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 14, overflow: 'hidden' }}>
+                    <Box style={{ padding: '14px 20px', borderBottom: `1px solid ${divider}` }}>
+                        <Group justify="space-between">
+                            <Text fw={700} size="sm" style={{ color: textPri }}>📋 Handover Reports</Text>
+                            {can('fleet.edit') && (
+                                <Box component={Link} href={`/system/fleet/${vehicle.id}/handovers/create`} style={{ padding: '6px 14px', borderRadius: 8, background: 'linear-gradient(135deg,#1565C0,#2196F3)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 12 }}>
+                                    + New Handover Report
+                                </Box>
+                            )}
+                        </Group>
+                    </Box>
+                    <Box style={{ padding: '8px 20px 16px' }}>
+                        {handovers.length === 0 ? (
+                            <Text size="sm" style={{ color: textMut, padding: '8px 0' }}>No handover reports yet.</Text>
+                        ) : (
+                            handovers.map(h => (
+                                <Box key={h.id} style={{ display: 'grid', gridTemplateColumns: '130px 1fr auto', gap: 12, alignItems: 'center', padding: '10px 0', borderBottom: `1px solid ${divider}` }}>
+                                    <Text size="sm" style={{ color: textSec }}>{formatDate(h.created_at)}</Text>
+                                    <Box>
+                                        <Text size="sm" style={{ color: textPri }}>{h.driver_name || '—'}{h.odometer_km != null ? ` · ${Number(h.odometer_km).toLocaleString()} km` : ''}</Text>
+                                        <Text size="10px" style={{ color: textMut }}>Logged by {h.creator?.name || '—'}</Text>
+                                    </Box>
+                                    <Group gap={8} justify="flex-end" wrap="nowrap">
+                                        <Box component={Link} href={`/system/fleet/handovers/${h.id}`} style={{ color: '#3B82F6', textDecoration: 'none', fontSize: 12, fontWeight: 700 }}>View</Box>
+                                        {can('fleet.delete') && (
+                                            <ActionIcon variant="subtle" color="red" size="sm" onClick={() => { if (confirm('Delete this handover report?')) router.delete(`/system/fleet/handovers/${h.id}`, { preserveScroll: true }); }} aria-label="Delete">🗑</ActionIcon>
+                                        )}
+                                    </Group>
+                                </Box>
+                            ))
+                        )}
+                    </Box>
+                </Box>
+            </Box>
 
             {vehicle.notes && (
                 <Box mt="md">

@@ -7,6 +7,7 @@ use App\Models\ServiceRecord;
 use App\Models\Vehicle;
 use App\Support\ReportExport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class MaintenanceController extends Controller
@@ -62,36 +63,40 @@ class MaintenanceController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'vehicle_id'           => 'required|exists:vehicles,id',
-            'service_type'         => 'required|string|max:80',
-            'service_date'         => 'required|date',
-            'mileage_km'           => 'nullable|integer|min:0',
-            'workshop_name'        => 'nullable|string|max:150',
-            'description'          => 'nullable|string',
-            'cost'                 => 'nullable|numeric|min:0',
-            'currency'             => 'required|string|max:10',
-            'next_service_date'    => 'nullable|date|after:service_date',
-            'next_service_mileage' => 'nullable|integer|min:0',
-            'notes'                => 'nullable|string',
+        $validated = $request->validate([
+            'records'                        => 'required|array|min:1',
+            'records.*.vehicle_id'           => 'required|exists:vehicles,id',
+            'records.*.service_type'         => 'required|string|max:80',
+            'records.*.service_date'         => 'required|date',
+            'records.*.mileage_km'           => 'nullable|integer|min:0',
+            'records.*.workshop_name'        => 'nullable|string|max:150',
+            'records.*.description'          => 'nullable|string',
+            'records.*.cost'                 => 'nullable|numeric|min:0',
+            'records.*.currency'             => 'required|string|max:10',
+            'records.*.next_service_date'    => 'nullable|date',
+            'records.*.next_service_mileage' => 'nullable|integer|min:0',
+            'records.*.notes'                => 'nullable|string',
         ]);
 
-        $data['created_by'] = $request->user()->id;
-        $record = ServiceRecord::create($data);
+        DB::transaction(function () use ($validated, $request) {
+            foreach ($validated['records'] as $rec) {
+                $rec['created_by'] = $request->user()->id;
+                ServiceRecord::create($rec);
+            }
 
-        // Update vehicle's next_service_date and mileage_km if provided
-        $vehicle = Vehicle::find($data['vehicle_id']);
-        $updates = [];
-        if (!empty($data['next_service_date'])) {
-            $updates['next_service_date'] = $data['next_service_date'];
-        }
-        if (!empty($data['mileage_km'])) {
-            $updates['mileage_km'] = $data['mileage_km'];
-        }
-        if ($updates) $vehicle->update($updates);
+            // Roll the latest service entry per vehicle up onto that vehicle.
+            collect($validated['records'])->groupBy('vehicle_id')->each(function ($recs, $vehicleId) {
+                $latest  = collect($recs)->sortByDesc('service_date')->first();
+                $updates = [];
+                if (! empty($latest['next_service_date'])) $updates['next_service_date'] = $latest['next_service_date'];
+                if (! empty($latest['mileage_km']))        $updates['mileage_km']        = $latest['mileage_km'];
+                if ($updates) Vehicle::where('id', $vehicleId)->update($updates);
+            });
+        });
 
+        $count = count($validated['records']);
         return redirect()->route('system.maintenance.index')
-            ->with('success', "Service record added for {$vehicle->plate}.");
+            ->with('success', "{$count} service record" . ($count !== 1 ? 's' : '') . ' added.');
     }
 
     public function show(ServiceRecord $maintenance)

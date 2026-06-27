@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\LicenseClass;
 use App\Models\Vehicle;
 use App\Models\Driver;
+use App\Models\ServiceRecord;
 use App\Models\VehicleDocumentType;
+use App\Models\VehicleHandover;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class VehicleController extends Controller
@@ -127,9 +130,20 @@ class VehicleController extends Controller
               ->orWhere('id', $vehicle->driver_id);
         })->orderBy('name')->get(['id', 'name', 'phone', 'status', 'license_classes']);
 
+        $maintenance = $vehicle->serviceRecords()->with('creator:id,name')->get();
+
+        $handovers = VehicleHandover::where('vehicle_id', $vehicle->id)
+            ->with('creator:id,name')
+            ->latest()
+            ->get(['id', 'driver_name', 'odometer_km', 'handed_over_by', 'received_by', 'created_at', 'created_by']);
+
         return Inertia::render('system/Fleet/Show', [
             'vehicle'             => $vehicle,
             'trips'               => $trips,
+            'maintenance'         => $maintenance,
+            'handovers'           => $handovers,
+            'maintenanceCost'     => (float) $maintenance->where('currency', 'TZS')->sum('cost'),
+            'serviceTypes'        => ServiceRecord::$serviceTypes,
             'statuses'            => Vehicle::$statuses,
             'driverStatuses'      => Driver::$statuses,
             'licenseClasses'      => LicenseClass::active()->orderBy('sort_order')->get()
@@ -138,6 +152,49 @@ class VehicleController extends Controller
             'availableDrivers'    => $availableDrivers,
             'customDocumentTypes' => VehicleDocumentType::active()->custom()->orderBy('sort_order')->get(['id', 'name']),
         ]);
+    }
+
+    public function storeMaintenance(Request $request, Vehicle $vehicle)
+    {
+        $validated = $request->validate([
+            'records'                        => 'required|array|min:1',
+            'records.*.service_type'         => 'required|string|max:80',
+            'records.*.service_date'         => 'required|date',
+            'records.*.mileage_km'           => 'nullable|integer|min:0',
+            'records.*.workshop_name'        => 'nullable|string|max:150',
+            'records.*.description'          => 'nullable|string',
+            'records.*.cost'                 => 'nullable|numeric|min:0',
+            'records.*.currency'             => 'required|string|max:10',
+            'records.*.next_service_date'    => 'nullable|date',
+            'records.*.next_service_mileage' => 'nullable|integer|min:0',
+            'records.*.notes'                => 'nullable|string',
+        ]);
+
+        DB::transaction(function () use ($validated, $vehicle, $request) {
+            foreach ($validated['records'] as $rec) {
+                $rec['vehicle_id'] = $vehicle->id;
+                $rec['created_by'] = $request->user()->id;
+                ServiceRecord::create($rec);
+            }
+
+            // Roll the most recent service entry's info up onto the vehicle.
+            $latest  = collect($validated['records'])->sortByDesc('service_date')->first();
+            $updates = [];
+            if (! empty($latest['next_service_date'])) $updates['next_service_date'] = $latest['next_service_date'];
+            if (! empty($latest['mileage_km']))        $updates['mileage_km']        = $latest['mileage_km'];
+            if ($updates) $vehicle->update($updates);
+        });
+
+        $count = count($validated['records']);
+        return back()->with('success', "{$count} service record" . ($count !== 1 ? 's' : '') . ' added.');
+    }
+
+    public function destroyMaintenance(Vehicle $vehicle, ServiceRecord $maintenance)
+    {
+        abort_unless($maintenance->vehicle_id === $vehicle->id, 404);
+        $maintenance->delete();
+
+        return back()->with('success', 'Service record deleted.');
     }
 
     public function edit(Vehicle $vehicle)

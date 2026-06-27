@@ -1,18 +1,15 @@
 import { Head } from '@inertiajs/react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
-import MaintenanceForm from './MaintenanceForm';
+import MaintenanceBulkForm from './MaintenanceBulkForm';
 
 export default function CreateMaintenance({ vehicles, types, prefillVehicleId }) {
     return (
-        <DashboardLayout title="Add Service Record">
-            <Head title="Add Service Record" />
-            <MaintenanceForm
+        <DashboardLayout title="Add Service Records">
+            <Head title="Add Service Records" />
+            <MaintenanceBulkForm
                 vehicles={vehicles}
                 types={types}
                 prefillVehicleId={prefillVehicleId}
-                submitUrl="/system/maintenance"
-                method="post"
-                submitLabel="Add Service Record"
             />
         </DashboardLayout>
     );

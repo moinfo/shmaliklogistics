@@ -1,5 +1,5 @@
 import DashboardLayout from '../../../layouts/DashboardLayout';
-import { Box, Grid, Text, Group, Select, TextInput, NumberInput, Textarea, Button, Stack, Switch, Modal, MultiSelect } from '@mantine/core';
+import { Box, Grid, Text, Group, Select, TextInput, NumberInput, Textarea, Button, Stack, Switch, Modal, MultiSelect, ActionIcon } from '@mantine/core';
 import { Link, useForm, router } from '@inertiajs/react';
 import { useState, useMemo } from 'react';
 import { useCan } from '../../../lib/can';
@@ -136,11 +136,81 @@ function StockModal({ opened, onClose, item, type, vehicles, inStockSerials }) {
     );
 }
 
+function EditMovementModal({ opened, onClose, item, movement, vehicles }) {
+    const locked = !!item.tracks_serials; // quantity = serial count, not editable here
+    const { data, setData, put, processing, errors } = useForm({
+        quantity: movement.quantity != null ? String(movement.quantity) : '',
+        reference: movement.reference || '',
+        batch_number: movement.batch_number || '',
+        vehicle_id: movement.vehicle_id ? String(movement.vehicle_id) : '',
+        notes: movement.notes || '',
+    });
+
+    const submit = (e) => {
+        e.preventDefault();
+        put(`/system/inventory/movements/${movement.id}`, { preserveScroll: true, onSuccess: onClose });
+    };
+
+    const typeLabel = movement.type === 'in' ? 'Stock In' : movement.type === 'out' ? 'Stock Out' : 'Adjustment';
+
+    return (
+        <Modal opened={opened} onClose={onClose} title={`Edit ${typeLabel} movement`} centered>
+            <form onSubmit={submit}>
+                <Stack gap="md">
+                    {locked ? (
+                        <Box style={{ padding: '10px 12px', background: 'var(--c-input)', borderRadius: 8, border: '1px solid var(--c-border-input)' }}>
+                            <Text size="xs" style={{ color: 'var(--c-text-muted)' }}>
+                                Quantity is locked for serial-tracked items ({fmtNum(movement.quantity)} unit{Number(movement.quantity) !== 1 ? 's' : ''} = serial count). Edit the contact details below.
+                            </Text>
+                        </Box>
+                    ) : (
+                        <NumberInput
+                            label={`Quantity (${item.unit}) *`}
+                            value={data.quantity}
+                            onChange={v => setData('quantity', v)}
+                            min={0.001}
+                            decimalScale={3}
+                            styles={inputStyle}
+                            error={errors.quantity}
+                            required
+                        />
+                    )}
+                    {!locked && item.tracks_batch && (
+                        <TextInput label="Lot / Batch number" value={data.batch_number} onChange={e => setData('batch_number', e.target.value)} styles={inputStyle} error={errors.batch_number} />
+                    )}
+                    <TextInput label="Reference" value={data.reference} onChange={e => setData('reference', e.target.value)} styles={inputStyle} error={errors.reference} />
+                    <Select label="Vehicle (optional)" placeholder="Link to vehicle..." value={data.vehicle_id} onChange={v => setData('vehicle_id', v || '')} data={[{ value: '', label: 'None' }, ...vehicles.map(v => ({ value: String(v.id), label: `${v.plate} — ${v.make} ${v.model_name}` }))]} clearable styles={inputStyle} />
+                    <Textarea label="Notes" rows={2} value={data.notes} onChange={e => setData('notes', e.target.value)} styles={inputStyle} error={errors.notes} />
+                    {errors.movement && <Text size="xs" style={{ color: '#EF4444' }}>{errors.movement}</Text>}
+                    <Group justify="flex-end" gap="sm">
+                        <Button variant="subtle" color="gray" onClick={onClose}>Cancel</Button>
+                        <Button type="submit" loading={processing} style={{ background: 'linear-gradient(135deg, #1565C0, #2196F3)', border: 'none', borderRadius: 8, fontWeight: 700 }}>Save changes</Button>
+                    </Group>
+                </Stack>
+            </form>
+        </Modal>
+    );
+}
+
+const fmtNum = (n) => n != null ? Number(n).toLocaleString(undefined, { maximumFractionDigits: 3 }) : '—';
+
 export default function InventoryShow({ item, movements, serials = [], inStockCount, vehicles, movTypes }) {
     const [editing, setEditing] = useState(false);
     const [stockModal, setStockModal] = useState(null);
     const [serialFilter, setSerialFilter] = useState('all'); // all | in_stock | issued
+    const [editMov, setEditMov] = useState(null);
     const can = useCan();
+    const canEditMov = can('inventory_movements.edit');
+    const canDeleteMov = can('inventory_movements.delete');
+    const showActions = canEditMov || canDeleteMov;
+
+    const deleteMovement = (m) => {
+        if (!confirm(`Delete this ${movTypes[m.type]?.label || m.type} of ${fmt(m.quantity, 2)} ${item.unit}? Later balances will be recalculated.`)) return;
+        router.delete(`/system/inventory/movements/${m.id}`, {
+            preserveScroll: true,
+            onError: (e) => alert(e.movement || e.quantity || 'Could not delete this movement.'),
+        });
+    };
 
     const { data, setData, put, processing, errors } = useForm({
         name: item.name, category_id: item.category_id ? String(item.category_id) : '',
@@ -355,8 +425,8 @@ export default function InventoryShow({ item, movements, serials = [], inStockCo
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ background: 'var(--c-border-row)', borderBottom: '1px solid var(--c-border-color)' }}>
-                                {['Date', 'Type', 'Qty', 'Balance After', 'Reference', 'Vehicle', 'By', 'Notes'].map(h => (
-                                    <th key={h} style={{ padding: '10px 16px', textAlign: 'left', color: '#64748B', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>{h}</th>
+                                {['Date', 'Type', 'Qty', 'Balance After', 'Reference', 'Vehicle', 'By', 'Notes', ...(showActions ? ['Actions'] : [])].map(h => (
+                                    <th key={h} style={{ padding: '10px 16px', textAlign: h === 'Actions' ? 'right' : 'left', color: '#64748B', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>{h}</th>
                                 ))}
                             </tr>
                         </thead>
@@ -390,6 +460,18 @@ export default function InventoryShow({ item, movements, serials = [], inStockCo
                                                 <Text size="10px" style={{ color: '#F59E0B', marginTop: 4 }}>🏷 Lot: {m.batch_number}</Text>
                                             )}
                                         </td>
+                                        {showActions && (
+                                            <td style={{ padding: '12px 16px' }}>
+                                                <Group gap={4} justify="flex-end" wrap="nowrap">
+                                                    {canEditMov && (
+                                                        <ActionIcon variant="subtle" color="blue" onClick={() => setEditMov(m)} aria-label="Edit movement">✎</ActionIcon>
+                                                    )}
+                                                    {canDeleteMov && (
+                                                        <ActionIcon variant="subtle" color="red" onClick={() => deleteMovement(m)} aria-label="Delete movement">🗑</ActionIcon>
+                                                    )}
+                                                </Group>
+                                            </td>
+                                        )}
                                     </tr>
                                 );
                             })}
@@ -404,6 +486,7 @@ export default function InventoryShow({ item, movements, serials = [], inStockCo
             </Box>
 
             {stockModal && <StockModal opened={!!stockModal} onClose={() => setStockModal(null)} item={item} type={stockModal} vehicles={vehicles} inStockSerials={inStockSerials} />}
+            {editMov && <EditMovementModal key={editMov.id} opened={!!editMov} onClose={() => setEditMov(null)} item={item} movement={editMov} vehicles={vehicles} />}
         </DashboardLayout>
     );
 }

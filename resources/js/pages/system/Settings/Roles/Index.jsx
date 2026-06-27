@@ -28,6 +28,7 @@ const MODULES = [
     { key: 'procurement_suppliers',       label: 'Procurement — Suppliers',   actions: ['view', 'create', 'edit', 'delete'] },
     { key: 'procurement_orders',          label: 'Procurement — Orders',      actions: ['view', 'create', 'edit', 'delete'] },
     { key: 'inventory',                   label: 'Inventory',                 actions: ['view', 'create', 'edit', 'delete'] },
+    { key: 'inventory_movements',         label: 'Inventory — Stock Movements', actions: ['edit', 'delete'] },
     { key: 'hr_employees',                label: 'HR: Employees',             actions: ['view', 'create', 'edit', 'delete'] },
     { key: 'hr_leave',                    label: 'HR: Leave',                 actions: ['view', 'create', 'approve'] },
     { key: 'hr_payroll',                  label: 'HR: Payroll',               actions: ['view', 'create', 'process'] },

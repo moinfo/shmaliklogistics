@@ -14,6 +14,7 @@ const en = {
         tagline: 'With Hustles and Prayers We\'ll Reach Our Destination. Reliable, cost-effective logistics across East and Central Africa.',
         quickLinks: 'Quick Links', services: 'Services', activeRoutes: 'Active Routes',
         copyright: '© 2026 SH Malik Logistics Company Limited. All rights reserved.',
+        privacy: 'Privacy Policy',
     },
     home: {
         quickStats: 'Quick Stats',
@@ -212,6 +213,7 @@ const sw = {
         tagline: 'Kwa Bidii na Maombi Tutafikia Marudio Yetu. Usafirishaji wa kuaminika na bei nafuu Afrika Mashariki na Kati.',
         quickLinks: 'Viungo vya Haraka', services: 'Huduma', activeRoutes: 'Njia Zinazofanya Kazi',
         copyright: '© 2026 SH Malik Logistics Company Limited. Haki zote zimehifadhiwa.',
+        privacy: 'Sera ya Faragha',
     },
     home: {
         quickStats: 'Takwimu za Haraka',

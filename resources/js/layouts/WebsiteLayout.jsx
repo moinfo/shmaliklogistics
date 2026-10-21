@@ -263,6 +263,12 @@ export default function WebsiteLayout({ children }) {
                     <Box style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 24 }}>
                         <Group justify="space-between" wrap="wrap" gap="sm">
                             <Text c="gray.6" size="xs">{T.footer.copyright}</Text>
+                            <Anchor component={Link} href="/privacy-policy" c="gray.5" size="xs"
+                                style={{ textDecoration: 'none', transition: 'color 0.2s' }}
+                                onMouseEnter={e => e.target.style.color = '#C73A3A'}
+                                onMouseLeave={e => e.target.style.color = ''}>
+                                {T.footer.privacy}
+                            </Anchor>
                             <Group gap="xs">
                                 <Box style={{ width: 6, height: 6, borderRadius: '50%', background: '#C73A3A' }} />
                                 <Text c="gray.6" size="xs">Handeni, Tanzania</Text>

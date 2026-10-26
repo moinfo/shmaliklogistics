@@ -14,6 +14,7 @@ const en = {
         tagline: 'With Hustles and Prayers We\'ll Reach Our Destination. Reliable, cost-effective logistics across East and Central Africa.',
         quickLinks: 'Quick Links', services: 'Services', activeRoutes: 'Active Routes',
         copyright: '© 2026 Trans-Mas Logistics Company Limited. All rights reserved.',
+        privacy: 'Privacy Policy',
     },
     home: {
         quickStats: 'Quick Stats',
@@ -153,6 +154,114 @@ const en = {
             ],
         },
     },
+    privacy: {
+        hero: {
+            badge: "Legal",
+            title: "Privacy",
+            highlight: "Policy",
+            desc: "How Trans-Mas Logistics collects, uses and protects your information on our website and in our mobile app.",
+            updated: "Last updated: 26 October 2026",
+        },
+        toc: "On this page",
+        intro: "Your privacy matters to us. This policy explains what information Trans-Mas Logistics Company Limited (\"Trans-Mas\", \"we\", \"us\") collects when you visit our website or use our mobile app, why we collect it, how we protect it, and the choices you have. By using our website or app you agree to the practices described here.",
+        sections: [
+            {
+                title: "Who we are",
+                paras: [
+                    "Trans-Mas Logistics Company Limited is a road-freight and logistics company based in Handeni, Tanzania (TIN 187-839-823). We are the party responsible for the personal information described in this policy.",
+                ],
+            },
+            {
+                title: "Information we collect",
+                paras: ["Depending on how you use our services, we may collect the following:"],
+                items: [
+                    "Account details: your name, email address, phone number, role and the credentials you use to sign in. Drivers may also have a licence or card ID on record.",
+                    "Operational records: trips, vehicles, cargo, inspections, check-ins, fuel and expense entries, receipts and documents you upload.",
+                    "Location: the GPS position of your device at the moment you record a trip check-in or a vehicle inspection (see \"Mobile app permissions\").",
+                    "Business and staff records: client contact details, quotes, invoices and payments; for staff, employment, leave, payroll and bank details that are managed by authorised personnel.",
+                    "Website enquiries: the name, email, phone number and message you send through our contact form.",
+                    "Technical data: device type, app version, IP address and basic logs needed to keep the service secure and working.",
+                ],
+            },
+            {
+                title: "Mobile app permissions",
+                paras: ["Our app asks for permissions only for the features that need them, and you can change them at any time in your phone settings."],
+                items: [
+                    "Location: used to stamp check-ins and inspections with where they happened. We read your location when you record one; the app does not track you continuously in the background.",
+                    "Fingerprint / Face ID: lets you sign in faster. Your biometric data is handled only by your phone\'s operating system; we never receive or store it. If you turn on biometric sign-in, your sign-in details are kept in your device\'s encrypted secure storage (Android Keystore / iOS Keychain).",
+                    "Photos and files: used only when you choose to attach a receipt, contract or document.",
+                    "Internet and network status: needed to load your data and to tell you when you are offline.",
+                ],
+            },
+            {
+                title: "How we use your information",
+                items: [
+                    "To provide and operate the platform: trips, fleet, billing, payroll and reporting.",
+                    "To verify your identity and keep accounts secure.",
+                    "To record where and when check-ins and inspections take place, for safety and accountability.",
+                    "To prepare quotes, invoices and shipping or customs documents for our clients.",
+                    "To respond to your enquiries and provide support.",
+                    "To maintain, secure and improve our website and app, and to meet legal obligations.",
+                ],
+            },
+            {
+                title: "Cookies and local storage",
+                paras: [
+                    "Our website uses a session cookie that keeps you signed in and protects forms from forgery. It also remembers your language and light/dark preferences in your browser. We do not use advertising or cross-site tracking cookies. Some pages load images from third-party services such as Unsplash, and our app may download fonts from Google Fonts, which means those providers can see your IP address when the content loads.",
+                ],
+            },
+            {
+                title: "Who we share information with",
+                paras: ["We do not sell your personal information. We share it only when necessary:"],
+                items: [
+                    "With our clients, for the shipments, quotes and invoices that concern them.",
+                    "With border, customs and transport authorities, where required to move cargo legally.",
+                    "With trusted service providers (for example hosting and email) who process data on our behalf and are bound to protect it.",
+                    "With the authorities, when the law requires it or to protect our rights and safety.",
+                ],
+            },
+            {
+                title: "Data security",
+                paras: [
+                    "We protect information with encrypted connections (HTTPS), token-based sign-in, role-based permissions so people only see what their job requires, and secure storage on your device. No system is completely secure, so please keep your password private and tell us right away if you suspect misuse of your account.",
+                ],
+            },
+            {
+                title: "How long we keep information",
+                paras: [
+                    "We keep information only as long as needed for the purposes above and to meet accounting, tax, employment and legal record-keeping requirements. When it is no longer needed it is deleted or anonymised.",
+                ],
+            },
+            {
+                title: "Your rights",
+                paras: ["In line with Tanzania\'s Personal Data Protection Act, 2022, you may ask us to:"],
+                items: [
+                    "Tell you what personal information we hold about you and give you a copy.",
+                    "Correct information that is inaccurate or incomplete.",
+                    "Delete your information, where we are not required to keep it.",
+                    "Stop or limit certain uses, and withdraw consent you have given.",
+                ],
+                after: "To make a request, contact us using the details below. We may need to verify your identity first. You also have the right to complain to the Personal Data Protection Commission of Tanzania.",
+            },
+            {
+                title: "Children\'s privacy",
+                paras: ["Our services are intended for businesses and adults. We do not knowingly collect personal information from anyone under 18."],
+            },
+            {
+                title: "Changes to this policy",
+                paras: ["We may update this policy from time to time. The date at the top shows when it was last changed, and significant changes will be highlighted on our website or in the app."],
+            },
+            {
+                title: "Contact us",
+                paras: ["Questions or requests about this policy or your information:"],
+                contact: [
+                    { icon: "📧", text: "info@transmaslogistics.co.tz" },
+                    { icon: "📞", text: "+255 652 373 434" },
+                    { icon: "📍", text: "Trans-Mas Logistics Company Limited, Handeni, Tanzania" },
+                ],
+            },
+        ],
+    },
     contact: {
         hero: { badge: 'Get In Touch', title: "Let's", highlight: 'Move Your Cargo', desc: 'We are ready to support your logistics needs with reliable and efficient solutions. Get in touch with us today to discuss how we can help move your business forward.' },
         cards: [
@@ -195,6 +304,7 @@ const sw = {
         tagline: 'Kwa Bidii na Maombi Tutafikia Marudio Yetu. Usafirishaji wa kuaminika na bei nafuu Afrika Mashariki na Kati.',
         quickLinks: 'Viungo vya Haraka', services: 'Huduma', activeRoutes: 'Njia Zinazofanya Kazi',
         copyright: '© 2026 Trans-Mas Logistics Company Limited. Haki zote zimehifadhiwa.',
+        privacy: 'Sera ya Faragha',
     },
     home: {
         quickStats: 'Takwimu za Haraka',
@@ -333,6 +443,114 @@ const sw = {
                 { role: 'Huduma kwa Wateja', name: 'Timu ya Msaada', icon: '📞', desc: 'Inapatikana masaa 24/7 kujibu maswali ya wateja, kutoa masasisho ya mizigo kwa wakati halisi na kuhakikisha shughuli laini.' },
             ],
         },
+    },
+    privacy: {
+        hero: {
+            badge: "Kisheria",
+            title: "Sera ya",
+            highlight: "Faragha",
+            desc: "Jinsi Trans-Mas Logistics inavyokusanya, kutumia na kulinda taarifa zako kwenye tovuti yetu na kwenye programu yetu ya simu.",
+            updated: "Imesasishwa mwisho: 26 Oktoba 2026",
+        },
+        toc: "Kwenye ukurasa huu",
+        intro: "Faragha yako ni muhimu kwetu. Sera hii inaeleza ni taarifa gani Trans-Mas Logistics Company Limited (\"Trans-Mas\", \"sisi\") hukusanya unapotembelea tovuti yetu au kutumia programu yetu ya simu, kwa nini tunazikusanya, jinsi tunavyozilinda, na chaguo ulizonazo. Kwa kutumia tovuti au programu yetu unakubali taratibu zilizoelezwa hapa.",
+        sections: [
+            {
+                title: "Sisi ni nani",
+                paras: [
+                    "Trans-Mas Logistics Company Limited ni kampuni ya usafirishaji wa mizigo kwa barabara yenye makao yake Handeni, Tanzania (TIN 187-839-823). Sisi ndio tunaowajibika kwa taarifa binafsi zinazoelezwa kwenye sera hii.",
+                ],
+            },
+            {
+                title: "Taarifa tunazokusanya",
+                paras: ["Kulingana na jinsi unavyotumia huduma zetu, tunaweza kukusanya yafuatayo:"],
+                items: [
+                    "Taarifa za akaunti: jina lako, barua pepe, namba ya simu, wadhifa na taarifa unazotumia kuingia. Madereva wanaweza pia kuwa na leseni au namba ya kitambulisho kwenye kumbukumbu.",
+                    "Kumbukumbu za uendeshaji: safari, magari, mizigo, ukaguzi, kuripoti safari (check-ins), mafuta na matumizi, risiti na nyaraka unazopakia.",
+                    "Mahali: nafasi ya GPS ya kifaa chako wakati unaporekodi check-in ya safari au ukaguzi wa gari (tazama \"Ruhusa za programu ya simu\").",
+                    "Kumbukumbu za biashara na wafanyakazi: mawasiliano ya wateja, nukuu, ankara na malipo; kwa wafanyakazi, taarifa za ajira, likizo, mishahara na benki zinazosimamiwa na watumishi walioidhinishwa.",
+                    "Maswali kupitia tovuti: jina, barua pepe, namba ya simu na ujumbe unaotuma kupitia fomu ya mawasiliano.",
+                    "Taarifa za kiufundi: aina ya kifaa, toleo la programu, anwani ya IP na kumbukumbu za msingi zinazohitajika kuweka huduma salama na kufanya kazi.",
+                ],
+            },
+            {
+                title: "Ruhusa za programu ya simu",
+                paras: ["Programu yetu huomba ruhusa kwa huduma zinazozihitaji tu, na unaweza kuzibadilisha wakati wowote kwenye mipangilio ya simu yako."],
+                items: [
+                    "Mahali: hutumika kuweka alama ya mahali check-in na ukaguzi vilipofanyika. Tunasoma mahali ulipo unaporekodi moja; programu haikufuatilii mfululizo nyuma ya pazia.",
+                    "Alama ya kidole / Face ID: hukuwezesha kuingia haraka. Taarifa zako za kibayometriki zinashughulikiwa na mfumo wa uendeshaji wa simu yako pekee; sisi hatuzipokei wala kuzihifadhi. Ukiwasha kuingia kwa kibayometriki, taarifa zako za kuingia huhifadhiwa kwenye hifadhi salama iliyosimbwa ya kifaa chako (Android Keystore / iOS Keychain).",
+                    "Picha na faili: hutumika tu unapochagua kuambatisha risiti, mkataba au nyaraka.",
+                    "Intaneti na hali ya mtandao: zinahitajika kupakia data yako na kukujulisha unapokuwa nje ya mtandao.",
+                ],
+            },
+            {
+                title: "Jinsi tunavyotumia taarifa zako",
+                items: [
+                    "Kutoa na kuendesha jukwaa: safari, magari, malipo, mishahara na ripoti.",
+                    "Kuthibitisha utambulisho wako na kuweka akaunti salama.",
+                    "Kurekodi mahali na wakati check-in na ukaguzi unapofanyika, kwa usalama na uwajibikaji.",
+                    "Kuandaa nukuu, ankara na nyaraka za usafirishaji au forodha kwa wateja wetu.",
+                    "Kujibu maswali yako na kutoa msaada.",
+                    "Kudumisha, kulinda na kuboresha tovuti na programu yetu, na kutimiza wajibu wa kisheria.",
+                ],
+            },
+            {
+                title: "Vidakuzi na hifadhi ya ndani",
+                paras: [
+                    "Tovuti yetu hutumia kidakuzi cha kikao (session) kinachokuweka umeingia na kulinda fomu dhidi ya udanganyifu. Pia hukumbuka lugha na mwonekano wako (mwanga/giza) kwenye kivinjari chako. Hatutumii vidakuzi vya matangazo wala vya kufuatilia kati ya tovuti. Baadhi ya kurasa hupakia picha kutoka huduma za wengine kama Unsplash, na programu yetu inaweza kupakua fonti kutoka Google Fonts, hivyo watoa huduma hao wanaweza kuona anwani yako ya IP maudhui yanapopakiwa.",
+                ],
+            },
+            {
+                title: "Tunashiriki taarifa na nani",
+                paras: ["Hatuuzi taarifa zako binafsi. Tunazishiriki pale tu inapobidi:"],
+                items: [
+                    "Na wateja wetu, kwa shehena, nukuu na ankara zinazowahusu.",
+                    "Na mamlaka za mipakani, forodha na usafirishaji, inapohitajika kusafirisha mizigo kisheria.",
+                    "Na watoa huduma tunaowaamini (mfano mwenyeji wa mtandao na barua pepe) wanaochakata data kwa niaba yetu na wanaofungwa kuilinda.",
+                    "Na mamlaka, pale sheria inapotutaka au kulinda haki na usalama wetu.",
+                ],
+            },
+            {
+                title: "Usalama wa data",
+                paras: [
+                    "Tunalinda taarifa kwa miunganisho iliyosimbwa (HTTPS), kuingia kwa tokeni, ruhusa kulingana na majukumu ili kila mtu aone kinachohusu kazi yake tu, na hifadhi salama kwenye kifaa chako. Hakuna mfumo ulio salama kabisa, kwa hiyo tafadhali linda nenosiri lako na utujulishe mara moja ukishuku matumizi mabaya ya akaunti yako.",
+                ],
+            },
+            {
+                title: "Muda tunaohifadhi taarifa",
+                paras: [
+                    "Tunahifadhi taarifa kwa muda unaohitajika tu kwa madhumuni yaliyotajwa na kutimiza mahitaji ya uhasibu, kodi, ajira na utunzaji wa kumbukumbu za kisheria. Zisipohitajika tena, hufutwa au kufanywa zisitambulike.",
+                ],
+            },
+            {
+                title: "Haki zako",
+                paras: ["Kwa mujibu wa Sheria ya Ulinzi wa Taarifa Binafsi ya Tanzania ya mwaka 2022, unaweza kutuomba:"],
+                items: [
+                    "Kukueleza ni taarifa gani binafsi tunazo kuhusu wewe na kukupa nakala.",
+                    "Kusahihisha taarifa zisizo sahihi au pungufu.",
+                    "Kufuta taarifa zako, pale ambapo hatulazimiki kuzitunza.",
+                    "Kusimamisha au kupunguza matumizi fulani, na kuondoa ridhaa uliyotoa.",
+                ],
+                after: "Kuwasilisha ombi, wasiliana nasi kwa njia zilizo hapa chini. Huenda tukahitaji kuthibitisha utambulisho wako kwanza. Pia una haki ya kulalamika kwa Tume ya Ulinzi wa Taarifa Binafsi ya Tanzania.",
+            },
+            {
+                title: "Faragha ya watoto",
+                paras: ["Huduma zetu zimelenga biashara na watu wazima. Hatukusanyi kwa makusudi taarifa binafsi za mtu yeyote aliye chini ya miaka 18."],
+            },
+            {
+                title: "Mabadiliko ya sera hii",
+                paras: ["Tunaweza kusasisha sera hii mara kwa mara. Tarehe iliyo juu inaonyesha ilipobadilishwa mara ya mwisho, na mabadiliko makubwa yataangaziwa kwenye tovuti yetu au kwenye programu."],
+            },
+            {
+                title: "Wasiliana nasi",
+                paras: ["Maswali au maombi kuhusu sera hii au taarifa zako:"],
+                contact: [
+                    { icon: "📧", text: "info@transmaslogistics.co.tz" },
+                    { icon: "📞", text: "+255 652 373 434" },
+                    { icon: "📍", text: "Trans-Mas Logistics Company Limited, Handeni, Tanzania" },
+                ],
+            },
+        ],
     },
     contact: {
         hero: { badge: 'Wasiliana Nasi', title: 'Hebu', highlight: 'Tusafirisha Mizigo Yako', desc: 'Tuko tayari kusaidia mahitaji yako ya usafirishaji na suluhisho za kuaminika na bora. Wasiliana nasi leo kujadili jinsi tunavyoweza kusaidia biashara yako kusonga mbele.' },

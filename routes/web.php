@@ -65,6 +65,7 @@ Route::get('/', fn () => Inertia::render('website/Home'))->name('home');
 Route::get('/services', fn () => Inertia::render('website/Services'))->name('services');
 Route::get('/about', fn () => Inertia::render('website/About'))->name('about');
 Route::get('/contact', fn () => Inertia::render('website/Contact'))->name('contact');
+Route::get('/privacy-policy', fn () => Inertia::render('website/Privacy'))->name('privacy');
 
 // ── NFC Staff Cards ─────────────────────────────────────────────────────────
 Route::get('/team', [NfcController::class, 'index'])->name('team');

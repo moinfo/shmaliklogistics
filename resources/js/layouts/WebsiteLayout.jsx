@@ -282,6 +282,13 @@ export default function WebsiteLayout({ children }) {
                                     {link.label}
                                 </Anchor>
                             ))}
+                            <Anchor component={Link} href="/privacy-policy"
+                                style={{ textDecoration: 'none', color: '#94A3B8', fontSize: 14, transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 8 }}
+                                onMouseEnter={e => { e.currentTarget.style.color = '#FB923C'; e.currentTarget.style.paddingLeft = '4px'; }}
+                                onMouseLeave={e => { e.currentTarget.style.color = '#94A3B8'; e.currentTarget.style.paddingLeft = '0'; }}>
+                                <Box style={{ width: 4, height: 4, borderRadius: '50%', background: '#EA580C', flexShrink: 0 }} />
+                                {T.footer.privacy}
+                            </Anchor>
                         </Stack>
 
                         {/* Services */}
@@ -319,7 +326,15 @@ export default function WebsiteLayout({ children }) {
                     {/* Bottom bar */}
                     <Box style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 24 }}>
                         <Group justify="space-between" wrap="wrap" gap="sm">
-                            <Text c="gray.6" size="xs">{T.footer.copyright}</Text>
+                            <Group gap="md">
+                                <Text c="gray.6" size="xs">{T.footer.copyright}</Text>
+                                <Anchor component={Link} href="/privacy-policy"
+                                    style={{ textDecoration: 'none', color: '#FB923C', fontSize: 12, fontWeight: 600, borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: 12, transition: 'color 0.2s' }}
+                                    onMouseEnter={e => { e.currentTarget.style.color = '#FDBA74'; e.currentTarget.style.textDecoration = 'underline'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.color = '#FB923C'; e.currentTarget.style.textDecoration = 'none'; }}>
+                                    {T.footer.privacy}
+                                </Anchor>
+                            </Group>
                             <Group gap="lg">
                                 <Group gap={6}>
                                     <motion.div

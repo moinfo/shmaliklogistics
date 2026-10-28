@@ -23,9 +23,10 @@ export default function MaintenanceBulkForm({ vehicles, types, prefillVehicleId 
         records: [blankRow(prefillVehicleId ? String(prefillVehicleId) : '')],
     });
 
-    const setRow = (i, field, value) => setData('records', data.records.map((r, idx) => (idx === i ? { ...r, [field]: value } : r)));
-    const addRow = () => setData('records', [...data.records, blankRow()]);
-    const removeRow = (i) => setData('records', data.records.length > 1 ? data.records.filter((_, idx) => idx !== i) : data.records);
+    // Functional updates: DatePicker's flatpickr callback is bound once, so it must not rely on a captured `data`.
+    const setRow = (i, field, value) => setData(prev => ({ ...prev, records: prev.records.map((r, idx) => (idx === i ? { ...r, [field]: value } : r)) }));
+    const addRow = () => setData(prev => ({ ...prev, records: [...prev.records, blankRow()] }));
+    const removeRow = (i) => setData(prev => ({ ...prev, records: prev.records.length > 1 ? prev.records.filter((_, idx) => idx !== i) : prev.records }));
     const err = (i, f) => errors[`records.${i}.${f}`];
 
     const inputStyles = {

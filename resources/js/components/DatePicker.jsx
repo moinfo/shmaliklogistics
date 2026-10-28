@@ -21,7 +21,11 @@ export default function DatePicker({
     const { colorScheme } = useMantineColorScheme();
     const isDark   = colorScheme === 'dark';
 
-    const border   = isDark ? 'rgba(33,150,243,0.12)' : '#E2E8F0';
+    // flatpickr is created once; always call the latest onChange to avoid stale closures.
+    const onChangeRef = useRef(onChange);
+    onChangeRef.current = onChange;
+
+    const border  = isDark ? 'rgba(33,150,243,0.12)' : '#E2E8F0';
     const bg       = styles.input?.background ?? (isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC');
     const color    = styles.input?.color      ?? (isDark ? '#E2E8F0' : '#1E293B');
     const labelCol = styles.label?.color      ?? (isDark ? 'var(--c-text-secondary)' : '#64748B');
@@ -39,7 +43,7 @@ export default function DatePicker({
                 const formatted = date
                     ? date.toLocaleDateString('en-CA') // YYYY-MM-DD
                     : '';
-                onChange(formatted);
+                onChangeRef.current(formatted);
             },
             onReady: (_, __, fp) => {
                 if (fp.altInput) {

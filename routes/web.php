@@ -34,6 +34,15 @@ use App\Http\Controllers\System\HR\LoanController;
 use App\Http\Controllers\Settings\PayrollSettingsController;
 use App\Http\Controllers\Settings\LicenseClassController;
 use App\Http\Controllers\Settings\VehicleDocumentTypeController;
+use App\Http\Controllers\Settings\GpsDeviceController;
+use App\Http\Controllers\System\FleetTrackingController;
+use App\Http\Controllers\System\GeofenceController;
+use App\Http\Controllers\System\TrackingAlertController;
+use App\Http\Controllers\System\TrackingReportController;
+use App\Http\Controllers\System\TripReportController;
+use App\Http\Controllers\System\TrackingShareController;
+use App\Http\Controllers\System\TrailController;
+use App\Http\Controllers\PublicTrackingController;
 use App\Http\Controllers\Settings\DeductionTypeController;
 use App\Http\Controllers\Settings\EmployeeDeductionController;
 use App\Http\Controllers\Settings\BankDetailController;
@@ -89,6 +98,10 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
 });
+
+// ── Public shipment tracking (unguessable, expiring, revocable share links) ──
+Route::get('track/{token}', [PublicTrackingController::class, 'show'])->where('token', '[A-Za-z0-9]{40}')->name('track.public');
+Route::get('track/{token}/position', [PublicTrackingController::class, 'position'])->where('token', '[A-Za-z0-9]{40}')->middleware('throttle:60,1')->name('track.public.position');
 
 // ── Customer Portal ──────────────────────────────────────────────────────────
 Route::prefix('portal')->name('portal.')->group(function () {
@@ -192,6 +205,26 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
     Route::patch('cargo/{cargo}/status', [CargoController::class, 'updateStatus'])->name('cargo.update-status')->middleware('permission:cargo.edit');
 
     // Fleet — static sub-routes must come before the resource to avoid {vehicle} wildcard capturing them
+    Route::get('fleet/live-map',           [FleetTrackingController::class, 'index'])->name('fleet.live-map')->middleware('permission:fleet_tracking.view');
+    Route::get('fleet/live-map/positions', [FleetTrackingController::class, 'positions'])->name('fleet.live-map.positions')->middleware('permission:fleet_tracking.view');
+    // Geofences, alerts, report, replay and share links — all under fleet_tracking.* (view = read, edit = manage)
+    Route::get('fleet/geofences',                 [GeofenceController::class, 'index'])->name('fleet.geofences.index')->middleware('permission:fleet_tracking.view');
+    Route::post('fleet/geofences',                [GeofenceController::class, 'store'])->name('fleet.geofences.store')->middleware('permission:fleet_tracking.edit');
+    Route::put('fleet/geofences/{geofence}',      [GeofenceController::class, 'update'])->name('fleet.geofences.update')->middleware('permission:fleet_tracking.edit');
+    Route::delete('fleet/geofences/{geofence}',   [GeofenceController::class, 'destroy'])->name('fleet.geofences.destroy')->middleware('permission:fleet_tracking.edit');
+    Route::get('fleet/tracking-alerts',           [TrackingAlertController::class, 'index'])->name('fleet.tracking-alerts')->middleware('permission:fleet_tracking.view');
+    Route::post('fleet/tracking-alerts/acknowledge-all', [TrackingAlertController::class, 'acknowledgeAll'])->name('fleet.tracking-alerts.ack-all')->middleware('permission:fleet_tracking.edit');
+    Route::post('fleet/tracking-alerts/{event}/acknowledge', [TrackingAlertController::class, 'acknowledge'])->name('fleet.tracking-alerts.ack')->middleware('permission:fleet_tracking.edit');
+    Route::get('fleet/tracking-report',           [TrackingReportController::class, 'index'])->name('fleet.tracking-report')->middleware('permission:fleet_tracking.view');
+    Route::get('fleet/tracking-report/export',    [TrackingReportController::class, 'export'])->name('fleet.tracking-report.export')->middleware('permission:fleet_tracking.view');
+    Route::get('fleet/trip-report',               [TripReportController::class, 'index'])->name('fleet.trip-report')->middleware('permission:fleet_tracking.view');
+    Route::get('fleet/trip-report/export',        [TripReportController::class, 'export'])->name('fleet.trip-report.export')->middleware('permission:fleet_tracking.view');
+    Route::get('fleet/{vehicle}/trail',           [TrailController::class, 'index'])->name('fleet.trail')->middleware('permission:fleet_tracking.view');
+    Route::get('fleet/{vehicle}/trail/data',      [TrailController::class, 'data'])->name('fleet.trail.data')->middleware('permission:fleet_tracking.view');
+    Route::get('fleet/{vehicle}/current',         [FleetTrackingController::class, 'current'])->name('fleet.current')->middleware('permission:fleet_tracking.view');
+    Route::get('fleet/{vehicle}/shares',          [TrackingShareController::class, 'index'])->name('fleet.shares.index')->middleware('permission:fleet_tracking.edit');
+    Route::post('fleet/{vehicle}/shares',         [TrackingShareController::class, 'store'])->name('fleet.shares.store')->middleware('permission:fleet_tracking.edit');
+    Route::delete('fleet/shares/{share}',         [TrackingShareController::class, 'destroy'])->name('fleet.shares.destroy')->middleware('permission:fleet_tracking.edit');
     Route::get('fleet/fuel-logs',              [FuelLogController::class, 'index'])->name('fleet.fuel-logs.index')->middleware('permission:fleet_fuel_logs.view');
     Route::post('fleet/fuel-logs',             [FuelLogController::class, 'store'])->name('fleet.fuel-logs.store')->middleware('permission:fleet_fuel_logs.create');
     Route::delete('fleet/fuel-logs/{fuelLog}', [FuelLogController::class, 'destroy'])->name('fleet.fuel-logs.destroy')->middleware('permission:fleet_fuel_logs.delete');
@@ -421,6 +454,10 @@ Route::middleware(['auth', 'no.driver'])->prefix('system')->name('system.')->gro
     Route::prefix('settings')->name('settings.')->group(function () use ($permResource) {
         $permResource('license-classes', LicenseClassController::class, 'settings', ['except' => ['show']]);
         $permResource('document-types',  VehicleDocumentTypeController::class, 'settings', ['except' => ['show']]);
+        $permResource('gps-devices', GpsDeviceController::class, 'settings', [
+            'only' => ['index', 'store', 'update', 'destroy'],
+            'parameters' => ['gps-devices' => 'gpsDevice'],
+        ]);
 
         Route::get('payroll',         [PayrollSettingsController::class, 'index'])->name('payroll.index')->middleware('permission:settings.view');
         Route::post('payroll',        [PayrollSettingsController::class, 'update'])->name('payroll.update')->middleware('permission:settings.edit');

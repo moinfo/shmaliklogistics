@@ -58,7 +58,7 @@ export default function Dashboard() {
     const { props } = usePage();
     const { colorScheme } = useMantineColorScheme();
     const isDark = colorScheme === 'dark';
-    const { stats = {}, recentTrips = [], fleetStatus = [], alerts = [], monthlyTrend = [], expenseByCategory = [] } = props;
+    const { stats = {}, recentTrips = [], fleetStatus = [], alerts = [], monthlyTrend = [], expenseByCategory = [], tracking = null } = props;
 
     const hour = new Date().getHours();
     const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
@@ -293,6 +293,31 @@ export default function Dashboard() {
                     </Box>
                 </motion.div>
             </SimpleGrid>
+
+            {/* Live tracking widget */}
+            {tracking && tracking.total > 0 && (
+                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+                    <Box mt="xl" component={Link} href="/system/fleet/live-map" style={{ display: 'block', textDecoration: 'none', background: cardBg, border: cardBorder, borderRadius: 16, boxShadow: cardShadow, padding: '16px 22px' }}>
+                        <Group justify="space-between" wrap="wrap" gap="md">
+                            <Group gap="sm">
+                                <Text style={{ fontSize: '1.1rem' }}>📡</Text>
+                                <Text fw={700} size="sm" style={{ color: textPri }}>Live Tracking</Text>
+                            </Group>
+                            <Group gap="xl">
+                                {[['Moving', tracking.moving, '#22C55E'], ['Idle', tracking.idle, '#F59E0B'], ['Parked', tracking.parked, '#64748B'], ['Offline', tracking.offline, '#EF4444']].map(([label, n, color]) => (
+                                    <Group key={label} gap={8}>
+                                        <Box style={{ width: 9, height: 9, borderRadius: '50%', background: color }} />
+                                        <Text size="sm" fw={800} style={{ color: textPri }}>{n}</Text>
+                                        <Text size="xs" style={{ color: textMut }}>{label}</Text>
+                                    </Group>
+                                ))}
+                                {tracking.open_alerts > 0 && <Badge color="red" variant="light" size="sm" radius="xl">{tracking.open_alerts} alert{tracking.open_alerts === 1 ? '' : 's'}</Badge>}
+                            </Group>
+                            <Text size="xs" style={{ color: '#3B82F6' }}>Open live map →</Text>
+                        </Group>
+                    </Box>
+                </motion.div>
+            )}
 
             {/* Alerts widget */}
             {alerts.length > 0 && (

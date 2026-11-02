@@ -41,6 +41,16 @@ class Vehicle extends Model
         return $this->belongsTo(Driver::class);
     }
 
+    public function gpsDevice()
+    {
+        return $this->hasOne(GpsDevice::class);
+    }
+
+    public function locations()
+    {
+        return $this->hasMany(VehicleLocation::class);
+    }
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');

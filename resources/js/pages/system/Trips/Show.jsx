@@ -6,6 +6,7 @@ import { useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useCan } from '../../../lib/can';
 import { formatDate } from '../../../lib/date';
+import VehicleTrackingPanel from '../../../components/VehicleTrackingPanel';
 
 const dk = {
     card:    '#0F1E32',
@@ -323,6 +324,18 @@ export default function ShowTrip({ trip, statuses, expenses = [], expenseCategor
                     <DataRow label="Weight (tons)"   value={trip.cargo_weight_tons} isDark={isDark} />
                 </Card>
             </SimpleGrid>
+
+            {trip.vehicle_id && (
+                <Box mb="md">
+                    <VehicleTrackingPanel
+                        vehicleId={trip.vehicle_id}
+                        tripId={trip.id}
+                        title="Trip tracking"
+                        from={trip.departure_date ? new Date(`${String(trip.departure_date).slice(0, 10)}T00:00:00`) : null}
+                        to={trip.arrival_date && ['delivered', 'completed'].includes(trip.status) ? new Date(`${String(trip.arrival_date).slice(0, 10)}T23:59:59`) : null}
+                    />
+                </Box>
+            )}
 
             {/* Financials */}
             <Card title="Financial Summary" isDark={isDark} accent={['#065F46', '#059669']}>

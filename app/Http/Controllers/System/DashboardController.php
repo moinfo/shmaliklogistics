@@ -8,7 +8,9 @@ use App\Models\Expense;
 use App\Models\Permit;
 use App\Models\Trip;
 use App\Models\Vehicle;
+use App\Models\GpsEvent;
 use App\Services\AlertService;
+use App\Services\FleetPositionService;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -87,6 +89,13 @@ class DashboardController extends Controller
             ->orderByDesc('total')
             ->get();
 
-        return Inertia::render('system/Dashboard', compact('stats', 'recentTrips', 'fleetStatus', 'alerts', 'monthlyTrend', 'expenseByCategory'));
+        // Live tracking summary — only for users who may see the Live Map.
+        $tracking = auth()->user()?->hasPermission('fleet_tracking.view')
+            ? app(FleetPositionService::class)->counts() + [
+                'open_alerts' => GpsEvent::whereNull('acknowledged_at')->where('severity', '!=', 'info')->count(),
+            ]
+            : null;
+
+        return Inertia::render('system/Dashboard', compact('stats', 'recentTrips', 'fleetStatus', 'alerts', 'monthlyTrend', 'expenseByCategory', 'tracking'));
     }
 }

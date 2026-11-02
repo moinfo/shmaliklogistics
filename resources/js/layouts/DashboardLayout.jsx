@@ -23,13 +23,17 @@ const navItems = [
     // ── Fleet ─────────────────────────────────────────────────────────────────
     {
         icon: '🚗', label: 'Fleet', href: '/system/fleet',
-        anyPerm: ['fleet.view', 'fleet_fuel_logs.view', 'inspections.view', 'trip_check_ins.view'],
+        anyPerm: ['fleet.view', 'fleet_fuel_logs.view', 'inspections.view', 'trip_check_ins.view', 'fleet_tracking.view'],
         children: [
             { icon: '🚗', label: 'All Vehicles',  href: '/system/fleet',                    perm: 'fleet.view' },
             { icon: '⛽', label: 'Fuel Logs',     href: '/system/fleet/fuel-logs',          perm: 'fleet_fuel_logs.view' },
             { icon: '🔧', label: 'Inspections',   href: '/system/inspections',              perm: 'inspections.view' },
             { icon: '📍', label: 'Check-Ins',     href: '/system/check-ins',                perm: 'trip_check_ins.view' },
-            { icon: '🗺️', label: 'Live Map',      href: '/system/fleet/live-map',           soon: true },
+            { icon: '🗺️', label: 'Live Map',      href: '/system/fleet/live-map',           perm: 'fleet_tracking.view' },
+            { icon: '🔔', label: 'Tracking Alerts', href: '/system/fleet/tracking-alerts',  perm: 'fleet_tracking.view' },
+            { icon: '📍', label: 'Geofences',     href: '/system/fleet/geofences',          perm: 'fleet_tracking.view' },
+            { icon: '📈', label: 'GPS Mileage',   href: '/system/fleet/tracking-report',    perm: 'fleet_tracking.view' },
+            { icon: '🧭', label: 'Trip Tracking Report', href: '/system/fleet/trip-report', perm: 'fleet_tracking.view' },
         ],
     },
 
@@ -145,6 +149,7 @@ const navItems = [
             { icon: '🏢', label: 'Company Settings',        href: '/system/settings/company',                 perm: 'settings.view' },
             { icon: '🪪', label: 'Licence Classes',         href: '/system/settings/license-classes',         perm: 'settings.view' },
             { icon: '📄', label: 'Document Types',          href: '/system/settings/document-types',          perm: 'settings.view' },
+            { icon: '📡', label: 'GPS Devices',             href: '/system/settings/gps-devices',             perm: 'settings.view' },
             { icon: '💰', label: 'Payroll Settings',        href: '/system/settings/payroll',                 perm: 'settings.view' },
             { icon: '📋', label: 'Deductions',              href: '/system/settings/deductions',              perm: 'settings.view' },
             { icon: '🔗', label: 'Deduction Subscriptions', href: '/system/settings/deduction-subscriptions', perm: 'settings.view' },

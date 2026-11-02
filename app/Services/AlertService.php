@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\BillingDocument;
 use App\Models\Driver;
+use App\Models\GpsEvent;
 use App\Models\Permit;
 use App\Models\Vehicle;
 
@@ -118,6 +119,26 @@ class AlertService
                     'href'     => "/system/fleet/{$v->id}",
                 ];
             }
+        }
+
+        // Unacknowledged tracker alerts from the last 2 days (zone enter/exit is informational, not listed here)
+        foreach (GpsEvent::with('vehicle:id,plate')
+            ->whereNull('acknowledged_at')
+            ->where('severity', '!=', 'info')
+            ->where('occurred_at', '>=', now()->subDays(2))
+            ->latest('occurred_at')
+            ->limit(20)
+            ->get() as $e) {
+            [$label, $icon] = GpsEvent::TYPES[$e->type] ?? [$e->type, '📡'];
+            $alerts[] = [
+                'type'     => 'gps',
+                'icon'     => $icon,
+                'color'    => $e->severity === 'critical' ? '#EF4444' : '#F59E0B',
+                'title'    => $label,
+                'subtitle' => $e->message,
+                'days'     => 0,
+                'href'     => '/system/fleet/tracking-alerts',
+            ];
         }
 
         // Sort: most urgent first (lowest days value)

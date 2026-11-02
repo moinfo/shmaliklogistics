@@ -11,6 +11,7 @@ const MODULES = [
     { key: 'trips',                       label: 'Trips',                     actions: ['view', 'create', 'edit', 'delete'] },
     { key: 'fleet',                       label: 'Fleet — Vehicles',          actions: ['view', 'create', 'edit', 'delete'] },
     { key: 'fleet_fuel_logs',             label: 'Fleet — Fuel Logs',         actions: ['view', 'create', 'delete'] },
+    { key: 'fleet_tracking',              label: 'Fleet — Live Tracking',     actions: ['view', 'edit'] },
     { key: 'drivers',                     label: 'Drivers',                   actions: ['view', 'create', 'edit', 'delete'] },
     { key: 'inspections',                 label: 'Vehicle Inspections',       actions: ['view'] },
     { key: 'trip_check_ins',              label: 'Trip Check-Ins',            actions: ['view'] },

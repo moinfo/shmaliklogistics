@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useCan } from '../../../lib/can';
 import { formatDate } from '../../../lib/date';
+import VehicleTrackingPanel from '../../../components/VehicleTrackingPanel';
 
 const dk = { card: '#0F1E32', border: 'var(--c-border-color)', divider: 'rgba(255,255,255,0.06)', textPri: '#E2E8F0', textSec: 'var(--c-text-secondary)', textMut: 'var(--c-text-muted)' };
 
@@ -519,7 +520,12 @@ export default function ShowVehicle({ vehicle, trips, maintenance = [], maintena
                 </Box>
             )}
 
-            {/* GPS Location */}
+            {/* Live tracking (tracker) */}
+            <Box mt="md">
+                <VehicleTrackingPanel vehicleId={vehicle.id} />
+            </Box>
+
+            {/* GPS Location (manual) */}
             <Box mt="md">
                 <GpsPanel vehicle={vehicle} isDark={isDark} cardBg={cardBg} cardBorder={cardBorder} textPri={textPri} textSec={textSec} textMut={textMut} divider={divider} canEdit={can('fleet.edit')} />
             </Box>

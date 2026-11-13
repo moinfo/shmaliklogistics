@@ -32,6 +32,16 @@ class FleetTrackingController extends Controller
     /** Current positions of one vehicle plus its place name — small widget feed (vehicle page, trip page). */
     public function current(Vehicle $vehicle): JsonResponse
     {
-        return response()->json($this->positions->all([$vehicle->id])[0] ?? null);
+        $position = $this->positions->all([$vehicle->id])[0] ?? null;
+
+        if (! $position) {
+            // response()->json(null) is NOT the JSON `null`: Symfony's JsonResponse silently
+            // replaces a null payload with an empty ArrayObject (XSSI hardening), so the
+            // frontend would receive `{}` and crash reading current.lat off it. Send the
+            // literal JSON `null` the frontend's "no tracker yet" check expects.
+            return response()->json(null, 200)->setContent('null');
+        }
+
+        return response()->json($position);
     }
 }
